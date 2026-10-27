@@ -1,0 +1,47 @@
+<view class="page profile-editor-page">
+  <view class="page-title">编辑资料</view>
+  <view class="muted page-intro">个人资料和球员档案在同一页编辑，保存后会在「我的」中分开展示。</view>
+
+  <view id="personal-section" class="section-title">个人资料</view>
+  <view class="card form-card">
+    <view class="field-title">头像</view>
+    <view class="avatar-setting">
+      <view class="avatar-preview">
+        <image wx:if="{{pendingAvatarPath || personal.avatarPath}}" class="avatar-image" src="{{pendingAvatarPath || personal.avatarPath}}" mode="aspectFill" />
+        <view wx:else class="eight-ball"><text>8</text></view>
+      </view>
+      <view class="avatar-actions">
+        <button class="profile-action-button" bindtap="chooseAvatar">从相册选择</button>
+        <button wx:if="{{personal.avatarPath || pendingAvatarPath}}" class="reset-avatar" bindtap="useDefaultAvatar">使用默认黑八</button>
+      </view>
+    </view>
+
+    <view class="field-title">昵称</view>
+    <input class="profile-input" maxlength="12" placeholder="输入昵称" value="{{personal.nickname}}" data-field="nickname" bindinput="onPersonalInput" />
+
+    <view class="field-title">年龄</view>
+    <input class="profile-input" type="number" maxlength="3" placeholder="输入年龄" value="{{personal.age}}" data-field="age" bindinput="onPersonalInput" />
+
+    <view class="field-title">性别</view>
+    <view class="choice-row">
+      <view wx:for="{{genderOptions}}" wx:key="*this" class="choice-chip {{personal.gender === item ? 'selected' : ''}}" data-value="{{item}}" bindtap="selectGender">{{item}}</view>
+    </view>
+
+  </view>
+
+  <view id="archive-section" class="section-title">球员档案</view>
+  <view class="card form-card archive-form">
+    <view class="field-title">台球自我介绍 <text class="optional">选填</text></view>
+    <textarea class="intro-input" maxlength="120" placeholder="例如：下班后常打球，偏稳健打法" value="{{archive.intro}}" data-field="intro" bindinput="onArchiveInput" />
+
+    <view class="field-title">常打玩法 <text class="optional">选填，可多选</text></view>
+    <view class="choice-row game-options">
+      <view wx:for="{{gameTypeOptions}}" wx:key="value" class="choice-chip {{item.selected ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="toggleGameType">{{item.value}}</view>
+    </view>
+  </view>
+
+  <view class="save-actions">
+    <button class="primary-button secondary-button" bindtap="cancelEdit">取消</button>
+    <button class="primary-button" bindtap="saveProfile">保存资料</button>
+  </view>
+</view>

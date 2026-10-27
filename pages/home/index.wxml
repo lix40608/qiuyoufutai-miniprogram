@@ -1,0 +1,55 @@
+<view class="page home-page">
+  <view class="home-heading row">
+    <view>
+      <view class="brand">球友赴台</view>
+      <view class="muted location" bindtap="showLocation">{{locationLabel}}　⌄</view>
+      <view class="location-privacy">位置仅保存在本机，用于估算直线距离</view>
+    </view>
+    <view class="message-entry" bindtap="showMessages">消息</view>
+  </view>
+
+  <view class="hero">
+    <view class="hero-eyebrow">今晚，找个球友</view>
+    <view class="hero-title">想打球？<br />附近有人等你</view>
+    <view class="hero-copy">同城约球 · 玩法合拍 · 说走就走</view>
+    <button class="hero-button" bindtap="goPublish">＋ 发起一场约球</button>
+    <view class="ball">8</view>
+  </view>
+
+  <view class="section-heading row">
+    <view class="section-title">选个玩法</view>
+  </view>
+  <view class="game-chips">
+    <view class="game-chip {{selectedGameType === '中式八球' ? 'selected' : ''}}" data-type="中式八球" bindtap="selectGameType">中式八球</view>
+    <view class="game-chip {{selectedGameType === '中式九球' ? 'selected' : ''}}" data-type="中式九球" bindtap="selectGameType">中式九球</view>
+    <view class="game-chip {{selectedGameType === '斯诺克' ? 'selected' : ''}}" data-type="斯诺克" bindtap="selectGameType">斯诺克</view>
+  </view>
+
+  <view class="section-heading row">
+    <view class="section-title">附近招募中</view>
+    <view class="text-link" bindtap="goFind">查看全部 ›</view>
+  </view>
+
+  <view wx:if="{{loadError}}" class="empty-state"><view class="empty-title">暂时无法加载约球</view><view class="muted">{{loadError}}</view></view>
+  <view wx:for="{{matches}}" wx:key="id" class="match-card" data-id="{{item.id}}" bindtap="openMatch">
+    <view class="row"><view class="tag">{{item.gameType}}</view><view class="fee">{{item.feeLabel}}</view></view>
+    <view class="match-title">{{item.title}}</view>
+    <view class="muted">{{item.startLabel}} · {{item.venue}}</view>
+    <view class="muted distance">{{item.distanceLabel}}{{item.area ? ' · ' + item.area : ''}}</view>
+    <view class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
+      <view class="host-avatar">
+        <image wx:if="{{item.hostAvatar}}" class="host-avatar-image" src="{{item.hostAvatar}}" mode="aspectFill" />
+        <view wx:else class="eight-ball"><text>8</text></view>
+      </view>
+      <view class="host-copy">
+        <view class="host-primary"><text class="host-name">{{item.hostName}}</text><text wx:if="{{item.hostAge}}">{{item.hostAge}}岁</text><text wx:if="{{item.hostGender}}">{{item.hostGender}}</text></view>
+        <view wx:if="{{item.hostIntro}}" class="muted host-intro">{{item.hostIntro}}</view>
+      </view>
+      <view class="profile-arrow">›</view>
+    </view>
+    <view class="card-actions">
+      <button class="primary-button action-button" catchtap="showDeferredFeature">确认组局</button>
+      <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature">去聊聊</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,85 @@
+const api = require('../../data/api');
+
+Page({
+  data: {
+    views: [
+      { label: '我发起的', value: 'created' },
+      { label: '我聊过的', value: 'chatted' }
+    ],
+    filters: [
+      { label: '编辑中', value: 'draft' },
+      { label: '组局中', value: 'active' },
+      { label: '已过期', value: 'expired' }
+    ],
+    activeView: 'created',
+    activeFilter: 'active',
+    records: [],
+    visibleRecords: []
+  },
+
+  onShow() {
+    this.refreshRecords();
+  },
+
+  onPullDownRefresh() {
+    this.refreshRecords();
+    wx.stopPullDownRefresh();
+  },
+
+  refreshRecords() {
+    api.getMyMatches().then((records) => {
+      const filteredRecords = this.data.activeView === 'created' ? records : [];
+      const visibleRecords = this.filterRecords(filteredRecords);
+      this.setData({ records: filteredRecords, visibleRecords });
+    }).catch((error) => wx.showModal({ title: '读取失败', content: error.message || '无法读取约局记录，请稍后重试。', showCancel: false }));
+  },
+
+  filterRecords(records) {
+    return records.filter((record) => {
+      if (this.data.activeView === 'chatted') return false;
+      if (record.status === 'cancelled') return false;
+      if (this.data.activeFilter === 'draft') return record.status === 'draft';
+      if (this.data.activeFilter === 'expired') return record.status !== 'draft' && record.displayEnded;
+      return record.status !== 'draft' && record.status !== 'cancelled' && !record.displayEnded;
+    });
+  },
+
+  selectView(event) {
+    this.setData({ activeView: event.currentTarget.dataset.value }, () => this.refreshRecords());
+  },
+
+  selectFilter(event) {
+    this.setData({ activeFilter: event.currentTarget.dataset.value }, () => this.refreshRecords());
+  },
+
+  openRecord(event) {
+    const { id, status } = event.currentTarget.dataset;
+    if (status === 'draft') {
+      getApp().globalData.editDraftId = id;
+      wx.switchTab({ url: '/pages/publish/index' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
+  },
+
+  cancelRecord(event) {
+    const { id } = event.currentTarget.dataset;
+    wx.showModal({
+      title: '取消这场约局？',
+      content: '取消后将从当前列表隐藏，本机历史记录仍会保留。',
+      confirmText: '确认取消',
+      cancelText: '继续招募',
+      success: (result) => {
+        if (!result.confirm) return;
+        api.cancelMatch(id).then(() => {
+          this.refreshRecords();
+          wx.showToast({ title: '已取消', icon: 'success' });
+        }).catch((error) => wx.showModal({ title: '取消失败', content: error.message || '服务暂时不可用，状态未更改。', showCancel: false }));
+      }
+    });
+  },
+
+  goPublish() {
+    wx.switchTab({ url: '/pages/publish/index' });
+  }
+});

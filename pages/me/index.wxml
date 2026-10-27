@@ -1,0 +1,44 @@
+<view class="page me-page">
+  <view class="page-title">我的</view>
+  <view class="section-title">个人资料</view>
+  <view class="card personal-card" bindtap="editPersonalProfile">
+    <view class="personal-avatar">
+      <image wx:if="{{personal.avatarPath}}" class="personal-avatar-image" src="{{personal.avatarPath}}" mode="aspectFill" />
+      <view wx:else class="eight-ball"><text>8</text></view>
+    </view>
+    <view class="personal-main">
+      <view class="profile-name">{{personal.nickname || '未设置昵称'}}</view>
+      <view wx:if="{{personalMeta}}" class="muted">{{personalMeta}}</view>
+    </view>
+    <view class="edit-link">{{personalComplete ? '编辑' : '去完善'}} ›</view>
+  </view>
+
+  <block wx:if="{{archiveConfigured}}">
+    <view class="section-title">球员档案</view>
+    <view class="profile-card card">
+    <view class="profile-head">
+      <view class="profile-main archive-content">
+        <view wx:if="{{archive.intro}}" class="archive-intro">{{archive.intro}}</view>
+        <view wx:if="{{!archive.intro && archive.gameTypes.length}}" class="muted">常打玩法</view>
+      </view>
+    </view>
+    <view wx:if="{{archive.gameTypes && archive.gameTypes.length}}" class="archive-games">
+      <view wx:for="{{archive.gameTypes}}" wx:key="*this" class="archive-game">{{item}}</view>
+    </view>
+  </view>
+  </block>
+
+  <view class="card menu-card message-menu" bindtap="showDeferredFeature" data-message="聊天界面可从约局详情预览，消息记录和通知尚未开通">
+    <view><view>消息与通知</view><view class="muted">查看聊天和组局提醒</view></view><view class="muted">›</view>
+  </view>
+
+  <view class="section-title">我的活动</view>
+  <view class="card menu-card" bindtap="goMyMatches">
+    <view><view>我的约局</view><view class="muted">{{localMatchCount ? localMatchCount + ' 条约局记录' : '查看草稿和我发起的约局'}}</view></view>
+    <view class="muted">›</view>
+  </view>
+  <view class="section-title settings-title">设置</view>
+  <view class="card menu-card" bindtap="showDeferredFeature" data-message="手机号绑定服务尚未开通">
+    <view><view>手机号绑定</view><view class="muted">双方确认组局后用于联系 · 暂未开通</view></view><view class="muted">›</view>
+  </view>
+</view>

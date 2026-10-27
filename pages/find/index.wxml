@@ -1,0 +1,63 @@
+<view class="page find-page">
+  <view class="find-heading row">
+    <view>
+      <view class="page-title">附近约球</view>
+      <view class="muted location" bindtap="showLocation">{{locationLabel}}　⌄</view>
+      <view class="location-privacy">位置仅保存在本机，用于估算直线距离</view>
+    </view>
+    <view class="message-entry" bindtap="showMessages">消息</view>
+  </view>
+
+  <view class="search-box">
+    <input class="search-input" placeholder="搜索球房或区域" value="{{searchText}}" bindinput="onSearchInput" />
+    <text class="clear-search" bindtap="clearSearch">×</text>
+  </view>
+
+  <scroll-view class="chips-scroll" scroll-x="true" show-scrollbar="false">
+    <view class="chips-row">
+      <view wx:for="{{gameTypes}}" wx:key="*this" class="game-chip {{selectedGameType === item ? 'selected' : ''}}" data-type="{{item}}" bindtap="selectGameType">{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="profile-filters">
+    <picker mode="selector" range="{{ageFilterLabels}}" value="{{ageFilterIndex}}" bindchange="selectAgeFilter">
+      <view class="filter-picker">{{ageFilterLabels[ageFilterIndex]}} <text>⌄</text></view>
+    </picker>
+    <picker mode="selector" range="{{genderFilters}}" value="{{genderFilterIndex}}" bindchange="selectGenderFilter">
+      <view class="filter-picker">{{genderFilters[genderFilterIndex]}} <text>⌄</text></view>
+    </picker>
+  </view>
+
+  <view class="section-heading row">
+    <view class="section-title">附近约局</view>
+    <view class="muted">{{matches.length}} 场招募中</view>
+  </view>
+
+  <view wx:if="{{matches.length}}">
+    <view wx:for="{{matches}}" wx:key="id" class="match-card" data-id="{{item.id}}" bindtap="openMatch">
+      <view class="row"><view class="tag">{{item.gameType}}</view><view class="fee">{{item.feeLabel}}</view></view>
+      <view class="match-title">{{item.title}}</view>
+      <view class="muted">{{item.startLabel}} · {{item.venue}}</view>
+      <view class="muted distance">{{item.distanceLabel}}{{item.area ? ' · ' + item.area : ''}}</view>
+      <view class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
+        <view class="host-avatar">
+          <image wx:if="{{item.hostAvatar}}" class="host-avatar-image" src="{{item.hostAvatar}}" mode="aspectFill" />
+          <view wx:else class="eight-ball"><text>8</text></view>
+        </view>
+        <view class="host-copy">
+          <view class="host-primary"><text class="host-name">{{item.hostName}}</text><text wx:if="{{item.hostAge}}">{{item.hostAge}}岁</text><text wx:if="{{item.hostGender}}">{{item.hostGender}}</text></view>
+          <view wx:if="{{item.hostIntro}}" class="muted host-intro">{{item.hostIntro}}</view>
+        </view>
+        <view class="profile-arrow">›</view>
+      </view>
+      <view class="card-actions">
+        <button class="primary-button action-button" catchtap="showDeferredFeature">确认组局</button>
+        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature">去聊聊</button>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="empty-state">
+    <view class="empty-title">{{loadError ? '暂时无法加载约球' : '暂时没有符合条件的约局'}}</view>
+    <view class="muted">{{loadError || '试试切换玩法或搜索条件'}}</view>
+  </view>
+</view>

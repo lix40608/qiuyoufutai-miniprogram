@@ -1,0 +1,77 @@
+page {
+  --color-ink: #173128;
+  --color-muted: #718178;
+  --color-green: #197257;
+  --color-felt: #eaf0e4;
+  --color-paper: #f7f7f2;
+  --color-card: #fffefa;
+  --color-line: #dfe5da;
+  --color-lime: #d8f36a;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 28rpx;
+}
+
+button::after {
+  border: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+
+.page-title {
+  font-size: 42rpx;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--color-muted);
+  font-size: 24rpx;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 26rpx;
+  border: 1rpx solid var(--color-line);
+  border-radius: 28rpx;
+  background: var(--color-card);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tag {
+  padding: 8rpx 12rpx;
+  border-radius: 10rpx;
+  background: var(--color-felt);
+  color: var(--color-green);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 84rpx;
+  padding: 0 26rpx;
+  border-radius: 22rpx;
+  background: var(--color-green);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.secondary-button {
+  color: var(--color-green);
+  border: 2rpx solid #b9d6c6;
+  background: var(--color-card);
+}

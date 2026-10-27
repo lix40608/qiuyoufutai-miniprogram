@@ -1,0 +1,44 @@
+{
+  "description": "球友赴台微信小程序",
+  "packOptions": {
+    "ignore": [
+      {
+        "value": "node_modules",
+        "type": "folder"
+      }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileHotReLoad": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "appid": "wx1dadeaa52f176c63",
+  "projectname": "qiuyoufutai-miniprogram",
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
+}

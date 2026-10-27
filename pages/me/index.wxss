@@ -1,0 +1,20 @@
+.me-page { padding-top: 42rpx; }
+.profile-card { display: block; }
+.personal-card { display: flex; align-items: center; gap: 20rpx; padding: 24rpx; }
+.personal-avatar { width: 96rpx; height: 96rpx; flex: none; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 3rpx solid #dfe5da; border-radius: 50%; background: #eef1eb; }
+.personal-avatar-image { width: 100%; height: 100%; }
+.personal-main { flex: 1; min-width: 0; }
+.profile-head { display: flex; align-items: center; gap: 20rpx; }
+.eight-ball { width: 92rpx; height: 92rpx; display: flex; align-items: center; justify-content: center; border: 4rpx solid #393d3b; border-radius: 50%; background: radial-gradient(circle at 32% 24%, #686d69 0, #222523 30%, #080909 72%); box-shadow: inset -8rpx -11rpx 18rpx rgba(0,0,0,.45), inset 5rpx 7rpx 10rpx rgba(255,255,255,.12); }
+.eight-ball text { width: 42rpx; height: 42rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f5f5f2; color: #111; font-size: 27rpx; font-weight: 800; }
+.profile-main { flex: 1; min-width: 0; }
+.profile-name { margin-bottom: 8rpx; font-size: 32rpx; font-weight: 800; }
+.archive-content { padding-right: 8rpx; }
+.edit-link { flex: none; color: #197257; font-size: 23rpx; font-weight: 700; }
+.menu-card { display: flex; align-items: center; justify-content: space-between; font-size: 26rpx; }
+.section-title { margin: 34rpx 4rpx 4rpx; font-size: 28rpx; font-weight: 800; }
+.message-menu { margin-top: 26rpx; }
+.settings-title { margin-top: 38rpx; }
+.archive-intro { color: #43584d; font-size: 25rpx; line-height: 1.55; }
+.archive-games { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
+.archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }

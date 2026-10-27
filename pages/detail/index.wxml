@@ -1,0 +1,33 @@
+<view wx:if="{{match}}" class="page detail-page">
+  <view class="card">
+    <view class="row"><view class="tag">{{match.status === 'confirmed' ? '已组局' : match.status === 'cancelled' ? '已取消' : match.displayEnded ? '公开展示已结束' : '招募中'}}</view><view class="fee">{{match.feeLabel}}</view></view>
+    <view class="match-title">{{match.title}}</view>
+    <view class="muted">{{match.gameType}} · {{match.startLabel}}</view>
+    <map wx:if="{{hasVenueLocation}}" class="venue-map" latitude="{{match.venueLatitude}}" longitude="{{match.venueLongitude}}" scale="15" markers="{{markers}}" bindtap="openMap" />
+    <view wx:else class="map-preview no-map"><view class="map-caption">暂无球房地图坐标</view></view>
+    <view class="row venue-row"><view class="venue-name">{{match.venue}}</view><view class="text-link" bindtap="openMap">查看位置 ›</view></view>
+    <view class="muted">{{match.area}}</view>
+    <view wx:if="{{match.note}}" class="match-note">{{match.note}}</view>
+    <view class="divider"></view>
+    <view class="host-row" catchtap="openHostProfile" data-user-id="{{match.hostUserId}}">
+      <view class="host-avatar">
+        <image wx:if="{{match.hostAvatar}}" class="host-avatar-image" src="{{match.hostAvatar}}" mode="aspectFill" />
+        <view wx:else class="eight-ball"><text>8</text></view>
+      </view>
+      <view class="host-copy">
+        <view class="host-primary"><text class="host-name">{{match.hostName}}</text><text wx:if="{{match.hostAge}}">{{match.hostAge}}岁</text><text wx:if="{{match.hostGender}}">{{match.hostGender}}</text></view>
+        <view wx:if="{{match.hostIntro}}" class="muted host-intro">{{match.hostIntro}}</view>
+      </view>
+      <view class="profile-arrow">查看资料 ›</view>
+    </view>
+  </view>
+
+  <view wx:if="{{match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
+    <button class="primary-button action-button" bindtap="openChat">确认组局</button>
+    <button class="primary-button secondary-button action-button" bindtap="openChat">去聊聊</button>
+  </view>
+  <view wx:if="{{match.status === 'confirmed'}}" class="contact-row">
+    <button class="contact-button" disabled>☎ 联系对方</button>
+    <view class="muted">双方确认组局后即可联系</view>
+  </view>
+</view>

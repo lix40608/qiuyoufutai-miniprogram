@@ -1,0 +1,4 @@
+<view class="page empty-state">
+  <view class="empty-title">聊天服务尚未开通</view>
+  <view class="muted">聊天不会保存在本机，也不会显示虚假的示例消息。</view>
+</view>

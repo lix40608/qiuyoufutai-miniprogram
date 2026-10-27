@@ -1,0 +1,20 @@
+.my-matches-page { padding-top: 34rpx; padding-bottom: 56rpx; }
+.demo-banner { margin-top: 18rpx; padding: 16rpx 18rpx; border-radius: 16rpx; background: #fff3dc; color: #805a23; font-size: 22rpx; }
+.view-tabs { display: flex; gap: 34rpx; margin-top: 30rpx; border-bottom: 1rpx solid #dfe5da; }
+.view-tab { padding: 0 4rpx 16rpx; color: #718178; font-size: 27rpx; }
+.view-tab.active { border-bottom: 5rpx solid #197257; color: #173128; font-weight: 800; }
+.filter-scroll { margin: 18rpx -28rpx 0; white-space: nowrap; }
+.filter-row { display: inline-flex; gap: 12rpx; padding: 0 28rpx; }
+.filter-chip { padding: 12rpx 17rpx; border-radius: 26rpx; background: #e7ebe2; color: #52645b; font-size: 21rpx; }
+.filter-chip.active { background: #197257; color: #fff; }
+.match-card { margin-top: 18rpx; padding: 24rpx; border: 1rpx solid #dfe5da; border-radius: 24rpx; background: #fffefa; }
+.card-top { display: flex; align-items: center; justify-content: space-between; }
+.match-title { margin: 17rpx 0 9rpx; font-size: 29rpx; font-weight: 800; }
+.venue-line { margin-top: 6rpx; }
+.card-actions { display: flex; gap: 12rpx; margin-top: 18rpx; }
+.card-actions button { flex: 1; margin: 0; font-size: 23rpx; }
+.cancel-button { background: #f2e8df; color: #805a43; }
+.empty-state { padding: 110rpx 18rpx 60rpx; text-align: center; }
+.empty-icon { margin-bottom: 15rpx; color: #93aa9b; font-size: 70rpx; }
+.empty-title { margin-bottom: 10rpx; font-size: 29rpx; font-weight: 800; }
+.empty-button { display: inline-flex; margin-top: 28rpx; padding: 0 34rpx; font-size: 24rpx; }

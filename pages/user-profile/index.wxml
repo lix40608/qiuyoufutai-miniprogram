@@ -1,0 +1,20 @@
+<view wx:if="{{profile}}" class="page user-profile-page">
+  <view class="card profile-hero">
+    <view class="profile-avatar">
+      <image wx:if="{{profile.avatarPath}}" class="profile-avatar-image" src="{{profile.avatarPath}}" mode="aspectFill" />
+      <view wx:else class="eight-ball"><text>8</text></view>
+    </view>
+    <view class="profile-identity">
+      <view class="profile-nickname">{{profile.nickname || '球友'}}</view>
+      <view class="muted profile-meta">{{profile.age ? profile.age + ' 岁' : ''}}{{profile.age && profile.gender ? ' · ' : ''}}{{profile.gender || ''}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{profile.intro || (profile.gameTypes && profile.gameTypes.length)}}" class="profile-section">
+    <view class="section-title">球员档案</view>
+    <view wx:if="{{profile.intro}}" class="card profile-intro">{{profile.intro}}</view>
+    <view wx:if="{{profile.gameTypes && profile.gameTypes.length}}" class="game-list">
+      <view wx:for="{{profile.gameTypes}}" wx:key="*this" class="game-chip">{{item}}</view>
+    </view>
+  </view>
+</view>

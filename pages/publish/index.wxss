@@ -1,0 +1,35 @@
+.publish-page { padding-top: 34rpx; padding-bottom: 60rpx; }
+.page-subtitle { margin-top: 10rpx; }
+.demo-banner { margin-top: 22rpx; padding: 18rpx 20rpx; border-radius: 18rpx; background: #fff3dc; color: #805a23; font-size: 23rpx; line-height: 1.5; }
+.form-card { margin-top: 24rpx; padding: 26rpx; border: 1rpx solid #dfe5da; border-radius: 26rpx; background: #fffefa; }
+.field-label { margin: 22rpx 0 12rpx; color: #30473c; font-size: 26rpx; font-weight: 700; }
+.field-label:first-child { margin-top: 0; }
+.required { color: #d75a50; }
+.optional { margin-left: 8rpx; color: #88958d; font-size: 21rpx; font-weight: 400; }
+.option-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.option-chip { padding: 14rpx 18rpx; border-radius: 28rpx; background: #edf0e9; color: #5d6e63; font-size: 23rpx; }
+.option-chip.active { background: #197257; color: #fff; }
+.picker-field, .text-field, .note-field { box-sizing: border-box; width: 100%; border: 1rpx solid #dfe5da; border-radius: 16rpx; background: #fff; color: #173128; font-size: 26rpx; }
+.picker-field { min-height: 82rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx; }
+.picker-field.placeholder { color: #9aa59e; }
+.picker-arrow { color: #718178; font-size: 32rpx; }
+.field-hint { margin: 9rpx 4rpx 0; color: #718178; font-size: 22rpx; }
+.venue-select-card { display: flex; align-items: center; min-height: 112rpx; margin-top: 12rpx; padding: 17rpx 18rpx; box-sizing: border-box; border: 1rpx solid #dfe5da; border-radius: 20rpx; background: #f3f6ef; transition: background-color .15s ease, border-color .15s ease; }
+.venue-select-card.venue-selected { border-color: #bfd9ca; background: #f1f7f0; }
+.venue-select-hover { background: #e9f0e7; }
+.venue-icon { width: 68rpx; height: 68rpx; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 18rpx; background: #dcebe0; }
+.venue-pin { position: relative; width: 26rpx; height: 26rpx; border: 5rpx solid #197257; border-radius: 50% 50% 50% 0; transform: rotate(-45deg) translate(3rpx, -3rpx); }
+.venue-pin::after { position: absolute; top: 7rpx; left: 7rpx; width: 8rpx; height: 8rpx; border-radius: 50%; background: #197257; content: ''; }
+.venue-copy { flex: 1; min-width: 0; margin-left: 16rpx; }
+.venue-title { overflow: hidden; color: #173128; font-size: 25rpx; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.venue-subtitle { overflow: hidden; margin-top: 6rpx; color: #7c8980; font-size: 20rpx; text-overflow: ellipsis; white-space: nowrap; }
+.venue-action { flex: none; margin-left: 12rpx; padding: 9rpx 14rpx; border-radius: 20rpx; background: #e3eee5; color: #197257; font-size: 20rpx; font-weight: 700; }
+.datetime-row { display: flex; gap: 14rpx; }
+.datetime-row picker { flex: 1; min-width: 0; }
+.text-field { height: 82rpx; padding: 0 20rpx; }
+.note-field { min-height: 170rpx; padding: 18rpx 20rpx; line-height: 1.5; }
+.char-count { margin-top: 6rpx; text-align: right; color: #9aa59e; font-size: 20rpx; }
+.fee-options { gap: 10rpx; }
+.form-actions { display: flex; gap: 14rpx; margin-top: 22rpx; }
+.form-actions button { flex: 1; margin: 0; padding: 0 14rpx; font-size: 24rpx; }
+.form-actions .publish-button { background: #197257; color: #fff; }

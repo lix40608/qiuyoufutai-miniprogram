@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/find/index",
+    "pages/publish/index",
+    "pages/me/index",
+    "pages/detail/index",
+    "pages/my-matches/index",
+    "pages/chat/index",
+    "pages/personal-profile/index",
+    "pages/user-profile/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "球友赴台",
+    "navigationBarBackgroundColor": "#f7f7f2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f7f2",
+    "backgroundTextStyle": "light"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于计算用户到球房的距离并排序附近约局"
+    }
+  },
+  "requiredPrivateInfos": ["getLocation", "chooseLocation"],
+  "tabBar": {
+    "color": "#718178",
+    "selectedColor": "#197257",
+    "backgroundColor": "#fffefa",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/index", "text": "首页" },
+      { "pagePath": "pages/find/index", "text": "找球" },
+      { "pagePath": "pages/publish/index", "text": "发布" },
+      { "pagePath": "pages/me/index", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

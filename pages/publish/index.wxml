@@ -1,0 +1,44 @@
+<view class="page publish-page">
+  <view class="page-title">发布约球</view>
+  <view class="muted page-subtitle">填写球局信息，邀请附近球友一起打球。</view>
+
+  <view class="form-card">
+    <view class="field-label">玩法 <text class="required">*</text></view>
+    <view class="option-row">
+      <view wx:for="{{gameTypes}}" wx:key="*this" class="option-chip {{form.gameType === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectGameType">{{item}}</view>
+    </view>
+
+    <view class="field-label">球房 <text class="required">*</text></view>
+    <view class="venue-select-card {{form.venueName ? 'venue-selected' : ''}}" hover-class="venue-select-hover" bindtap="chooseVenueOnMap">
+      <view class="venue-icon"><view class="venue-pin"></view></view>
+      <view class="venue-copy">
+        <view class="venue-title">{{form.venueName || '选择球房'}}</view>
+        <view class="venue-subtitle">{{form.venueAddress || form.venueArea || (form.venueName ? '已记录球房位置' : '选择本场约球地点')}}</view>
+      </view>
+      <view class="venue-action">{{form.venueName ? '更换' : '选择'}}</view>
+    </view>
+
+    <view class="field-label">开球时间 <text class="required">*</text></view>
+    <view class="datetime-row">
+      <picker mode="date" start="{{minDate}}" value="{{form.date}}" bindchange="selectDate"><view class="picker-field">{{form.date}}</view></picker>
+      <picker mode="time" value="{{form.time}}" bindchange="selectTime"><view class="picker-field">{{form.time}}</view></picker>
+    </view>
+
+    <view class="field-label">水平偏好或说明 <text class="optional">选填</text></view>
+    <input class="text-field" maxlength="40" placeholder="例如：水平随意，轻松打几局" value="{{form.level}}" data-field="level" bindinput="onTextInput" />
+
+    <view class="field-label">费用方式</view>
+    <view class="option-row fee-options">
+      <view wx:for="{{feeTypes}}" wx:key="*this" class="option-chip {{form.feeLabel === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectFeeType">{{item}}</view>
+    </view>
+
+    <view class="field-label">备注 <text class="optional">选填</text></view>
+    <textarea class="note-field" maxlength="200" placeholder="补充说明球局安排、规则或其他信息" value="{{form.note}}" data-field="note" bindinput="onTextInput" />
+    <view class="char-count">{{form.note.length || 0}}/200</view>
+  </view>
+
+  <view class="form-actions">
+    <button class="primary-button secondary-button" bindtap="saveDraft">保存草稿</button>
+    <button class="primary-button publish-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="publishMatch">发布约球</button>
+  </view>
+</view>
