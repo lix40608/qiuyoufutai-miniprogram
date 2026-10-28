@@ -28,8 +28,8 @@
   </view>
   </block>
 
-  <view class="card menu-card message-menu" bindtap="showDeferredFeature" data-message="聊天界面可从约局详情预览，消息记录和通知尚未开通">
-    <view><view>消息与通知</view><view class="muted">查看聊天和组局提醒</view></view><view class="muted">›</view>
+  <view class="card menu-card message-menu" bindtap="showMessages">
+    <view><view>消息与通知</view><view class="muted">查看约局聊天与确认进度</view></view><view class="muted">›</view>
   </view>
 
   <view class="section-title">我的活动</view>

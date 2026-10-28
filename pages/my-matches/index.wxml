@@ -11,7 +11,7 @@
     </view>
   </scroll-view>
 
-  <view wx:if="{{activeView === 'chatted'}}" class="empty-state">
+  <view wx:if="{{activeView === 'chatted' && !visibleRecords.length}}" class="empty-state">
     <view class="empty-icon">◌</view>
     <view class="empty-title">还没有聊过的约局</view>
     <view class="muted">加入一场约局后，可以在这里查看参与记录。</view>
@@ -19,9 +19,9 @@
   </view>
 
   <view wx:elif="{{visibleRecords.length}}">
-    <view wx:for="{{visibleRecords}}" wx:key="id" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" bindtap="openRecord">
+    <view wx:for="{{visibleRecords}}" wx:key="id" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" bindtap="openRecord">
       <view class="card-top">
-          <view class="tag">{{item.status === 'draft' ? '编辑中' : item.displayEnded ? '已过期' : '组局中'}}</view>
+          <view class="tag">{{item.status === 'draft' ? '编辑中' : item.status === 'matched' ? '已组局' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已过期' : '组局中'}}</view>
         <view wx:if="{{item.status !== 'draft'}}" class="muted">{{item.displayEnded ? '公开展示已结束 · 记录仍保留' : ''}}</view>
       </view>
       <view class="match-title">{{item.title}}</view>
@@ -30,7 +30,7 @@
       <view class="card-actions">
         <button wx:if="{{item.status === 'draft'}}" class="primary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="draft">继续编辑</button>
         <button wx:if="{{item.status === 'recruiting'}}" class="primary-button secondary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="recruiting">查看详情</button>
-        <button wx:if="{{item.status !== 'draft' && !item.displayEnded}}" class="primary-button cancel-button" catchtap="cancelRecord" data-id="{{item.id}}">管理 / 取消</button>
+        <button wx:if="{{activeView === 'created' && item.status === 'recruiting' && !item.displayEnded}}" class="primary-button cancel-button" catchtap="cancelRecord" data-id="{{item.id}}">管理 / 取消</button>
         <button wx:if="{{item.displayEnded}}" class="primary-button secondary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="{{item.status}}">查看记录</button>
       </view>
     </view>

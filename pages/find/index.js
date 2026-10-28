@@ -1,3 +1,4 @@
+const navigation = require('../../data/navigation');
 const api = require('../../data/api');
 const locationStore = require('../../data/location-store');
 
@@ -41,6 +42,7 @@ Page({
   },
 
   refreshMatches() {
+    const requestId = this._requestId = (this._requestId || 0) + 1;
     const gameType = this.data.selectedGameType === '全部玩法' ? '' : this.data.selectedGameType;
     const ageFilter = ageFilters[this.data.ageFilterIndex];
     const genderFilter = this.data.genderFilters[this.data.genderFilterIndex];
@@ -51,9 +53,12 @@ Page({
       ageMin: ageFilter.min === 0 ? undefined : ageFilter.min,
       ageMax: ageFilter.max === Infinity ? undefined : ageFilter.max,
       gender: genderFilter === '不限性别' ? '' : genderFilter
-    }).then((matches) => this.setData({ matches, loadError: '' }))
-      .catch((error) => this.setData({ matches: [], loadError: error.message || '暂时无法连接服务' }));
+    }).then((matches) => { if (requestId === this._requestId) this.setData({ matches, loadError: '' }); })
+      .catch((error) => { if (requestId === this._requestId) this.setData({ matches: [], loadError: error.message || '暂时无法连接服务' }); });
   },
+
+  onHide() { clearTimeout(this._searchTimer); },
+  onUnload() { clearTimeout(this._searchTimer); this._requestId = (this._requestId || 0) + 1; },
 
   selectGameType(event) {
     this.setData({ selectedGameType: event.currentTarget.dataset.type }, () => this.refreshMatches());
@@ -69,7 +74,10 @@ Page({
   },
 
   onSearchInput(event) {
-    this.setData({ searchText: event.detail.value }, () => this.refreshMatches());
+    this.setData({ searchText: event.detail.value });
+    clearTimeout(this._searchTimer);
+    this._requestId = (this._requestId || 0) + 1;
+    this._searchTimer = setTimeout(() => this.refreshMatches(), 250);
   },
 
   selectAgeFilter(event) {
@@ -86,13 +94,9 @@ Page({
     wx.navigateTo({ url: `/pages/user-profile/index?id=${encodeURIComponent(userId)}` });
   },
 
-  showDeferredFeature() {
-    wx.showToast({ title: '聊天服务尚未接入', icon: 'none' });
-  },
+  showDeferredFeature(event) { navigation.openChat(this, event); },
 
-  showMessages() {
-    wx.showToast({ title: '消息中心尚未接入', icon: 'none' });
-  },
+  showMessages() { navigation.openMessages(); },
 
   showLocation() {
     locationStore.openLocationActions((userLocation) => {

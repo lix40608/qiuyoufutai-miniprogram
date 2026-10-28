@@ -1,0 +1,5 @@
+.conversation-row { display: flex; align-items: center; gap: 24rpx; }
+.conversation-main { flex: 1; min-width: 0; }
+.conversation-name { margin-bottom: 12rpx; font-weight: 700; font-size: 30rpx; }
+.conversation-status { margin-left: 18rpx; color: #197257; font-size: 22rpx; font-weight: 400; }
+.conversation-main .muted { margin-top: 6rpx; }

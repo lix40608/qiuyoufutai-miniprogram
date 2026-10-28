@@ -1,4 +1,32 @@
-<view class="page empty-state">
-  <view class="empty-title">聊天服务尚未开通</view>
-  <view class="muted">聊天不会保存在本机，也不会显示虚假的示例消息。</view>
+<view class="chat-page" style="height: calc(100vh - {{keyboardHeight}}px)">
+  <view wx:if="{{loadError}}" class="empty-state"><view class="empty-title">暂时无法打开聊天</view><view class="muted">{{loadError}}</view></view>
+  <block wx:else>
+    <view wx:if="{{match}}" class="match-pin {{focusConfirm ? 'highlight-pin' : ''}}">
+      <view class="pin-top"><view class="pin-mark">8</view><view class="pin-status">{{statusLabel}}</view><view class="pin-open" bindtap="openDetail">查看详情 ›</view></view>
+      <view class="pin-title">{{match.title}}</view>
+      <view class="pin-meta">{{match.startLabel}} · {{match.venue}}</view>
+      <view class="confirm-line">
+        <view><view class="confirm-count">{{count}}<text> / 2</text></view><view class="confirm-hint">{{hint}}</view></view>
+        <button wx:if="{{canConfirm}}" class="confirm-button" loading="{{confirming}}" disabled="{{confirming}}" bindtap="confirmMatch">确认组局</button>
+        <button wx:elif="{{conversation.won}}" class="confirm-button" bindtap="openDetail">查看详情</button>
+      </view>
+    </view>
+    <view wx:if="{{syncError}}" class="sync-error" bindtap="sync">{{syncError}} · 点击重试</view>
+    <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{scrollTarget}}" scroll-with-animation="true">
+      <view wx:if="{{loading}}" class="system-message">正在同步消息…</view>
+      <view wx:elif="{{!messages.length}}" class="system-message">先聊聊玩法和时间，商量好后再确认组局。</view>
+      <view wx:for="{{messages}}" wx:key="key" id="{{item.key}}" class="message-row {{item.mine ? 'mine-row' : ''}}">
+        <view wx:if="{{!item.mine}}" class="message-avatar other-avatar">球友</view>
+        <view class="bubble-wrap"><view class="message-time">{{item.timeLabel}}</view><view class="bubble {{item.mine ? 'mine-bubble' : 'other-bubble'}}">{{item.content}}</view>
+          <view wx:if="{{item.state === 'failed'}}" class="failed-message" data-key="{{item.key}}" bindtap="showFailure">! {{item.failureLabel}} · 查看原因</view>
+        </view>
+        <view wx:if="{{item.mine}}" class="message-avatar mine-avatar">我</view>
+      </view>
+    </scroll-view>
+    <view wx:if="{{closed}}" class="closed-banner">{{hint}}</view>
+    <view wx:else class="composer">
+      <input class="message-input" placeholder="聊聊这场约球" value="{{draft}}" maxlength="1000" adjust-position="false" bindinput="onDraftInput" bindkeyboardheightchange="onKeyboardHeightChange" bindconfirm="sendMessage" confirm-type="send" />
+      <button class="send-button" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending || !draft || loading}}">发送</button>
+    </view>
+  </block>
 </view>

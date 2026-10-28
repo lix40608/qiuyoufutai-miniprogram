@@ -73,7 +73,7 @@ Page({
 
   loadDraft(id) {
     api.getMyMatches().then((records) => {
-        const draft = records.find((record) => record.id === id && record.status === 'draft');
+        const draft = records.find((record) => String(record.id) === String(id) && record.status === 'draft');
         if (!draft) return wx.showToast({ title: '草稿不存在或已发布', icon: 'none' });
         const startsAt = draft.startAt;
         this.setData({ form: Object.assign(defaultForm(), draft, { date: `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, '0')}-${String(startsAt.getDate()).padStart(2, '0')}`, time: `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` }) });
@@ -116,15 +116,19 @@ Page({
   },
 
   saveDraft() {
-    api.saveDraft(this.data.form).then((draft) => {
+    if (this.data.submitting || this._savingDraft) return;
+    this._savingDraft = true;
+    const form = Object.assign({}, this.data.form, { requestKey: this.data.form.requestKey || `draft-${Date.now()}-${Math.random().toString(36).slice(2)}` });
+    this.setData({ form });
+    api.saveDraft(form).then((draft) => {
       const startsAt = draft.startAt;
       this.setData({ form: Object.assign({}, this.data.form, draft, { date: `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, '0')}-${String(startsAt.getDate()).padStart(2, '0')}`, time: `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` }) });
       wx.showToast({ title: '草稿已保存', icon: 'success' });
-    }).catch((error) => wx.showModal({ title: '草稿未保存', content: error.message || '服务暂时不可用，内容仍保留在页面中。', showCancel: false }));
+    }).catch((error) => wx.showModal({ title: '草稿未保存', content: error.message || '服务暂时不可用，内容仍保留在页面中。', showCancel: false })).finally(() => { this._savingDraft = false; });
   },
 
   publishMatch() {
-    if (this.data.submitting) return;
+    if (this.data.submitting || this._savingDraft) return;
     if (!this.data.form.venueName) {
       wx.showToast({ title: '请选择球房', icon: 'none' });
       return;

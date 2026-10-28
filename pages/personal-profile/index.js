@@ -77,6 +77,7 @@ Page({
   },
 
   saveProfile() {
+    if (this._saving) return;
     const personal = this.data.personal;
     const age = Number(personal.age);
     if (!personal.nickname.trim()) return wx.showToast({ title: '请填写昵称', icon: 'none' });
@@ -86,21 +87,22 @@ Page({
       intro: (this.data.archive.intro || '').trim(),
       gameTypes: this.data.archive.gameTypes || []
     });
+    this._saving = true;
     const persist = (avatarUrl) => {
       api.saveProfile(Object.assign({}, personal, {
-        avatarUrl: avatarUrl || personal.avatarPath,
+        avatarUrl,
         nickname: personal.nickname.trim(),
-        age: String(age),
+        age,
         intro: archive.intro,
         gameTypes: archive.gameTypes
       })).then(() => {
         wx.showToast({ title: '资料已保存', icon: 'success' });
         wx.navigateBack();
-      }).catch((error) => wx.showModal({ title: '资料未保存', content: error.message || '服务暂时不可用，请重试。', showCancel: false }));
+      }).catch((error) => wx.showModal({ title: '资料未保存', content: error.message || '服务暂时不可用，请重试。', showCancel: false })).finally(() => { this._saving = false; });
     };
 
     if (this.data.pendingAvatarPath) {
-      api.uploadAvatar(this.data.pendingAvatarPath).then(persist).catch((error) => wx.showModal({ title: '头像未保存', content: error.message || '无法上传这张照片，请重试。', showCancel: false }));
+      api.uploadAvatar(this.data.pendingAvatarPath).then(persist).catch((error) => { this._saving = false; wx.showModal({ title: '头像未保存', content: error.message || '无法上传这张照片，请重试。', showCancel: false }); });
       return;
     }
     persist(this.data.resetAvatar ? '' : (personal.avatarPath || ''));

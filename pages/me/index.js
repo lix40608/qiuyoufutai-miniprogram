@@ -34,6 +34,8 @@ Page({
     wx.navigateTo({ url: '/pages/personal-profile/index?section=personal' });
   },
 
+  showMessages() { wx.navigateTo({ url: '/pages/messages/index' }); },
+
   goMyMatches() {
     wx.navigateTo({ url: '/pages/my-matches/index' });
   },

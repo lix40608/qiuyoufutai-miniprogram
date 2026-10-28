@@ -28,7 +28,9 @@ function clearUserLocation() {
 
 function distanceKm(from, to) {
   if (!from || !to) return null;
-  const values = [from.latitude, from.longitude, to.latitude, to.longitude].map(Number);
+  const raw = [from.latitude, from.longitude, to.latitude, to.longitude];
+  if (raw.some(value => value == null || value === '')) return null;
+  const values = raw.map(Number);
   if (!values.every(Number.isFinite)) return null;
   const radians = (degrees) => degrees * Math.PI / 180;
   const [lat1, lon1, lat2, lon2] = values;

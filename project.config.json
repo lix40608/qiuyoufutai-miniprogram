@@ -5,6 +5,10 @@
       {
         "value": "node_modules",
         "type": "folder"
+      },
+      {
+        "value": "tests",
+        "type": "folder"
       }
     ],
     "include": []

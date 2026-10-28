@@ -1,3 +1,4 @@
+const navigation = require('../../data/navigation');
 const api = require('../../data/api');
 const locationStore = require('../../data/location-store');
 
@@ -29,13 +30,9 @@ Page({
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
   },
 
-  openChat() {
-    wx.showToast({ title: '聊天服务尚未接入', icon: 'none' });
-  },
+  openChat(event) { navigation.openChat(this, event); },
 
-  showDeferredFeature() {
-    wx.showToast({ title: '聊天服务尚未接入', icon: 'none' });
-  },
+  showDeferredFeature(event) { navigation.openChat(this, event); },
 
   selectGameType(event) {
     const gameType = event.currentTarget.dataset.type;
@@ -43,9 +40,7 @@ Page({
     wx.switchTab({ url: '/pages/find/index' });
   },
 
-  showMessages() {
-    wx.showToast({ title: '消息中心尚未接入', icon: 'none' });
-  },
+  showMessages() { navigation.openMessages(); },
 
   showLocation() {
     locationStore.openLocationActions((userLocation) => {

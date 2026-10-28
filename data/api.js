@@ -2,45 +2,55 @@ const TOKEN_KEY = 'qiuyou-futai.session-token.v1';
 // 微信云托管测试服务；正式发布前替换为生产环境地址。
 const API_BASE_URL = 'https://springboot-r9wn-336416-13-1518350960.sh.run.tcloudbase.com';
 
+let loginPromise = null;
+
 function request(path, options = {}) {
   const token = wx.getStorageSync(TOKEN_KEY);
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${API_BASE_URL}${path}`,
       method: options.method || 'GET',
+      timeout: 15000,
       data: options.data,
       header: Object.assign({ 'content-type': 'application/json' }, token ? { Authorization: `Bearer ${token}` } : {}, options.header || {}),
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) return resolve(response.data.data);
-        if (response.statusCode === 401) wx.removeStorageSync(TOKEN_KEY);
+        if (response.statusCode === 401 && wx.getStorageSync(TOKEN_KEY) === token) wx.removeStorageSync(TOKEN_KEY);
         const error = new Error(response.data && response.data.error ? response.data.error.message : '服务暂时不可用');
         error.code = response.data && response.data.error && response.data.error.code;
         error.statusCode = response.statusCode;
         reject(error);
       },
-      fail(error) { reject(error); }
+      fail() { reject(new Error('网络连接失败，请检查网络后重试')); }
     });
   });
 }
 
 function ensureLogin() {
   if (wx.getStorageSync(TOKEN_KEY)) return Promise.resolve();
-  return new Promise((resolve, reject) => {
+  if (loginPromise) return loginPromise;
+  loginPromise = new Promise((resolve, reject) => {
     wx.login({
       success(result) {
         if (!result.code) return reject(new Error('微信登录失败，请重试'));
         request('/v1/auth/login', { method: 'POST', data: { code: result.code } }).then((session) => {
+          if (!session || !session.token) throw new Error('登录会话无效，请重试');
           wx.setStorageSync(TOKEN_KEY, session.token);
           resolve();
-        }, reject);
+        }).catch(reject);
       },
-      fail: reject
+      fail: () => reject(new Error('微信登录失败，请重试'))
     });
-  });
+  }).finally(() => { loginPromise = null; });
+  return loginPromise;
 }
 
 function withLogin(path, options) {
-  return ensureLogin().then(() => request(path, options));
+  return ensureLogin().then(() => request(path, options)).catch((error) => {
+    if (error.statusCode !== 401) throw error;
+    // A 401 is rejected before the handler; renew once, never retry network failures.
+    return ensureLogin().then(() => request(path, options));
+  });
 }
 
 function normalizeMatch(match) {
@@ -57,12 +67,16 @@ function normalizeMatch(match) {
     title: match.note ? match.note.split('\n')[0].slice(0, 22) : `找球友一起打${match.gameType}`,
     venue: match.venueName,
     area: match.venueArea,
+    hostUserId: match.host && match.host.id,
+    displayEnded: match.status === 'cancelled' || (match.status === 'matched'
+      ? Boolean(match.matchedAt) && Date.now() >= new Date(match.matchedAt).getTime() + 86400000
+      : match.status === 'recruiting' && Date.now() >= startAt.getTime() + 1800000),
     hostName: match.host && match.host.nickname,
     hostAvatar: match.host && absoluteAvatarUrl(match.host.avatarUrl),
     hostAge: match.host && match.host.age,
-    hostGender: match.host && match.host.gender,
+    hostGender: match.host && genderLabel(match.host.gender),
     hostIntro: match.host && match.host.intro,
-    hostGameTypes: match.host && match.host.gameTypes,
+    hostGameTypes: parseGames(match.host && match.host.gameTypes),
     localOnly: false
   });
 }
@@ -70,35 +84,59 @@ function normalizeMatch(match) {
 module.exports = {
   ensureLogin,
   getProfile: () => withLogin('/v1/me/profile').then(normalizeProfile),
-  saveProfile: (profile) => withLogin('/v1/me/profile', { method: 'PUT', data: Object.assign({}, profile, { avatarUrl: stripBaseUrl(Object.prototype.hasOwnProperty.call(profile, 'avatarUrl') ? profile.avatarUrl : (profile.avatarPath || '')) }) }).then(normalizeProfile),
+  saveProfile: (profile) => withLogin('/v1/me/profile', { method: 'PUT', data: Object.assign({}, profile, { gender: genderValue(profile.gender), age: profile.age === '' ? null : Number(profile.age), avatarUrl: stripBaseUrl(Object.prototype.hasOwnProperty.call(profile, 'avatarUrl') ? profile.avatarUrl : (profile.avatarPath || '')) }) }).then(normalizeProfile),
   uploadAvatar(path) {
-    return ensureLogin().then(() => new Promise((resolve, reject) => {
+    const upload = () => new Promise((resolve, reject) => {
+      const token = wx.getStorageSync(TOKEN_KEY);
       wx.uploadFile({
-        url: `${API_BASE_URL}/v1/me/avatar`,
-        filePath: path,
-        name: 'avatar',
-        header: { Authorization: `Bearer ${wx.getStorageSync(TOKEN_KEY)}` },
+        url: `${API_BASE_URL}/v1/me/avatar`, filePath: path, name: 'avatar', timeout: 20000,
+        header: { Authorization: `Bearer ${token}` },
         success(response) {
           let body;
           try { body = JSON.parse(response.data); } catch (_) { return reject(new Error('头像上传失败')); }
-          if (response.statusCode >= 200 && response.statusCode < 300) return resolve(absoluteAvatarUrl(body.data.avatarUrl));
-          reject(new Error(body.error ? body.error.message : '头像上传失败'));
+          if (response.statusCode >= 200 && response.statusCode < 300 && body.data && body.data.avatarUrl) return resolve(absoluteAvatarUrl(body.data.avatarUrl));
+          if (response.statusCode === 401 && wx.getStorageSync(TOKEN_KEY) === token) wx.removeStorageSync(TOKEN_KEY);
+          const error = new Error(body.error ? body.error.message : '头像上传失败');
+          error.statusCode = response.statusCode;
+          reject(error);
         },
-        fail: reject
+        fail() { reject(new Error('头像上传失败，请检查网络后重试')); }
       });
-    }));
+    });
+    return ensureLogin().then(upload).catch(error => {
+      if (error.statusCode !== 401) throw error;
+      return ensureLogin().then(upload);
+    });
   },
+  openConversation: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}/conversations`, { method: 'POST' }),
+  getConversations: () => withLogin('/v1/me/conversations'),
+  getConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}`),
+  getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}`),
+  sendMessage: (id, content) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content } }),
+  confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
   getPublicMatches: (query = '') => withLogin(`/v1/matches${query}`).then((rows) => rows.map(normalizeMatch)),
+  async getChattedMatches() {
+    const [profile, conversations] = await Promise.all([this.getProfile(), this.getConversations()]);
+    const mine = conversations.filter(item => Number(item.guestUserId) === Number(profile.userId));
+    const records = [];
+    // Bound concurrent detail reads rather than sending hundreds of requests at once.
+    for (let offset = 0; offset < mine.length; offset += 4) {
+      const batch = await Promise.all(mine.slice(offset, offset + 4).map(async item =>
+        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id })));
+      records.push(...batch);
+    }
+    return records;
+  },
   getMyMatches: () => withLogin('/v1/me/matches').then((rows) => rows.map(normalizeMatch)),
   getMatch: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}`).then(normalizeMatch),
   saveDraft: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}` : '/v1/matches', { method: form.id ? 'PUT' : 'POST', data: toMatchPayload(form, 'draft'), header: form.id ? {} : { 'X-Idempotency-Key': form.requestKey || createRequestKey() } }).then(normalizeMatch),
   publishMatch: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}/publish` : '/v1/matches', { method: 'POST', data: toMatchPayload(form, 'recruiting'), header: { 'X-Idempotency-Key': form.publishRequestKey || createRequestKey() } }).then(normalizeMatch),
   cancelMatch: (id) => withLogin(`/v1/me/matches/${encodeURIComponent(id)}/cancel`, { method: 'POST' }).then(normalizeMatch),
-  getUserProfile: (id) => withLogin(`/v1/users/${encodeURIComponent(id)}/profile`).then((profile) => Object.assign({}, profile, { avatarUrl: absoluteAvatarUrl(profile.avatarUrl) })),
+  getUserProfile: (id) => withLogin(`/v1/users/${encodeURIComponent(id)}/profile`).then(normalizeProfile),
   searchMatches(options = {}) {
     const params = [];
     if (options.gameType) params.push(`gameType=${encodeURIComponent(options.gameType)}`);
-    if (options.gender) params.push(`gender=${encodeURIComponent(options.gender)}`);
+    if (options.gender) params.push(`gender=${encodeURIComponent(genderValue(options.gender))}`);
     if (options.searchText) params.push(`q=${encodeURIComponent(options.searchText)}`);
     if (Number.isFinite(options.ageMin)) params.push(`ageMin=${options.ageMin}`);
     if (Number.isFinite(options.ageMax)) params.push(`ageMax=${options.ageMax}`);
@@ -127,11 +165,12 @@ function absoluteAvatarUrl(url) {
 }
 
 function stripBaseUrl(url) {
+  url = url || '';
   return url.indexOf(API_BASE_URL) === 0 ? url.slice(API_BASE_URL.length) : url;
 }
 
 function normalizeProfile(profile) {
-  return Object.assign({}, profile, { avatarPath: absoluteAvatarUrl(profile.avatarUrl) });
+  return Object.assign({}, profile, { gender: genderLabel(profile.gender), gameTypes: parseGames(profile.gameTypes), avatarUrl: absoluteAvatarUrl(profile.avatarUrl), avatarPath: absoluteAvatarUrl(profile.avatarUrl) });
 }
 
 function toMatchPayload(form, status) {
@@ -144,8 +183,8 @@ function toMatchPayload(form, status) {
     venueName: form.venueName,
     venueArea: form.venueArea,
     venueAddress: form.venueAddress,
-    venueLatitude: form.venueLatitude === '' ? null : Number(form.venueLatitude),
-    venueLongitude: form.venueLongitude === '' ? null : Number(form.venueLongitude),
+    venueLatitude: form.venueLatitude == null || form.venueLatitude === '' ? null : Number(form.venueLatitude),
+    venueLongitude: form.venueLongitude == null || form.venueLongitude === '' ? null : Number(form.venueLongitude),
     startsAt,
     level: form.level,
     feeLabel: form.feeLabel,
@@ -155,4 +194,11 @@ function toMatchPayload(form, status) {
 
 function createRequestKey() {
   return `wx-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function genderLabel(value) { return ({ male: '男', female: '女', undisclosed: '' })[value] === undefined ? (value || '') : ({ male: '男', female: '女', undisclosed: '' })[value]; }
+function genderValue(value) { return ({ '男': 'male', '女': 'female' })[value] || value || ''; }
+function parseGames(value) {
+  if (Array.isArray(value)) return value;
+  try { const parsed = JSON.parse(value || '[]'); return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; }
 }

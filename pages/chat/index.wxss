@@ -29,3 +29,8 @@
 .composer { flex: none; display: flex; align-items: center; gap: 14rpx; padding: 14rpx 20rpx calc(14rpx + env(safe-area-inset-bottom)); border-top: 1rpx solid #e1e5de; background: #fffefa; }
 .message-input { flex: 1; height: 76rpx; padding: 0 20rpx; box-sizing: border-box; border: 1rpx solid #e1e5de; border-radius: 18rpx; background: #f6f7f3; color: #173128; font-size: 25rpx; }
 .send-button { width: 112rpx; height: 76rpx; margin: 0; padding: 0; border-radius: 18rpx; background: #197257; color: #fff; font-size: 24rpx; font-weight: 700; line-height: 76rpx; }
+.highlight-pin { border-color: #197257; }
+.sync-error { padding: 12rpx 24rpx; background: #fff3dc; color: #805a23; font-size: 22rpx; }
+.failed-message { padding-top: 10rpx; color: #b34235; font-size: 22rpx; }
+.closed-banner { padding: 22rpx 24rpx calc(22rpx + env(safe-area-inset-bottom)); color: #718178; text-align: center; font-size: 24rpx; background: #fffefa; }
+button[disabled] { opacity: .5; }

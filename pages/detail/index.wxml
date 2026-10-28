@@ -1,6 +1,6 @@
 <view wx:if="{{match}}" class="page detail-page">
   <view class="card">
-    <view class="row"><view class="tag">{{match.status === 'confirmed' ? '已组局' : match.status === 'cancelled' ? '已取消' : match.displayEnded ? '公开展示已结束' : '招募中'}}</view><view class="fee">{{match.feeLabel}}</view></view>
+    <view class="row"><view class="tag">{{match.status === 'matched' ? '已组局' : match.status === 'cancelled' ? '已取消' : match.displayEnded ? '公开展示已结束' : '招募中'}}</view><view class="fee">{{match.feeLabel}}</view></view>
     <view class="match-title">{{match.title}}</view>
     <view class="muted">{{match.gameType}} · {{match.startLabel}}</view>
     <map wx:if="{{hasVenueLocation}}" class="venue-map" latitude="{{match.venueLatitude}}" longitude="{{match.venueLongitude}}" scale="15" markers="{{markers}}" bindtap="openMap" />
@@ -23,11 +23,11 @@
   </view>
 
   <view wx:if="{{match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
-    <button class="primary-button action-button" bindtap="openChat">确认组局</button>
-    <button class="primary-button secondary-button action-button" bindtap="openChat">去聊聊</button>
+    <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
+    <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>
   </view>
-  <view wx:if="{{match.status === 'confirmed'}}" class="contact-row">
+  <view wx:if="{{match.status === 'matched'}}" class="contact-row">
     <button class="contact-button" disabled>☎ 联系对方</button>
-    <view class="muted">双方确认组局后即可联系</view>
+    <view class="muted">电话联系暂未开通，可从消息继续沟通</view>
   </view>
 </view>

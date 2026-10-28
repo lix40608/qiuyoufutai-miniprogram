@@ -51,8 +51,8 @@
         <view class="profile-arrow">›</view>
       </view>
       <view class="card-actions">
-        <button class="primary-button action-button" catchtap="showDeferredFeature">确认组局</button>
-        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature">去聊聊</button>
+        <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
+        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊</button>
       </view>
     </view>
   </view>

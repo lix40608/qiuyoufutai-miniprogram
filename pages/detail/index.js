@@ -1,3 +1,4 @@
+const navigation = require('../../data/navigation');
 const api = require('../../data/api');
 
 Page({
@@ -5,17 +6,18 @@ Page({
     match: null
   },
 
-  onLoad(query) {
-    api.getMatch(query.id).then((match) => {
+  onLoad(query) { this._matchId = query.id; },
+
+  onShow() {
+    api.getMatch(this._matchId).then((match) => {
       const hasVenueLocation = Number.isFinite(Number(match.venueLatitude)) && Number.isFinite(Number(match.venueLongitude))
-        && match.venueLatitude !== '' && match.venueLongitude !== '';
+        && match.venueLatitude !== '' && match.venueLongitude !== ''
+        && match.venueLatitude != null && match.venueLongitude != null;
       this.setData({ match, hasVenueLocation, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), title: match.venue }] : [] });
     }).catch((error) => wx.showToast({ title: error.message || '这场约局暂不可用', icon: 'none' }));
   },
 
-  openChat() {
-    wx.showToast({ title: '聊天服务尚未接入', icon: 'none' });
-  },
+  openChat(event) { navigation.openChat(this, event); },
 
   openHostProfile(event) {
     const userId = event.currentTarget.dataset.userId;

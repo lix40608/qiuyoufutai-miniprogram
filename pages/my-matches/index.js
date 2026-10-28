@@ -23,20 +23,22 @@ Page({
 
   onPullDownRefresh() {
     this.refreshRecords();
-    wx.stopPullDownRefresh();
   },
 
   refreshRecords() {
-    api.getMyMatches().then((records) => {
-      const filteredRecords = this.data.activeView === 'created' ? records : [];
+    const activeView = this.data.activeView;
+    const request = activeView === 'created' ? api.getMyMatches() : api.getChattedMatches();
+    request.then((records) => {
+      if (this.data.activeView !== activeView) return;
+      const filteredRecords = records;
       const visibleRecords = this.filterRecords(filteredRecords);
       this.setData({ records: filteredRecords, visibleRecords });
-    }).catch((error) => wx.showModal({ title: '读取失败', content: error.message || '无法读取约局记录，请稍后重试。', showCancel: false }));
+    }).catch((error) => wx.showModal({ title: '读取失败', content: error.message || '无法读取约局记录，请稍后重试。', showCancel: false })).finally(() => wx.stopPullDownRefresh());
   },
 
   filterRecords(records) {
     return records.filter((record) => {
-      if (this.data.activeView === 'chatted') return false;
+      if (this.data.activeView === 'chatted') return true;
       if (record.status === 'cancelled') return false;
       if (this.data.activeFilter === 'draft') return record.status === 'draft';
       if (this.data.activeFilter === 'expired') return record.status !== 'draft' && record.displayEnded;
@@ -53,7 +55,8 @@ Page({
   },
 
   openRecord(event) {
-    const { id, status } = event.currentTarget.dataset;
+    const { id, status, conversationId } = event.currentTarget.dataset;
+    if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${conversationId}` });
     if (status === 'draft') {
       getApp().globalData.editDraftId = id;
       wx.switchTab({ url: '/pages/publish/index' });
@@ -66,7 +69,7 @@ Page({
     const { id } = event.currentTarget.dataset;
     wx.showModal({
       title: '取消这场约局？',
-      content: '取消后将从当前列表隐藏，本机历史记录仍会保留。',
+      content: '取消后将从当前列表隐藏，历史约局和已有聊天仍会保留，聊天停止发送与确认。',
       confirmText: '确认取消',
       cancelText: '继续招募',
       success: (result) => {
