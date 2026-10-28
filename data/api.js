@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'qiuyou-futai.session-token.v1';
-const API_BASE_URL = 'http://127.0.0.1:8787'; // Set to the HTTPS domain of the deployed API before device testing.
+// 微信云托管测试服务；正式发布前替换为生产环境地址。
+const API_BASE_URL = 'https://springboot-r9wn-336416-13-1518350960.sh.run.tcloudbase.com';
 
 function request(path, options = {}) {
   const token = wx.getStorageSync(TOKEN_KEY);
