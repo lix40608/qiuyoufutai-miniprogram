@@ -2,13 +2,15 @@ const api = require('../../data/api');
 const model = require('../../data/chat-model');
 
 Page({
-  data: { match: null, conversation: null, messages: [], draft: '', loading: true,
+  data: { match: null, conversation: null, messages: [], draft: '', loading: true, newMessageCount: 0,
     sending: false, confirming: false, loadError: '', syncError: '', keyboardHeight: 0,
     closed: false, canConfirm: false, showInvite: false, inviteDismissed: false, count: 0, hint: '', statusLabel: '', scrollTarget: '', focusConfirm: false, showConfirmedTip: false,
     currentName: '我', currentAvatar: '', peerName: '球友', peerAvatar: '', systemNotice: '' },
 
   onLoad(query) {
     this._afterId = 0;
+    this._nearBottom = true;
+    this._messageViewportHeight = 0;
     this.setData({ focusConfirm: query.focus === 'confirm' });
     this.initialize(query);
   },
@@ -67,14 +69,48 @@ Page({
     }
   },
   renderMessages(messages) {
-    const previousCount = this.data.messages.length;
+    const previousIds = new Set((this.data.messages || []).filter(item => item.id != null).map(item => String(item.id)));
     const rows = messages.map(item => Object.assign({}, item, {
       key: item.id ? `message-${item.id}` : item.clientId,
       mine: Number(item.senderId) === Number(this._userId),
       timeLabel: new Date(item.createdAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
     }));
-    this.setData({ messages: rows });
-    if (rows.length !== previousCount && rows.length) this.setData({ scrollTarget: rows[rows.length - 1].key });
+    const addedMessages = rows.filter(item => item.id != null && !previousIds.has(String(item.id)));
+    const addedIncoming = addedMessages.filter(item => !item.mine).length;
+    const addedMine = addedMessages.some(item => item.mine);
+    const followLatest = !this._hasRenderedMessages || this._nearBottom || addedMine;
+    const newMessageCount = addedIncoming && !followLatest
+      ? (Number(this.data.newMessageCount) || 0) + addedIncoming
+      : followLatest ? 0 : (Number(this.data.newMessageCount) || 0);
+    const update = { messages: rows, newMessageCount };
+    if (followLatest && rows.length) update.scrollTarget = rows[rows.length - 1].key;
+    this._hasRenderedMessages = true;
+    this.setData(update);
+  },
+  onMessageScroll(event) {
+    const detail = event.detail || {};
+    this._lastMessageScroll = detail;
+    if (this._messageViewportHeight > 0) return this.updateMessageScrollState(detail);
+    if (this._measuringMessageViewport) return;
+    this._measuringMessageViewport = true;
+    wx.createSelectorQuery().in(this).select('.message-list').boundingClientRect(rect => {
+      this._messageViewportHeight = rect ? rect.height : 0;
+      this._measuringMessageViewport = false;
+      if (this._lastMessageScroll) this.updateMessageScrollState(this._lastMessageScroll);
+    }).exec();
+  },
+  updateMessageScrollState(detail) {
+    const scrollTop = Number(detail.scrollTop) || 0;
+    const scrollHeight = Number(detail.scrollHeight) || 0;
+    this._nearBottom = scrollHeight <= this._messageViewportHeight + 48
+      || scrollHeight - scrollTop - this._messageViewportHeight <= 60;
+    if (this._nearBottom && this.data.newMessageCount) this.setData({ newMessageCount: 0 });
+  },
+  jumpToLatest() {
+    const latest = (this.data.messages || []).slice(-1)[0];
+    if (!latest) return;
+    this._nearBottom = true;
+    this.setData({ scrollTarget: latest.key, newMessageCount: 0 });
   },
   showConfirmedTip() {
     clearTimeout(this._confirmedTipTimer);
@@ -84,7 +120,13 @@ Page({
     }, 2800);
   },
   onDraftInput(event) { this.setData({ draft: event.detail.value }); },
-  onKeyboardHeightChange(event) { this.setData({ keyboardHeight: event.detail.height || 0 }); },
+  onKeyboardHeightChange(event) {
+    this.setData({ keyboardHeight: event.detail.height || 0 }, () => {
+      wx.createSelectorQuery().in(this).select('.message-list').boundingClientRect(rect => {
+        this._messageViewportHeight = rect ? rect.height : 0;
+      }).exec();
+    });
+  },
   async sendMessage() {
     const content = this.data.draft.trim();
     if (!content || this.data.loading || this.data.sending || this.data.closed || !this._ready) return;

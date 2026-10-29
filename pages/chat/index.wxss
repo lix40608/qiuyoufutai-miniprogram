@@ -19,7 +19,10 @@
 .invite-actions button { height: 64rpx; margin: 0; padding: 0 24rpx; border-radius: 18rpx; font-size: 21rpx; line-height: 64rpx; }
 .invite-later { border: 1rpx solid #dfe5da; background: #f4f5f1; color: #60766a; }
 .invite-confirm { background: #197257; color: #fff; font-weight: 700; }
-.message-list { flex: 1; min-height: 0; padding: 12rpx 22rpx 18rpx; box-sizing: border-box; }
+.message-region { position: relative; flex: 1; min-height: 0; display: flex; }
+.message-list { flex: 1; width: 100%; height: 100%; min-height: 0; padding: 12rpx 22rpx 18rpx; box-sizing: border-box; }
+.new-messages-tip { position: absolute; right: 28rpx; bottom: 22rpx; z-index: 5; display: flex; align-items: center; gap: 8rpx; max-width: 80%; padding: 13rpx 20rpx; border: 1rpx solid #cfe4d3; border-radius: 28rpx; background: #fffefa; box-shadow: 0 5rpx 18rpx rgba(23, 49, 40, .14); color: #197257; font-size: 21rpx; font-weight: 600; }
+.new-messages-arrow { font-size: 25rpx; line-height: 1; }
 .date-divider { width: max-content; margin: 8rpx auto 28rpx; padding: 7rpx 16rpx; border-radius: 20rpx; background: #e9ece6; color: #7d8980; font-size: 19rpx; }
 .system-message { max-width: 610rpx; margin: 0 auto 28rpx; padding: 13rpx 20rpx; border-radius: 15rpx; background: #e9ece6; color: #738077; font-size: 21rpx; line-height: 1.5; text-align: center; }
 .message-row { display: flex; align-items: flex-start; gap: 14rpx; margin: 0 0 28rpx; }

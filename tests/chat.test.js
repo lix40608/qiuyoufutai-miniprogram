@@ -59,6 +59,50 @@ test('sending does not skip unseen peer messages when polling resumes', async ()
   assert.equal(requestedAfter, 10);
   assert.equal(p.data.messages.map(item => item.id).join(','), '10,11,12');
 });
+
+test('阅读旧消息时新消息不抢滚动位置，并显示可点击的新消息提示', () => {
+  const p = page({});
+  p._userId = 1;
+  p._messageViewportHeight = 400;
+  p._hasRenderedMessages = true;
+  p.data.messages = [{ id: 10, senderId: 3, content: '旧消息', createdAt: '2026-10-28T10:00:00Z', key: 'message-10' }];
+  p.data.scrollTarget = 'message-10';
+  p.onMessageScroll({ detail: { scrollTop: 100, scrollHeight: 980 } });
+  assert.equal(p._nearBottom, false);
+  p.renderMessages([
+    ...p.data.messages,
+    { id: 11, senderId: 3, content: '新消息', createdAt: '2026-10-28T10:01:00Z' }
+  ]);
+  assert.equal(p.data.scrollTarget, 'message-10');
+  assert.equal(p.data.newMessageCount, 1);
+  p.jumpToLatest();
+  assert.equal(p.data.scrollTarget, 'message-11');
+  assert.equal(p.data.newMessageCount, 0);
+});
+
+test('停留在最新消息时新消息继续自动跟随且不显示提示', () => {
+  const p = page({});
+  p._userId = 1;
+  p._nearBottom = true;
+  p._hasRenderedMessages = true;
+  p.data.messages = [{ id: 10, senderId: 3, content: '旧消息', createdAt: '2026-10-28T10:00:00Z', key: 'message-10' }];
+  p.renderMessages([
+    ...p.data.messages,
+    { id: 11, senderId: 3, content: '新消息', createdAt: '2026-10-28T10:01:00Z' }
+  ]);
+  assert.equal(p.data.scrollTarget, 'message-11');
+  assert.equal(p.data.newMessageCount, 0);
+});
+
+test('滚动回最新位置时清除新消息提示', () => {
+  const p = page({});
+  p._messageViewportHeight = 400;
+  p.data.newMessageCount = 2;
+  p.onMessageScroll({ detail: { scrollTop: 550, scrollHeight: 980 } });
+  assert.equal(p.data.newMessageCount, 0);
+  assert.equal(p._nearBottom, true);
+});
+
 test('opening the confirmation dialog never confirms before the user accepts', () => {
   let submissions = 0;
   const p = page({}, { showModal: options => options.success({ confirm: false }) });
@@ -161,4 +205,6 @@ test('结束的我聊过卡片显示查看聊天且聊天页隐藏输入区', ()
   assert.match(group, /item\.displayEnded \? '查看聊天' : '进入聊天'/);
   assert.match(chat, /wx:if="\{\{!closed\}\}" class="composer"/);
   assert.match(chat, /wx:if="\{\{closed && !systemNotice\}\}" class="closed-banner"/);
+  assert.match(chat, /bindscroll="onMessageScroll"/);
+  assert.match(chat, /class="new-messages-tip" bindtap="jumpToLatest"/);
 });

@@ -21,24 +21,27 @@
       </view>
     </view>
     <view wx:if="{{syncError}}" class="sync-error" bindtap="sync">{{syncError}} · 点击重试</view>
-    <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{scrollTarget}}" scroll-with-animation="true">
-      <view wx:if="{{loading}}" class="system-message">正在同步消息…</view>
-      <view wx:elif="{{!messages.length}}" class="system-message">先聊聊玩法和时间，商量好后再确认组局。</view>
-      <view wx:for="{{messages}}" wx:key="key" id="{{item.key}}" class="message-row {{item.mine ? 'mine-row' : ''}}">
-        <view wx:if="{{!item.mine}}" class="message-avatar other-avatar">
-          <image wx:if="{{conversation.peerAvatar}}" class="avatar-image" src="{{conversation.peerAvatar}}" mode="aspectFill" />
-          <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
+    <view class="message-region">
+      <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{scrollTarget}}" scroll-with-animation="true" bindscroll="onMessageScroll">
+        <view wx:if="{{loading}}" class="system-message">正在同步消息…</view>
+        <view wx:elif="{{!messages.length}}" class="system-message">先聊聊玩法和时间，商量好后再确认组局。</view>
+        <view wx:for="{{messages}}" wx:key="key" id="{{item.key}}" class="message-row {{item.mine ? 'mine-row' : ''}}">
+          <view wx:if="{{!item.mine}}" class="message-avatar other-avatar">
+            <image wx:if="{{conversation.peerAvatar}}" class="avatar-image" src="{{conversation.peerAvatar}}" mode="aspectFill" />
+            <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
+          </view>
+          <view class="bubble-wrap"><view class="message-sender">{{item.mine ? currentName : peerName}}</view><view class="message-time">{{item.timeLabel}}</view><view class="bubble {{item.mine ? 'mine-bubble' : 'other-bubble'}}">{{item.content}}</view>
+            <view wx:if="{{item.state === 'failed'}}" class="failed-message" data-key="{{item.key}}" bindtap="showFailure">! {{item.failureLabel}} · 查看原因</view>
+          </view>
+          <view wx:if="{{item.mine}}" class="message-avatar mine-avatar">
+            <image wx:if="{{currentAvatar}}" class="avatar-image" src="{{currentAvatar}}" mode="aspectFill" />
+            <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
+          </view>
         </view>
-        <view class="bubble-wrap"><view class="message-sender">{{item.mine ? currentName : peerName}}</view><view class="message-time">{{item.timeLabel}}</view><view class="bubble {{item.mine ? 'mine-bubble' : 'other-bubble'}}">{{item.content}}</view>
-          <view wx:if="{{item.state === 'failed'}}" class="failed-message" data-key="{{item.key}}" bindtap="showFailure">! {{item.failureLabel}} · 查看原因</view>
-        </view>
-        <view wx:if="{{item.mine}}" class="message-avatar mine-avatar">
-          <image wx:if="{{currentAvatar}}" class="avatar-image" src="{{currentAvatar}}" mode="aspectFill" />
-          <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
-        </view>
-      </view>
-      <view wx:if="{{systemNotice}}" id="closure-notice" class="system-message closure-notice">{{systemNotice}}</view>
-    </scroll-view>
+        <view wx:if="{{systemNotice}}" id="closure-notice" class="system-message closure-notice">{{systemNotice}}</view>
+      </scroll-view>
+      <view wx:if="{{newMessageCount}}" class="new-messages-tip" bindtap="jumpToLatest">{{newMessageCount > 99 ? '99+' : newMessageCount}} 条新消息 <text class="new-messages-arrow">↓</text></view>
+    </view>
     <view wx:if="{{closed && !systemNotice}}" class="closed-banner">{{hint}}</view>
     <view wx:if="{{!closed}}" class="composer">
       <view class="message-input-shell">
