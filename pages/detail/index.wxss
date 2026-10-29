@@ -25,8 +25,12 @@
 .match-note { margin-top: 16rpx; color: #52645b; font-size: 25rpx; line-height: 1.6; white-space: pre-wrap; }
 .card-actions { display: flex; gap: 14rpx; margin-top: 22rpx; }
 .action-button { flex: 1; margin: 0; min-height: 82rpx; line-height: 82rpx; font-size: 26rpx; }
-.contact-row { display: flex; align-items: center; gap: 18rpx; margin-top: 20rpx; padding: 18rpx; border-radius: 22rpx; background: #f0f2ed; }
-.contact-button { margin: 0; padding: 0 20rpx; height: 72rpx; line-height: 72rpx; border-radius: 18rpx; background: #dfe4dd; color: #849087; font-size: 24rpx; font-weight: 700; }
+.contact-card { display: flex; align-items: center; justify-content: space-between; gap: 18rpx; }
+.contact-copy { flex: 1; min-width: 0; }
+.contact-title { color: #197257; font-size: 24rpx; font-weight: 700; }
+.contact-hint { margin-top: 6rpx; color: #718178; font-size: 21rpx; line-height: 1.4; }
+.contact-action { flex: none; min-width: 150rpx; margin: 0; padding: 0 20rpx; height: 68rpx; line-height: 68rpx; border-radius: 18rpx; background: #197257; color: #fff; font-size: 23rpx; font-weight: 700; }
+.contact-action-disabled { background: #e5eae4; color: #849087; }
 .local-contact-row { min-height: 68rpx; }
 
 .detail-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:26rpx}.status{color:#287f60;background:#eaf5eb;border-radius:24rpx;padding:7rpx 14rpx;font-size:21rpx}.detail-label{font-size:21rpx;color:#91a197}.venue-name{font-size:34rpx;line-height:1.35;margin-top:8rpx;color:#193c30}.time-block{display:flex;align-items:center;gap:14rpx;margin-top:22rpx;padding:16rpx 18rpx;border-radius:16rpx;background:#f0f6f0}.time-icon{width:42rpx;height:42rpx;line-height:42rpx;text-align:center;border-radius:50%;background:#dceee0;color:#21775c;font-size:28rpx}.time-value{margin-top:4rpx;font-size:26rpx;font-weight:650;color:#235440}.address-row{display:flex;align-items:center;gap:18rpx;margin-top:18rpx}.address-copy{flex:1;min-width:0}.address-value{margin-top:6rpx;color:#536a5c;font-size:24rpx;line-height:1.5}.text-link{flex:none}.detail-information{margin-top:22rpx}.info-row{display:flex;align-items:flex-start;gap:24rpx;margin-top:14rpx;color:#536a5c;font-size:24rpx;line-height:1.5}.info-label{flex:none;color:#91a197}.info-note{white-space:pre-wrap;word-break:break-all}

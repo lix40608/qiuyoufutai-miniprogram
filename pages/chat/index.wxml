@@ -1,14 +1,23 @@
 <view class="chat-page" style="height: calc(100vh - {{keyboardHeight}}px)">
   <view wx:if="{{loadError}}" class="empty-state"><view class="empty-title">暂时无法打开聊天</view><view class="muted">{{loadError}}</view></view>
   <block wx:else>
-    <view wx:if="{{match}}" class="match-pin {{focusConfirm ? 'highlight-pin' : ''}}">
-      <view class="pin-top"><view class="pin-mark">8</view><view class="pin-status">{{statusLabel}}</view><view class="pin-open" bindtap="openDetail">查看详情 ›</view></view>
+    <view wx:if="{{showConfirmedTip}}" class="confirmation-toast">双方已确认组局，可前往约局详情联系对方。</view>
+    <view wx:if="{{match}}" class="match-pin">
+      <view class="pin-top"><view class="pin-status">{{statusLabel}}</view><view class="pin-game">{{match.gameType}}</view></view>
       <view class="pin-title">{{match.title}}</view>
       <view class="pin-meta">{{match.startLabel}} · {{match.venue}}</view>
-      <view class="confirm-line">
-        <view><view class="confirm-count">{{count}}<text> / 2</text></view><view class="confirm-hint">{{hint}}</view></view>
-        <button wx:if="{{canConfirm}}" class="confirm-button" loading="{{confirming}}" disabled="{{confirming}}" bindtap="confirmMatch">确认组局</button>
-        <button wx:elif="{{conversation.won}}" class="confirm-button" bindtap="openDetail">查看详情</button>
+    </view>
+    <view wx:if="{{match}}" class="confirm-panel {{focusConfirm ? 'highlight-pin' : ''}}">
+      <view class="confirm-head"><view class="confirm-title">组局确认</view><view class="confirm-progress">确认进度 {{count}}/2</view></view>
+      <view class="confirm-hint">{{hint}}</view>
+      <button wx:if="{{canConfirm}}" class="confirm-button" loading="{{confirming}}" disabled="{{confirming}}" bindtap="confirmMatch">确认组局</button>
+      <button wx:elif="{{conversation.won}}" class="confirm-button" bindtap="openDetail">查看详情</button>
+    </view>
+    <view wx:if="{{showInvite && !inviteDismissed}}" class="invite-card">
+      <view class="invite-title">对方已确认，是否确认本场组局？</view>
+      <view class="invite-actions">
+        <button class="invite-later" bindtap="dismissInvite">暂不</button>
+        <button class="invite-confirm" loading="{{confirming}}" disabled="{{confirming}}" bindtap="confirmMatch">确认组局</button>
       </view>
     </view>
     <view wx:if="{{syncError}}" class="sync-error" bindtap="sync">{{syncError}} · 点击重试</view>
@@ -16,17 +25,28 @@
       <view wx:if="{{loading}}" class="system-message">正在同步消息…</view>
       <view wx:elif="{{!messages.length}}" class="system-message">先聊聊玩法和时间，商量好后再确认组局。</view>
       <view wx:for="{{messages}}" wx:key="key" id="{{item.key}}" class="message-row {{item.mine ? 'mine-row' : ''}}">
-        <view wx:if="{{!item.mine}}" class="message-avatar other-avatar">球友</view>
-        <view class="bubble-wrap"><view class="message-time">{{item.timeLabel}}</view><view class="bubble {{item.mine ? 'mine-bubble' : 'other-bubble'}}">{{item.content}}</view>
+        <view wx:if="{{!item.mine}}" class="message-avatar other-avatar">
+          <image wx:if="{{conversation.peerAvatar}}" class="avatar-image" src="{{conversation.peerAvatar}}" mode="aspectFill" />
+          <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
+        </view>
+        <view class="bubble-wrap"><view class="message-sender">{{item.mine ? currentName : peerName}}</view><view class="message-time">{{item.timeLabel}}</view><view class="bubble {{item.mine ? 'mine-bubble' : 'other-bubble'}}">{{item.content}}</view>
           <view wx:if="{{item.state === 'failed'}}" class="failed-message" data-key="{{item.key}}" bindtap="showFailure">! {{item.failureLabel}} · 查看原因</view>
         </view>
-        <view wx:if="{{item.mine}}" class="message-avatar mine-avatar">我</view>
+        <view wx:if="{{item.mine}}" class="message-avatar mine-avatar">
+          <image wx:if="{{currentAvatar}}" class="avatar-image" src="{{currentAvatar}}" mode="aspectFill" />
+          <image wx:else class="avatar-image" src="/assets/eight-ball.png" mode="aspectFit" />
+        </view>
       </view>
+      <view wx:if="{{systemNotice}}" id="closure-notice" class="system-message closure-notice">{{systemNotice}}</view>
     </scroll-view>
-    <view wx:if="{{closed}}" class="closed-banner">{{hint}}</view>
-    <view wx:else class="composer">
-      <input class="message-input" placeholder="聊聊这场约球" value="{{draft}}" maxlength="1000" adjust-position="false" bindinput="onDraftInput" bindkeyboardheightchange="onKeyboardHeightChange" bindconfirm="sendMessage" confirm-type="send" />
-      <button class="send-button" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending || !draft || loading}}">发送</button>
+    <view wx:if="{{closed && !systemNotice}}" class="closed-banner">{{hint}}</view>
+    <view wx:if="{{!closed}}" class="composer">
+      <view class="message-input-shell">
+        <input class="message-input" placeholder="发送消息…" value="{{draft}}" maxlength="1000" adjust-position="false" bindinput="onDraftInput" bindkeyboardheightchange="onKeyboardHeightChange" bindconfirm="sendMessage" confirm-type="send" />
+      </view>
+      <view class="send-button-wrap">
+        <button class="send-button" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending || loading}}">发送</button>
+      </view>
     </view>
   </block>
 </view>

@@ -108,26 +108,41 @@ module.exports = {
       return ensureLogin().then(upload);
     });
   },
-  openConversation: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}/conversations`, { method: 'POST' }),
-  getConversations: () => withLogin('/v1/me/conversations'),
-  getConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}`),
+  openConversation: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}/conversations`, { method: 'POST' }).then(normalizeConversation),
+  getConversations(page, pageSize, guestOnly = false) {
+    const params = [];
+    if (Number.isFinite(page) && Number.isFinite(pageSize)) params.push(`page=${page}&pageSize=${Math.min(pageSize, 10)}`);
+    if (guestOnly) params.push('guestOnly=true');
+    const query = params.length ? `?${params.join('&')}` : '';
+    return withLogin(`/v1/me/conversations${query}`).then(rows => rows.map(normalizeConversation));
+  },
+  getLatestMatchConversation: (matchId) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/conversations/latest`).then(conversation => conversation ? normalizeConversation(conversation) : null),
+  getConversation: (id, markRead = false) => withLogin(`/v1/conversations/${encodeURIComponent(id)}${markRead ? '?markRead=true' : ''}`).then(normalizeConversation),
+  markConversationRead: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/read`, { method: 'POST' }),
+  getNotifications: () => withLogin('/v1/me/notifications'),
+  getUnreadNotificationCount: () => withLogin('/v1/me/notifications/unread-count').then(result => Number(result.count) || 0),
+  markNotificationRead: (id) => withLogin(`/v1/me/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' }),
   getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}`),
   sendMessage: (id, content, clientId) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content, clientId } }),
   confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
   getPublicMatches: (query = '') => withLogin(`/v1/matches${query}`).then((rows) => rows.map(normalizeMatch)),
-  async getChattedMatches() {
-    const [profile, conversations] = await Promise.all([this.getProfile(), this.getConversations()]);
-    const mine = conversations.filter(item => Number(item.guestUserId) === Number(profile.userId));
+  async getChattedMatches(page, pageSize) {
+    const conversations = await this.getConversations(page, pageSize);
     const records = [];
     // Bound concurrent detail reads rather than sending hundreds of requests at once.
-    for (let offset = 0; offset < mine.length; offset += 4) {
-      const batch = await Promise.all(mine.slice(offset, offset + 4).map(async item =>
-        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id })));
+    for (let offset = 0; offset < conversations.length; offset += 4) {
+      const batch = await Promise.all(conversations.slice(offset, offset + 4).map(async item =>
+        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, unreadCount: item.unreadCount })));
       records.push(...batch);
     }
     return records;
   },
-  getMyMatches: () => withLogin('/v1/me/matches').then((rows) => rows.map(normalizeMatch)),
+  getMyMatches(page, pageSize, filter) {
+    const query = Number.isFinite(page) && Number.isFinite(pageSize)
+      ? `?page=${page}&pageSize=${Math.min(pageSize, 10)}${filter && filter !== 'all' ? `&filter=${encodeURIComponent(filter)}` : ''}`
+      : '';
+    return withLogin(`/v1/me/matches${query}`).then((rows) => rows.map(normalizeMatch));
+  },
   getMatch: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}`).then(normalizeMatch),
   saveDraft: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}` : '/v1/matches', { method: form.id ? 'PUT' : 'POST', data: toMatchPayload(form, 'draft'), header: form.id ? {} : { 'X-Idempotency-Key': form.requestKey || createRequestKey() } }).then(normalizeMatch),
   publishMatch: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}/publish` : '/v1/matches', { method: 'POST', data: toMatchPayload(form, 'recruiting'), header: { 'X-Idempotency-Key': form.publishRequestKey || createRequestKey() } }).then(normalizeMatch),
@@ -140,6 +155,8 @@ module.exports = {
     if (options.searchText) params.push(`q=${encodeURIComponent(options.searchText)}`);
     if (Number.isFinite(options.ageMin)) params.push(`ageMin=${options.ageMin}`);
     if (Number.isFinite(options.ageMax)) params.push(`ageMax=${options.ageMax}`);
+    if (Number.isFinite(options.page)) params.push(`page=${options.page}`);
+    if (Number.isFinite(options.pageSize)) params.push(`pageSize=${Math.min(options.pageSize, 10)}`);
     return withLogin(`/v1/matches${params.length ? `?${params.join('&')}` : ''}`).then((rows) => {
       const locationStore = require('./location-store');
       return rows.map(normalizeMatch).map((match) => {
@@ -171,6 +188,10 @@ function stripBaseUrl(url) {
 
 function normalizeProfile(profile) {
   return Object.assign({}, profile, { gender: genderLabel(profile.gender), gameTypes: parseGames(profile.gameTypes), avatarUrl: absoluteAvatarUrl(profile.avatarUrl), avatarPath: absoluteAvatarUrl(profile.avatarUrl) });
+}
+
+function normalizeConversation(conversation) {
+  return Object.assign({}, conversation, { peerAvatar: absoluteAvatarUrl(conversation.peerAvatar) });
 }
 
 function toMatchPayload(form, status) {

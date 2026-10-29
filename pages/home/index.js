@@ -6,8 +6,11 @@ const locationStore = require('../../data/location-store');
 Page({
   data: {
     matches: [],
+    page: 1,
+    hasMore: true,
+    loadingMore: false,
     currentUserId: null,
-    selectedGameType: '中式八球',
+    selectedGameType: '全部',
     userLocation: null,
     locationLabel: '选择位置查看附近球友',
     isLoading: true,
@@ -32,13 +35,27 @@ Page({
   },
 
   refreshMatches() {
+    return this.loadMatches(1, false);
+  },
+
+  loadMatches(page, append) {
     const requestId = this._requestId = (this._requestId || 0) + 1;
-    this.setData({ isLoading: true });
-    return api.searchMatches({ userLocation: this.data.userLocation }).then((matches) => {
-      if (requestId === this._requestId) this.setData({ matches: matches.slice(0, 2), isLoading: false, loadError: '' });
+    this.setData(append ? { loadingMore: true } : { isLoading: true, loadError: '', page: 1, hasMore: true, matches: [] });
+    const gameType = this.data.selectedGameType === '全部' ? '' : this.data.selectedGameType;
+    return api.searchMatches({ gameType, userLocation: this.data.userLocation, page, pageSize: 10 }).then((rows) => {
+      if (requestId !== this._requestId) return;
+      if (append && !rows.length) return this.setData({ loadingMore: false, hasMore: false });
+      const matches = (append ? this.data.matches.concat(rows) : rows).map(row => Object.assign({}, row, { chatUnreadCount: (this.data.unreadByMatchId || {})[String(row.id)] || 0 }));
+      this.setData({ matches, page, hasMore: rows.length === 10, isLoading: false, loadingMore: false, loadError: '' });
     }).catch((error) => {
-      if (requestId === this._requestId) this.setData({ matches: [], isLoading: false, loadError: error.message || '暂时无法连接服务' });
+      if (requestId === this._requestId) this.setData(append
+        ? { loadingMore: false }
+        : { matches: [], isLoading: false, loadError: error.message || '暂时无法连接服务' });
     });
+  },
+
+  onReachBottom() {
+    if (!this.data.isLoading && !this.data.loadingMore && this.data.hasMore) this.loadMatches(this.data.page + 1, true);
   },
 
   onHide() { unread.stop(this); },
@@ -57,8 +74,7 @@ Page({
 
   selectGameType(event) {
     const gameType = event.currentTarget.dataset.type;
-    getApp().globalData.pendingGameType = gameType;
-    wx.switchTab({ url: '/pages/find/index' });
+    this.setData({ selectedGameType: gameType }, () => this.refreshMatches());
   },
 
   showMessages() { navigation.openMessages(); },
@@ -78,6 +94,7 @@ Page({
   },
 
   goFind() {
+    getApp().globalData.pendingGameType = this.data.selectedGameType === '全部' ? '' : this.data.selectedGameType;
     wx.switchTab({ url: '/pages/find/index' });
   },
 

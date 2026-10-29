@@ -21,6 +21,13 @@
     </view>
   </view>
 
+  <view wx:if="{{match}}" class="card contact-card">
+    <view class="contact-copy">
+      <view class="contact-title">联系对方</view>
+      <view class="contact-hint">{{contactHint}}</view>
+    </view>
+    <button class="contact-action contact-action-disabled" bindtap="contactOther">联系对方</button>
+  </view>
   <view wx:if="{{!isHost && match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
     <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>

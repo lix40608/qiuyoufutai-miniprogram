@@ -4,7 +4,8 @@ const model = require('../../data/chat-model');
 Page({
   data: { match: null, conversation: null, messages: [], draft: '', loading: true,
     sending: false, confirming: false, loadError: '', syncError: '', keyboardHeight: 0,
-    closed: false, canConfirm: false, count: 0, hint: '', statusLabel: '', scrollTarget: '', focusConfirm: false },
+    closed: false, canConfirm: false, showInvite: false, inviteDismissed: false, count: 0, hint: '', statusLabel: '', scrollTarget: '', focusConfirm: false, showConfirmedTip: false,
+    currentName: '我', currentAvatar: '', peerName: '球友', peerAvatar: '', systemNotice: '' },
 
   onLoad(query) {
     this._afterId = 0;
@@ -13,18 +14,19 @@ Page({
   },
   onShow() { this._active = true; if (this._ready) this.sync(); },
   onHide() { this._active = false; clearTimeout(this._timer); },
-  onUnload() { this._active = false; this._destroyed = true; clearTimeout(this._timer); },
+  onUnload() { this._active = false; this._destroyed = true; clearTimeout(this._timer); clearTimeout(this._confirmedTipTimer); },
 
   async initialize(query) {
     try {
       const profile = await api.getProfile();
       this._userId = profile.userId;
-      const conversation = query.id ? await api.getConversation(query.id) : await api.openConversation(query.matchId);
+      const conversation = query.id ? await api.getConversation(query.id, true) : await api.openConversation(query.matchId);
       const match = await api.getMatch(conversation.matchId);
       if (this._destroyed) return;
       this._ready = true;
       wx.setNavigationBarTitle({ title: conversation.peerName || '约局聊天' });
-      this.setData(Object.assign({ match, conversation, loadError: '' }, model.conversationState(conversation, this._userId)));
+      this.setData(Object.assign({ match, conversation, loadError: '', currentName: profile.nickname || '我', currentAvatar: profile.avatarUrl || '',
+        peerName: conversation.peerName || '球友', peerAvatar: conversation.peerAvatar || '' }, model.conversationState(conversation, this._userId)));
       if (this._active) this.sync();
     } catch (error) {
       if (!this._destroyed) this.setData({ loading: false, loadError: error.message || '暂时无法打开聊天' });
@@ -38,6 +40,7 @@ Page({
     let catchingUp = false;
     try {
       const conversation = await api.getConversation(this.data.conversation.id);
+      const justConfirmed = Boolean(conversation.won && !this.data.conversation.won);
       // Page through history without skipping incoming messages or overlapping requests.
       for (let page = 0; page < 10 && this._active; page++) {
         const rows = await api.getMessages(conversation.id, this._afterId);
@@ -49,7 +52,13 @@ Page({
         catchingUp = rows.length === 100;
         if (!catchingUp) break;
       }
-      if (!this._destroyed) this.setData(Object.assign({ conversation, loading: false, syncError: '' }, model.conversationState(conversation, this._userId)));
+      if (!this._destroyed) {
+        const nextState = model.conversationState(conversation, this._userId);
+        const newlyReceivedInvite = !this.data.showInvite && nextState.showInvite;
+        this.setData(Object.assign({ conversation, loading: false, syncError: '' }, nextState));
+        if (newlyReceivedInvite) api.markConversationRead(conversation.id).catch(() => {});
+        if (justConfirmed) this.showConfirmedTip();
+      }
     } catch (error) {
       if (!this._destroyed) this.setData({ loading: false, syncError: error.message || '连接中断，正在重试' });
     } finally {
@@ -66,6 +75,13 @@ Page({
     }));
     this.setData({ messages: rows });
     if (rows.length !== previousCount && rows.length) this.setData({ scrollTarget: rows[rows.length - 1].key });
+  },
+  showConfirmedTip() {
+    clearTimeout(this._confirmedTipTimer);
+    this.setData({ showConfirmedTip: true });
+    this._confirmedTipTimer = setTimeout(() => {
+      if (!this._destroyed) this.setData({ showConfirmedTip: false });
+    }, 2800);
   },
   onDraftInput(event) { this.setData({ draft: event.detail.value }); },
   onKeyboardHeightChange(event) { this.setData({ keyboardHeight: event.detail.height || 0 }); },
@@ -84,12 +100,28 @@ Page({
           failureLabel: error.statusCode ? '未发送' : '发送结果待确认',
           failureReason: error.statusCode ? error.message : '发送结果暂未确认，请等待消息同步后再决定是否重发。' };
         this.renderMessages(model.mergeMessages(this.data.messages, [failed]));
+        await this.lockClosedConversation(error, '刚才这条消息未投递');
       }
     } finally { if (!this._destroyed) this.setData({ sending: false }); }
+  },
+  async lockClosedConversation(error, actionLabel) {
+    if (!['MATCH_CANCELLED', 'CONVERSATION_CLOSED', 'MATCH_ALREADY_WON'].includes(error.code)) return false;
+    const cancelled = error.code === 'MATCH_CANCELLED';
+    const reason = cancelled ? '约局已取消' : '本场已由其他聊天完成组局';
+    const notice = `${reason}。${actionLabel}；本聊天的确认和发送已关闭，你仍可查看历史记录。`;
+    this.setData({ closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice' });
+    try {
+      const conversation = await api.getConversation(this.data.conversation.id);
+      if (!this._destroyed) this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId), {
+        closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice'
+      }));
+    } catch (_) { /* Keep the authoritative action rejection visible and keep actions locked. */ }
+    return true;
   },
   showFailure(event) {
     const item = this.data.messages.find(row => row.key === event.currentTarget.dataset.key);
     if (!item) return;
+    if (this.data.closed) return wx.showModal({ title: '消息未发送', content: item.failureReason, showCancel: false, confirmText: '知道了' });
     wx.showModal({ title: '消息未确认发送', content: item.failureReason, confirmText: '修改消息',
       success: result => {
         if (!result.confirm || this._destroyed) return;
@@ -97,6 +129,7 @@ Page({
         this.renderMessages(this.data.messages.filter(row => row.key !== item.key));
       } });
   },
+  dismissInvite() { this.setData({ inviteDismissed: true }); },
   confirmMatch() {
     if (!this.data.canConfirm || this.data.confirming) return;
     wx.showModal({ title: '确认这场约球？', content: '确认表示你愿意按约定赴约，双方确认后即组局成功。', confirmText: '确认组局',
@@ -109,10 +142,13 @@ Page({
       const conversation = await api.confirmConversation(this.data.conversation.id);
       if (!this._destroyed) {
         this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId)));
-        wx.showToast({ title: conversation.won ? '双方已确认组局' : '已确认，等待对方', icon: 'none' });
+        if (conversation.won) this.showConfirmedTip();
+        else wx.showToast({ title: '已确认，等待对方', icon: 'none' });
       }
-    } catch (error) { if (!this._destroyed) wx.showToast({ title: error.message || '确认失败，请重试', icon: 'none' }); }
+    } catch (error) {
+      if (!this._destroyed && !await this.lockClosedConversation(error, '本次确认未提交')) wx.showToast({ title: error.message || '确认失败，请重试', icon: 'none' });
+    }
     finally { if (!this._destroyed) this.setData({ confirming: false }); this.sync(); }
   },
-  openDetail() { if (this.data.match) wx.navigateTo({ url: `/pages/detail/index?id=${this.data.match.id}` }); }
+  openDetail() { if (this.data.match) wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(this.data.match.id)}` }); }
 });

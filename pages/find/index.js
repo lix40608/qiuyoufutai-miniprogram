@@ -17,6 +17,10 @@ Page({
     gameTypes: ['全部玩法', '中式八球', '中式九球', '斯诺克'],
     selectedGameType: '全部玩法',
     matches: [],
+    page: 1,
+    hasMore: true,
+    loading: false,
+    loadingMore: false,
     currentUserId: null,
     hasLocation: false,
     userLocation: null,
@@ -46,19 +50,39 @@ Page({
   },
 
   refreshMatches() {
+    return this.loadMatches(1, false);
+  },
+
+  loadMatches(page, append) {
     const requestId = this._requestId = (this._requestId || 0) + 1;
     const gameType = this.data.selectedGameType === '全部玩法' ? '' : this.data.selectedGameType;
     const ageFilter = ageFilters[this.data.ageFilterIndex];
     const genderFilter = this.data.genderFilters[this.data.genderFilterIndex];
-    api.searchMatches({
+    const request = api.searchMatches({
       gameType,
       userLocation: this.data.userLocation,
       searchText: this.data.searchText,
       ageMin: ageFilter.min === 0 ? undefined : ageFilter.min,
       ageMax: ageFilter.max === Infinity ? undefined : ageFilter.max,
-      gender: genderFilter === '不限性别' ? '' : genderFilter
-    }).then((matches) => { if (requestId === this._requestId) this.setData({ matches, loadError: '' }); })
-      .catch((error) => { if (requestId === this._requestId) this.setData({ matches: [], loadError: error.message || '暂时无法连接服务' }); });
+      gender: genderFilter === '不限性别' ? '' : genderFilter,
+      page,
+      pageSize: 10
+    });
+    this.setData(append ? { loadingMore: true } : { loading: true, loadingMore: false, page: 1, hasMore: true, matches: [], loadError: '' });
+    return request.then((rows) => {
+      if (requestId !== this._requestId) return;
+      if (append && !rows.length) return this.setData({ loadingMore: false, hasMore: false });
+      const matches = (append ? this.data.matches.concat(rows) : rows).map(row => Object.assign({}, row, { chatUnreadCount: (this.data.unreadByMatchId || {})[String(row.id)] || 0 }));
+      this.setData({ matches, page, hasMore: rows.length === 10, loading: false, loadingMore: false, loadError: '' });
+    }).catch((error) => {
+      if (requestId === this._requestId) this.setData(append
+        ? { loadingMore: false }
+        : { matches: [], loading: false, loadError: error.message || '暂时无法连接服务' });
+    });
+  },
+
+  onReachBottom() {
+    if (!this.data.loading && !this.data.loadingMore && this.data.hasMore) this.loadMatches(this.data.page + 1, true);
   },
 
   onHide() { unread.stop(this); clearTimeout(this._searchTimer); },

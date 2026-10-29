@@ -5,7 +5,7 @@
       <view class="location-entry" bindtap="showLocation"><view class="pin-icon location-pin"><view class="pin-dot"></view></view><text class="location-label">{{locationLabel}}</text><text class="location-arrow">›</text></view>
       <view class="location-privacy">用于查找附近约局</view>
     </view>
-    <view class="message-entry" bindtap="showMessages">消息<view wx:if="{{unreadCount}}" class="message-unread">{{unreadCount > 99 ? '99+' : unreadCount}}</view></view>
+    <view class="message-entry" bindtap="showMessages"><view class="bell-icon"><view class="bell-top"></view><view class="bell-base"></view></view><view wx:if="{{unreadCount}}" class="message-unread"></view></view>
   </view>
 
   <view class="hero">
@@ -20,6 +20,7 @@
     <view class="section-title">选个玩法</view>
   </view>
   <view class="game-chips">
+    <view class="game-chip {{selectedGameType === '全部' ? 'selected' : ''}}" data-type="全部" bindtap="selectGameType">全部</view>
     <view class="game-chip {{selectedGameType === '中式八球' ? 'selected' : ''}}" data-type="中式八球" bindtap="selectGameType">中式八球</view>
     <view class="game-chip {{selectedGameType === '中式九球' ? 'selected' : ''}}" data-type="中式九球" bindtap="selectGameType">中式九球</view>
     <view class="game-chip {{selectedGameType === '斯诺克' ? 'selected' : ''}}" data-type="斯诺克" bindtap="selectGameType">斯诺克</view>
@@ -55,8 +56,9 @@
       </view>
       <view wx:if="{{currentUserId != null && item.hostUserId != null && currentUserId != item.hostUserId}}" class="card-actions">
         <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
-        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊</button>
+        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊<view wx:if="{{item.chatUnreadCount}}" class="action-unread-dot"></view></button>
       </view>
     </view>
   </block>
+  <view wx:if="{{matches.length}}" class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
 </view>

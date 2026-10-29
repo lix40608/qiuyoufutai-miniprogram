@@ -18,7 +18,10 @@ Page({
     loading: true,
     loadError: '',
     records: [],
-    visibleRecords: []
+    visibleRecords: [],
+    page: 1,
+    hasMore: true,
+    loadingMore: false
   },
 
   onLoad(query) {
@@ -34,19 +37,31 @@ Page({
   },
 
   refreshRecords() {
+    return this.loadRecords(1, false);
+  },
+
+  loadRecords(page, append) {
     const activeView = this.data.activeView;
     const requestId = this._requestId = (this._requestId || 0) + 1;
-    this.setData({ loading: true, loadError: '' });
-    const request = activeView === 'created' ? api.getMyMatches() : api.getChattedMatches();
+    this.setData(append ? { loadingMore: true } : { loading: true, loadingMore: false, loadError: '', page: 1, hasMore: true, records: [], visibleRecords: [] });
+    const request = activeView === 'created'
+      ? api.getMyMatches(page, 10, this.data.activeFilter)
+      : api.getChattedMatches(page, 10);
     request.then((records) => {
       if (requestId !== this._requestId || this.data.activeView !== activeView) return;
-      const filteredRecords = records;
-      const visibleRecords = this.filterRecords(filteredRecords);
-      this.setData({ records: filteredRecords, visibleRecords, loading: false });
+      if (append && !records.length) return this.setData({ loadingMore: false, hasMore: false });
+      const merged = (append ? this.data.records.concat(records) : records).map(item => Object.assign({}, item, {
+        rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`
+      }));
+      this.setData({ records: merged, visibleRecords: this.filterRecords(merged), page, hasMore: records.length === 10, loading: false, loadingMore: false });
     }).catch((error) => {
       if (requestId !== this._requestId) return;
-      this.setData({ loading: false, loadError: error.message || '无法读取约局记录，请稍后重试。' });
+      this.setData(append ? { loadingMore: false } : { loading: false, loadError: error.message || '无法读取约局记录，请稍后重试。' });
     }).finally(() => wx.stopPullDownRefresh());
+  },
+
+  onReachBottom() {
+    if (!this.data.loading && !this.data.loadingMore && this.data.hasMore) this.loadRecords(this.data.page + 1, true);
   },
 
   filterRecords(records) {
@@ -70,10 +85,17 @@ Page({
   },
 
   openRecord(event) {
-    const { id, status, conversationId } = event.currentTarget.dataset;
+    const { id, status, conversationId, chatFirst } = event.currentTarget.dataset;
     if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${conversationId}` });
     if (status === 'draft') {
       wx.navigateTo({ url: `/pages/publish/index?draftId=${encodeURIComponent(id)}` });
+      return;
+    }
+    if (chatFirst) {
+      api.getLatestMatchConversation(id).then(conversation => {
+        if (conversation) wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversation.id)}` });
+        else wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(id)}` });
+      }).catch(error => wx.showToast({ title: error.message || '暂时无法打开聊天', icon: 'none' }));
       return;
     }
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });

@@ -24,11 +24,12 @@
   </view>
 
   <view wx:elif="{{visibleRecords.length}}">
-    <view wx:for="{{visibleRecords}}" wx:key="id" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" bindtap="openRecord">
+    <view wx:for="{{visibleRecords}}" wx:key="rowKey" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" data-chat-first="{{activeView === 'created' && item.status !== 'draft'}}" bindtap="openRecord">
       <view class="card-top">
           <view class="tag">{{item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已过期' : item.status === 'matched' ? '已组局' : '组局中'}}</view>
         <view wx:if="{{item.status !== 'draft'}}" class="muted">{{item.displayEnded ? '公开展示已结束 · 记录仍保留' : ''}}</view>
       </view>
+      <view wx:if="{{activeView === 'chatted'}}" class="chat-partner">与 {{item.peerName || '球友'}} 聊天</view>
       <view class="record-venue"><view class="record-label">球房</view><view class="record-venue-name">{{item.venueName || '球房待选择'}}</view></view>
       <view class="record-time"><text class="record-clock">◷</text><view><view class="record-label">开球时间</view><view class="record-time-value">{{item.startLabel}}</view></view></view>
       <view class="muted record-meta">{{item.gameType || '玩法待填写'}} · 费用 {{item.feeLabel || '待定'}}</view>
@@ -36,11 +37,10 @@
       <view wx:if="{{item.note}}" class="muted record-extra">备注：{{item.note}}</view>
       <view class="card-actions">
         <button wx:if="{{item.status === 'draft'}}" class="primary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="draft">继续编辑</button>
-        <button wx:if="{{item.status === 'recruiting'}}" class="primary-button secondary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="recruiting">查看详情</button>
-        <button wx:if="{{activeView === 'created' && item.status === 'recruiting' && !item.displayEnded}}" class="primary-button cancel-button" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
-        <button wx:if="{{item.displayEnded}}" class="primary-button secondary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="{{item.status}}">查看记录</button>
+        <button wx:if="{{activeView === 'created' && item.status === 'recruiting'}}" class="primary-button cancel-button" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
       </view>
     </view>
+    <view class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
   </view>
 
   <view wx:elif="{{activeView === 'created'}}" class="empty-state">

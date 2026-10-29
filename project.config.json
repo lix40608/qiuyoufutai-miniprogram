@@ -44,5 +44,6 @@
   "projectname": "qiuyoufutai-miniprogram",
   "condition": {},
   "simulatorPluginLibVersion": {},
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "3.16.2"
 }

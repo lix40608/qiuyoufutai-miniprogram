@@ -70,6 +70,61 @@ test('chat endpoints send only an explicit confirmation request when called', as
   assert.equal(calls[1].url.endsWith('/v1/conversations/12/confirm'), true);
 });
 
+test('opening a chat can mark its pending confirmation invitation as read', async () => {
+  const calls = [];
+  const c = client(o => { calls.push(o); return ok({ id: 12 }); }, 'session');
+  await c.api.getConversation(12, true);
+  assert.match(calls[0].url, /\/v1\/conversations\/12\?markRead=true$/);
+  await c.api.markConversationRead(12);
+  assert.equal(calls[1].url.endsWith('/v1/conversations/12/read'), true);
+  assert.equal(calls[1].method, 'POST');
+});
+
+test('message center reads peer avatar and notification endpoints with unread count', async () => {
+  const calls = [];
+  const c = client(o => {
+    calls.push(o);
+    if (o.url.endsWith('/v1/me/conversations')) return ok([{ id: 12, peerName: '小周', peerAvatar: '/avatars/peer.jpg', unreadCount: 2 }]);
+    if (o.url.endsWith('/v1/me/notifications/unread-count')) return ok({ count: 3 });
+    if (o.url.endsWith('/v1/me/notifications')) return ok([{ id: 8, matchId: 7, type: 'CANCELLED' }]);
+    return ok({ read: true });
+  }, 'session');
+  const conversations = await c.api.getConversations();
+  assert.equal(conversations[0].peerAvatar.endsWith('/avatars/peer.jpg'), true);
+  assert.equal((await c.api.getNotifications())[0].matchId, 7);
+  assert.equal(await c.api.getUnreadNotificationCount(), 3);
+  await c.api.markNotificationRead(8);
+  assert.equal(calls.some(call => call.url.endsWith('/v1/me/notifications/8/read') && call.method === 'POST'), true);
+});
+
+test('我聊过的包含发起方参与的会话，而不只包含主动加入方', async () => {
+  const calls = [];
+  const c = client(o => {
+    calls.push(o);
+    if (o.url.endsWith('/v1/me/profile')) return ok({ ...profile, userId: 1 });
+    if (o.url.includes('/v1/me/conversations')) return ok([
+      { id: 10, matchId: 70, hostUserId: 1, guestUserId: 2 },
+      { id: 11, matchId: 71, hostUserId: 3, guestUserId: 1 }
+    ]);
+    if (o.url.endsWith('/v1/matches/70') || o.url.endsWith('/v1/matches/71')) return ok({ id: Number(o.url.slice(-2)), status: 'matched', host: { id: 1 } });
+    return ok([]);
+  }, 'session');
+
+  const rows = await c.api.getChattedMatches(1, 10);
+
+  assert.equal(rows.length, 2);
+  assert.equal(rows.map(row => row.conversationId).join(','), '10,11');
+  assert.equal(calls.some(call => call.url.includes('guestOnly=true')), false);
+});
+
+test('发起方打开球局卡片时读取胜出或最近活跃的聊天', async () => {
+  let request;
+  const c = client(o => { request = o; return ok({ id: 19, peerName: '小周' }); }, 'session');
+  const row = await c.api.getLatestMatchConversation(70);
+  assert.match(request.url, /\/v1\/matches\/70\/conversations\/latest$/);
+  assert.equal(row.peerName, '小周');
+});
+
 test('对返回的全部约局按距离排序，后返回的近处约局不会被截掉', async () => {
   const rows = Array.from({ length: 101 }, (_, index) => ({
     id: index + 1, startsAt: '2030-01-01T10:00:00Z', gameType: '中式八球',

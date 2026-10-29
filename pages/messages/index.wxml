@@ -1,11 +1,29 @@
 <view class="page">
-  <view class="page-title">我的消息</view>
-  <view wx:if="{{loadError}}" class="card muted" bindtap="refresh">{{loadError}} · 点击重试</view>
-  <view wx:if="{{loading}}" class="empty-state">正在读取聊天…</view>
-  <view wx:elif="{{!conversations.length && !loadError}}" class="empty-state"><view class="empty-title">还没有聊天</view><view class="muted">找到合适的约局，和球友聊聊吧。</view></view>
-  <view wx:for="{{conversations}}" wx:key="id" class="card conversation-row" data-id="{{item.id}}" bindtap="openConversation">
-    <image class="conversation-avatar" src="/assets/eight-ball.png" mode="aspectFit" />
-    <view wx:if="{{item.unreadCount}}" class="unread-badge">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</view>
-    <view class="conversation-main"><view class="conversation-name">{{item.peerName || '球友'}}<text class="conversation-status">{{item.stateLabel}}</text></view><view class="conversation-preview">{{item.lastMessage || '还没有消息'}}</view><view class="muted">{{item.timeLabel}}</view></view>
+  <view class="page-title">消息与通知</view>
+  <view class="message-tabs">
+    <view class="message-tab {{activeTab === 'chat' ? 'active' : ''}}" data-tab="chat" bindtap="selectTab">聊天<text wx:if="{{chatUnreadCount}}" class="tab-count">{{chatUnreadCount > 99 ? '99+' : chatUnreadCount}}</text></view>
+    <view class="message-tab {{activeTab === 'notification' ? 'active' : ''}}" data-tab="notification" bindtap="selectTab">通知<text wx:if="{{notificationUnreadCount}}" class="tab-count">{{notificationUnreadCount > 99 ? '99+' : notificationUnreadCount}}</text></view>
   </view>
+
+  <block wx:if="{{activeTab === 'chat'}}">
+    <view wx:if="{{loadError}}" class="card muted" bindtap="refresh">{{loadError}} · 点击重试</view>
+    <view wx:if="{{loading}}" class="empty-state">正在读取聊天…</view>
+    <view wx:elif="{{!conversations.length && !loadError}}" class="empty-state"><view class="empty-title">还没有聊天</view><view class="muted">找到合适的约局，和球友聊聊吧。</view></view>
+    <view wx:for="{{conversations}}" wx:key="id" class="card conversation-row" data-id="{{item.id}}" bindtap="openConversation">
+      <image class="conversation-avatar" src="{{item.peerAvatar || '/assets/eight-ball.png'}}" mode="aspectFill" />
+      <view wx:if="{{item.unreadCount}}" class="unread-badge">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</view>
+      <view class="conversation-main"><view class="conversation-name">{{item.peerName || '球友'}}<text class="conversation-status">{{item.stateLabel}}</text></view><view class="conversation-preview">{{item.lastMessage || '还没有消息'}}</view><view class="muted">{{item.timeLabel}}</view></view>
+    </view>
+  </block>
+
+  <block wx:elif="{{activeTab === 'notification'}}">
+    <view wx:if="{{notificationError}}" class="card muted" bindtap="refresh">{{notificationError}} · 点击重试</view>
+    <view wx:if="{{loading}}" class="empty-state">正在读取通知…</view>
+    <view wx:elif="{{!notifications.length && !notificationError}}" class="empty-state"><view class="empty-title">暂时没有通知</view><view class="muted">约局状态变化和公开展示结束会显示在这里。</view></view>
+    <view wx:for="{{notifications}}" wx:key="id" class="card notification-row {{item.unread ? 'notification-unread' : ''}}" data-id="{{item.id}}" data-match-id="{{item.matchId}}" bindtap="openNotification">
+      <view class="notification-mark">{{item.type === 'CANCELLED' ? '×' : item.type === 'DISPLAY_ENDED' ? '·' : '✓'}}</view>
+      <view class="notification-main"><view class="notification-title">{{item.title}}<text wx:if="{{item.unread}}" class="notification-dot"></text></view><view class="notification-content">{{item.content}}</view><view class="muted">{{item.timeLabel}}</view></view>
+      <view class="notification-arrow">›</view>
+    </view>
+  </block>
 </view>
