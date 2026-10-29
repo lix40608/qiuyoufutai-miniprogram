@@ -54,13 +54,13 @@ function withLogin(path, options) {
 }
 
 function normalizeMatch(match) {
-  const startAt = new Date(match.startsAt);
+  const startAt = match.startsAt ? new Date(match.startsAt) : null;
   const today = new Date();
-  const target = new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate());
+  const target = startAt ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate()) : null;
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const dayOffset = Math.round((target - todayStart) / 86400000);
-  const dayLabel = dayOffset === 0 ? '今天' : dayOffset === 1 ? '明天' : `${startAt.getMonth() + 1}月${startAt.getDate()}日`;
-  const startLabel = `${dayLabel} ${String(startAt.getHours()).padStart(2, '0')}:${String(startAt.getMinutes()).padStart(2, '0')}`;
+  const dayOffset = target ? Math.round((target - todayStart) / 86400000) : null;
+  const dayLabel = !startAt ? '' : dayOffset === 0 ? '今天' : dayOffset === 1 ? '明天' : `${startAt.getMonth() + 1}月${startAt.getDate()}日`;
+  const startLabel = startAt ? `${dayLabel} ${String(startAt.getHours()).padStart(2, '0')}:${String(startAt.getMinutes()).padStart(2, '0')}` : '时间待选择';
   return Object.assign({}, match, {
     startAt,
     startLabel,
@@ -70,7 +70,7 @@ function normalizeMatch(match) {
     hostUserId: match.host && match.host.id,
     displayEnded: match.status === 'cancelled' || (match.status === 'matched'
       ? Boolean(match.matchedAt) && Date.now() >= new Date(match.matchedAt).getTime() + 86400000
-      : match.status === 'recruiting' && Date.now() >= startAt.getTime() + 1800000),
+      : match.status === 'recruiting' && startAt && Date.now() >= startAt.getTime() + 1800000),
     hostName: match.host && match.host.nickname,
     hostAvatar: match.host && absoluteAvatarUrl(match.host.avatarUrl),
     hostAge: match.host && match.host.age,
@@ -112,7 +112,7 @@ module.exports = {
   getConversations: () => withLogin('/v1/me/conversations'),
   getConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}`),
   getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}`),
-  sendMessage: (id, content) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content } }),
+  sendMessage: (id, content, clientId) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content, clientId } }),
   confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
   getPublicMatches: (query = '') => withLogin(`/v1/matches${query}`).then((rows) => rows.map(normalizeMatch)),
   async getChattedMatches() {

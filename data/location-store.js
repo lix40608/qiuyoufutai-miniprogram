@@ -46,12 +46,12 @@ function formatDistance(km) {
   return km < 1 ? `${Math.max(50, Math.round(km * 1000 / 50) * 50)} 米` : `${km.toFixed(1)} 公里`;
 }
 
-function handleLocationError(error) {
+function handleLocationError(error, purpose) {
   const message = (error && error.errMsg) || '';
   if (/auth deny|authorize|permission/i.test(message)) {
     wx.showModal({
       title: '需要位置权限',
-      content: '开启位置权限后，才能定位并估算你到球房的距离。也可以取消后继续浏览。',
+      content: purpose === 'venue' ? '位置权限用于定位当前位置，方便查找和选择附近球房。' : '位置权限用于定位当前位置，查看附近约球和距离。',
       confirmText: '去设置',
       cancelText: '暂不设置',
       success(result) {
@@ -63,13 +63,13 @@ function handleLocationError(error) {
   wx.showToast({ title: '获取当前位置失败，请检查位置服务后重试', icon: 'none' });
 }
 
-function chooseMapLocation(initialLocation, onSuccess) {
+function chooseMapLocation(initialLocation, onSuccess, purpose) {
   const options = {
     success(location) {
       onSuccess(location);
     },
     fail(error) {
-      if (!/cancel/i.test((error && error.errMsg) || '')) handleLocationError(error);
+      if (!/cancel/i.test((error && error.errMsg) || '')) handleLocationError(error, purpose);
     }
   };
   if (initialLocation) {
@@ -83,13 +83,13 @@ function chooseMapLocationFromCurrent(onSuccess) {
   wx.getLocation({
     type: 'gcj02',
     success(currentLocation) {
-      chooseMapLocation(currentLocation, onSuccess);
+      chooseMapLocation(currentLocation, onSuccess, 'venue');
     },
-    fail: handleLocationError
+    fail: (error) => handleLocationError(error, 'venue')
   });
 }
 
-// 优先以当前位置打开地图；定位失败时仍尝试打开地图供用户手动选点。
+// 授权被拒绝时解释用途；其他定位失败仍可尝试手动选点。
 function chooseUserLocation(onChange) {
   const select = (initialLocation) => chooseMapLocation(initialLocation, (location) => {
     onChange(saveUserLocation(Object.assign({}, location, {
@@ -97,7 +97,15 @@ function chooseUserLocation(onChange) {
       source: 'map'
     })));
   });
-  wx.getLocation({ type: 'gcj02', success: select, fail: () => select(null) });
+  wx.getLocation({
+    type: 'gcj02',
+    success: select,
+    fail: (error) => {
+      const message = (error && error.errMsg) || '';
+      if (/auth deny|authorize|permission/i.test(message)) return handleLocationError(error);
+      select(null);
+    }
+  });
 }
 
 function openLocationActions(onChange) {

@@ -60,3 +60,11 @@ test('hidden chat pages do not poll', async () => {
   await p.sync();
   assert.equal(requests, 0);
 });
+
+test('服务端返回同一客户端消息时替换待确认消息', () => {
+  const failed = { clientId: 'msg-1', senderId: 1, content: '你好', state: 'failed', createdAt: '2026-10-28T10:00:00Z' };
+  const delivered = { id: 12, clientId: 'msg-1', senderId: 1, content: '你好', createdAt: '2026-10-28T10:00:01Z' };
+  const merged = model.mergeMessages([failed], [delivered]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].id, 12);
+});

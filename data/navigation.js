@@ -12,13 +12,11 @@ function openChat(page, event) {
       return;
     }
     if (!(profile.nickname || '').trim() || !profile.age || !profile.gender) {
-      wx.showModal({ title: '完善资料后参与约球', content: '请先填写昵称、年龄和性别。', confirmText: '去完善资料', cancelText: '暂不参与',
+      wx.showModal({ title: '完善资料后参与约球', content: '请先填写昵称、年龄和性别。', confirmText: '去完善', cancelText: '暂不参与',
         success: result => {
           if (!result.confirm) return;
-          const openProfile = () => wx.navigateTo({ url: '/pages/personal-profile/index' });
-          // 列表入口先进入详情，以便保存资料后回到原约球。
-          if (page.data.match) openProfile();
-          else wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(match.id)}`, success: openProfile });
+          // 直接打开资料编辑，保存后返回用户原来的页面。
+          wx.navigateTo({ url: '/pages/personal-profile/index' });
         },
         complete: () => { page._openingChat = false; }
       });

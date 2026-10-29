@@ -48,7 +48,7 @@ test('临近午夜时默认开球时间进入次日', () => {
 test('草稿保存成功后进入我的约局的编辑中列表', async () => {
   let destination;
   const wx = {
-    navigateTo(options) { destination = options.url; options.success(); },
+    redirectTo(options) { destination = options.url; options.success(); },
     showToast() {}, showModal() {}
   };
   const api = { saveDraft: () => Promise.resolve({ id: 12, startAt: new Date('2030-01-01T10:00:00Z') }) };
@@ -61,9 +61,9 @@ test('草稿保存成功后进入我的约局的编辑中列表', async () => {
   assert.equal(page.data.savingDraft, false);
 });
 
-test('发布成功后进入我的约局的组局中列表', async () => {
+test('发布成功后进入约球首页', async () => {
   let destination;
-  const wx = { navigateTo(options) { destination = options.url; options.success(); }, showToast() {}, showModal() {} };
+  const wx = { switchTab(options) { destination = options.url; options.success(); }, showToast() {}, showModal() {} };
   const api = {
     getProfile: () => Promise.resolve({ nickname: '球友', age: 28, gender: '男' }),
     publishMatch: () => Promise.resolve({ id: 20 })
@@ -73,7 +73,7 @@ test('发布成功后进入我的约局的组局中列表', async () => {
   page.data.form.date = '2030-01-01';
   page.publishMatch();
   await new Promise(setImmediate);
-  assert.equal(destination, '/pages/my-matches/index?filter=active');
+  assert.equal(destination, '/pages/group/index');
   assert.equal(page.data.submitting, false);
 });
 

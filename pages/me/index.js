@@ -1,4 +1,5 @@
 const api = require('../../data/api');
+const unread = require('../../data/unread');
 
 const emptyPersonal = { avatarPath: '', nickname: '', age: '', gender: '' };
 const emptyArchive = { intro: '', gameTypes: [] };
@@ -10,8 +11,12 @@ Page({
   },
 
   onShow() {
+    unread.start(this);
     this.refreshPage();
   },
+
+  onHide() { unread.stop(this); },
+  onUnload() { unread.stop(this); },
 
   refreshPage() {
     api.getProfile().then((profile) => {

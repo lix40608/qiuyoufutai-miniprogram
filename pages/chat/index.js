@@ -73,13 +73,14 @@ Page({
     const content = this.data.draft.trim();
     if (!content || this.data.loading || this.data.sending || this.data.closed || !this._ready) return;
     if (content.length > 1000) return wx.showToast({ title: '消息最多 1000 字', icon: 'none' });
+    const clientId = `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     this.setData({ sending: true, draft: '' });
     try {
-      const message = await api.sendMessage(this.data.conversation.id, content);
+      const message = await api.sendMessage(this.data.conversation.id, content, clientId);
       if (!this._destroyed) this.renderMessages(model.mergeMessages(this.data.messages, [message]));
     } catch (error) {
       if (!this._destroyed) {
-        const failed = { clientId: `failed-${Date.now()}`, senderId: this._userId, content, state: 'failed', createdAt: new Date().toISOString(),
+        const failed = { clientId, senderId: this._userId, content, state: 'failed', createdAt: new Date().toISOString(),
           failureLabel: error.statusCode ? '未发送' : '发送结果待确认',
           failureReason: error.statusCode ? error.message : '发送结果暂未确认，请等待消息同步后再决定是否重发。' };
         this.renderMessages(model.mergeMessages(this.data.messages, [failed]));

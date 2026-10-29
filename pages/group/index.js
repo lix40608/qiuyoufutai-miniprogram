@@ -4,7 +4,14 @@ const locationStore = require('../../data/location-store');
 Page({
   data: { activeView: 'created', loading: true, loadError: '', latestActive: null, latestDraft: null, chatted: [] },
 
-  onShow() { this.refresh(); },
+  onShow() {
+    const app = getApp();
+    if (app.globalData.showCreatedMatches) {
+      app.globalData.showCreatedMatches = false;
+      this.setData({ activeView: 'created' });
+    }
+    this.refresh();
+  },
   onUnload() { this._requestId = (this._requestId || 0) + 1; },
 
   refresh() {

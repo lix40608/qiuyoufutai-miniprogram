@@ -6,11 +6,11 @@ test('missing venue coordinates do not become the equator at zero longitude', ()
   assert.equal(location.distanceKm({ latitude: 32, longitude: 118 }, { latitude: '', longitude: '' }), null);
 });
 
-test('位置权限失败后仍尝试打开地图，确认选点才保存位置', () => {
+test('非权限问题导致定位失败时仍尝试打开地图，确认选点才保存位置', () => {
   let options;
   let saved;
   global.wx = {
-    getLocation: ({ fail }) => fail({ errMsg: 'getLocation:fail auth deny' }),
+    getLocation: ({ fail }) => fail({ errMsg: 'getLocation:fail unavailable' }),
     chooseLocation: (value) => { options = value; },
     setStorageSync: (key, value) => { saved = value; }
   };

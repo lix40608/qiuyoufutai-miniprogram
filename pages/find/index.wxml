@@ -10,7 +10,7 @@
       </view>
       <view class="location-privacy">用于查找附近约局</view>
     </view>
-    <view class="message-entry" bindtap="showMessages">消息</view>
+    <view class="message-entry" bindtap="showMessages">消息<view wx:if="{{unreadCount}}" class="message-unread">{{unreadCount > 99 ? '99+' : unreadCount}}</view></view>
   </view>
 
   <view class="search-box">

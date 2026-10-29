@@ -1,5 +1,6 @@
 const navigation = require('../../data/navigation');
 const api = require('../../data/api');
+const unread = require('../../data/unread');
 const locationStore = require('../../data/location-store');
 
 const ageFilters = [
@@ -29,6 +30,7 @@ Page({
   },
 
   onShow() {
+    unread.start(this);
     api.getProfile().then(profile => this.setData({ currentUserId: profile.userId })).catch(() => this.setData({ currentUserId: null }));
     const app = getApp();
     if (app.globalData.pendingGameType) {
@@ -59,8 +61,8 @@ Page({
       .catch((error) => { if (requestId === this._requestId) this.setData({ matches: [], loadError: error.message || '暂时无法连接服务' }); });
   },
 
-  onHide() { clearTimeout(this._searchTimer); },
-  onUnload() { clearTimeout(this._searchTimer); this._requestId = (this._requestId || 0) + 1; },
+  onHide() { unread.stop(this); clearTimeout(this._searchTimer); },
+  onUnload() { unread.stop(this); clearTimeout(this._searchTimer); this._requestId = (this._requestId || 0) + 1; },
 
   selectGameType(event) {
     this.setData({ selectedGameType: event.currentTarget.dataset.type }, () => this.refreshMatches());

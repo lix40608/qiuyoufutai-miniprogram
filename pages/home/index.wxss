@@ -80,3 +80,5 @@
 .ball{display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:2rpx solid #303637;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -8rpx -10rpx 16rpx rgba(0,0,0,.6),0 10rpx 18rpx rgba(16,43,33,.25)}.ball text{display:flex;align-items:center;justify-content:center;width:48rpx;height:48rpx;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#deded7 85%);color:#161a19;font-size:34rpx;line-height:1;font-weight:800;box-shadow:inset -2rpx -2rpx 4rpx rgba(0,0,0,.2)}
 
 .ball-image{position:absolute;top:32rpx;right:24rpx;width:132rpx;height:132rpx}
+
+.message-entry{position:relative}.message-side{display:flex;align-items:center;gap:12rpx}.message-unread{display:inline-flex;align-items:center;justify-content:center;min-width:30rpx;height:30rpx;padding:0 6rpx;border-radius:20rpx;background:#d8564e;color:#fff;font-size:19rpx;line-height:30rpx;box-sizing:border-box}.message-entry .message-unread{position:absolute;top:-8rpx;right:-8rpx}

@@ -4,7 +4,8 @@
   <view wx:if="{{loading}}" class="empty-state">正在读取聊天…</view>
   <view wx:elif="{{!conversations.length && !loadError}}" class="empty-state"><view class="empty-title">还没有聊天</view><view class="muted">找到合适的约局，和球友聊聊吧。</view></view>
   <view wx:for="{{conversations}}" wx:key="id" class="card conversation-row" data-id="{{item.id}}" bindtap="openConversation">
-    <image class="eight-ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
-    <view class="conversation-main"><view class="conversation-name">{{item.peerName || '球友'}}<text class="conversation-status">{{item.stateLabel}}</text></view><view class="muted">{{item.timeLabel}}</view><view class="muted">查看这场约局的聊天 ›</view></view>
+    <image class="conversation-avatar" src="/assets/eight-ball.png" mode="aspectFit" />
+    <view wx:if="{{item.unreadCount}}" class="unread-badge">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</view>
+    <view class="conversation-main"><view class="conversation-name">{{item.peerName || '球友'}}<text class="conversation-status">{{item.stateLabel}}</text></view><view class="conversation-preview">{{item.lastMessage || '还没有消息'}}</view><view class="muted">{{item.timeLabel}}</view></view>
   </view>
 </view>

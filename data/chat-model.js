@@ -19,7 +19,12 @@ function conversationState(conversation, userId) {
 // Sending a message must not advance the fetch cursor: unseen peer messages can precede its ID.
 function mergeMessages(current, incoming) {
   const items = new Map();
-  current.concat(incoming).forEach(item => items.set(item.id ? `server-${item.id}` : item.clientId, item));
+  current.concat(incoming).forEach(item => {
+    // 服务端回传相同客户端标识时，用已送达消息替换待确认消息。
+    const key = item.clientId ? `client-${item.senderId}-${item.clientId}` : `server-${item.id}`;
+    const old = items.get(key);
+    if (!old || item.id || !old.id) items.set(key, item);
+  });
   return Array.from(items.values()).sort((a, b) => a.id && b.id ? Number(a.id) - Number(b.id)
     : new Date(a.createdAt) - new Date(b.createdAt));
 }

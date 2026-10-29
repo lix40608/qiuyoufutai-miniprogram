@@ -39,11 +39,9 @@ Page({
   onShow() {
     this.setData({ minDate: datePart(new Date()) });
     const app = getApp();
-    let resumingDraft = false;
     if (app.globalData.editDraftId) {
       this.loadDraft(app.globalData.editDraftId);
       app.globalData.editDraftId = '';
-      resumingDraft = true;
     }
     if (app.globalData.resumePublishAfterProfile) {
       app.globalData.resumePublishAfterProfile = false;
@@ -53,7 +51,7 @@ Page({
       }).catch((error) => wx.showToast({ title: error.message || '读取资料失败', icon: 'none' }));
       return;
     }
-    if (!resumingDraft) this.promptForProfileIfNeeded();
+    this.promptForProfileIfNeeded();
   },
 
   onHide() {
@@ -68,10 +66,13 @@ Page({
       wx.showModal({
         title: '完善资料再发布',
         content: '发布约球需要填写昵称、年龄和性别。先完善个人资料。',
-        confirmText: '去完善资料',
+        confirmText: '去完善',
         cancelText: '暂不发布',
         success: (result) => {
-          if (!result.confirm) return;
+          if (!result.confirm) {
+            wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/group/index' }) });
+            return;
+          }
           getApp().globalData.resumePublishAfterProfile = true;
           wx.navigateTo({ url: '/pages/personal-profile/index?resumePublish=1' });
         }
@@ -84,7 +85,7 @@ Page({
         const draft = records.find((record) => String(record.id) === String(id) && record.status === 'draft');
         if (!draft) return wx.showToast({ title: '草稿不存在或已发布', icon: 'none' });
         const startsAt = draft.startAt;
-        this.setData({ form: Object.assign(defaultForm(), draft, { date: `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, '0')}-${String(startsAt.getDate()).padStart(2, '0')}`, time: `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` }) });
+        this.setData({ form: Object.assign(defaultForm(), draft, { date: startsAt ? datePart(startsAt) : '', time: startsAt ? `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` : '' }) });
         wx.pageScrollTo({ scrollTop: 0, duration: 0 });
     }).catch((error) => wx.showToast({ title: error.message || '读取草稿失败', icon: 'none' }));
   },
@@ -139,7 +140,7 @@ Page({
         return;
       }
       const startsAt = draft.startAt;
-      this.setData({ form: Object.assign({}, this.data.form, draft, { date: `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, '0')}-${String(startsAt.getDate()).padStart(2, '0')}`, time: `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` }) });
+      this.setData({ form: Object.assign({}, this.data.form, draft, { date: startsAt ? datePart(startsAt) : '', time: startsAt ? `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` : '' }) });
       // 跳转成功后清空表单，跳转失败时保留已保存的草稿供继续操作。
       wx.redirectTo({
         url: '/pages/my-matches/index?filter=draft',
@@ -179,10 +180,11 @@ Page({
     }).then((published) => {
       if (!published) return;
       this.setData({ form: defaultForm(), formErrors: { venue: '', time: '' }, submitting: false });
-      wx.redirectTo({
-        url: '/pages/my-matches/index?filter=active',
+      getApp().globalData.showCreatedMatches = true;
+      wx.switchTab({
+        url: '/pages/group/index',
         success: () => wx.showToast({ title: '发布成功', icon: 'success' }),
-        fail: () => wx.showModal({ title: '发布成功', content: '暂时无法打开我的约局，可稍后在「组局中」查看。', showCancel: false })
+        fail: () => wx.showModal({ title: '发布成功', content: '暂时无法打开我的约球，可稍后在「约球」页面查看。', showCancel: false })
       });
     }).catch((error) => {
       this.setData({ submitting: false });

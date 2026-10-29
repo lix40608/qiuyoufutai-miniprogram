@@ -5,7 +5,7 @@
       <view class="location-entry" bindtap="showLocation"><view class="pin-icon location-pin"><view class="pin-dot"></view></view><text class="location-label">{{locationLabel}}</text><text class="location-arrow">›</text></view>
       <view class="location-privacy">用于查找附近约局</view>
     </view>
-    <view class="message-entry" bindtap="showMessages">消息</view>
+    <view class="message-entry" bindtap="showMessages">消息<view wx:if="{{unreadCount}}" class="message-unread">{{unreadCount > 99 ? '99+' : unreadCount}}</view></view>
   </view>
 
   <view class="hero">
