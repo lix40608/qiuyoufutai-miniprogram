@@ -26,7 +26,7 @@ Page({
       this._ready = true;
       wx.setNavigationBarTitle({ title: conversation.peerName || '约局聊天' });
       this.setData(Object.assign({ match, conversation, loadError: '', currentName: profile.nickname || '我', currentAvatar: profile.avatarUrl || '',
-        peerName: conversation.peerName || '球友', peerAvatar: conversation.peerAvatar || '' }, model.conversationState(conversation, this._userId)));
+        peerName: conversation.peerName || '球友', peerAvatar: conversation.peerAvatar || '' }, model.conversationState(conversation, this._userId, match)));
       if (this._active) this.sync();
     } catch (error) {
       if (!this._destroyed) this.setData({ loading: false, loadError: error.message || '暂时无法打开聊天' });
@@ -53,7 +53,7 @@ Page({
         if (!catchingUp) break;
       }
       if (!this._destroyed) {
-        const nextState = model.conversationState(conversation, this._userId);
+        const nextState = model.conversationState(conversation, this._userId, this.data.match);
         const newlyReceivedInvite = !this.data.showInvite && nextState.showInvite;
         this.setData(Object.assign({ conversation, loading: false, syncError: '' }, nextState));
         if (newlyReceivedInvite) api.markConversationRead(conversation.id).catch(() => {});
@@ -105,14 +105,14 @@ Page({
     } finally { if (!this._destroyed) this.setData({ sending: false }); }
   },
   async lockClosedConversation(error, actionLabel) {
-    if (!['MATCH_CANCELLED', 'CONVERSATION_CLOSED', 'MATCH_ALREADY_WON'].includes(error.code)) return false;
+    if (!['MATCH_CANCELLED', 'CONVERSATION_CLOSED', 'MATCH_ALREADY_WON', 'MATCH_DISPLAY_ENDED'].includes(error.code)) return false;
     const cancelled = error.code === 'MATCH_CANCELLED';
-    const reason = cancelled ? '约局已取消' : '本场已由其他聊天完成组局';
+    const reason = cancelled ? '约局已取消' : error.code === 'MATCH_DISPLAY_ENDED' ? '本场公开展示期限已结束' : '本场已由其他聊天完成组局';
     const notice = `${reason}。${actionLabel}；本聊天的确认和发送已关闭，你仍可查看历史记录。`;
     this.setData({ closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice' });
     try {
       const conversation = await api.getConversation(this.data.conversation.id);
-      if (!this._destroyed) this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId), {
+      if (!this._destroyed) this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId, this.data.match), {
         closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice'
       }));
     } catch (_) { /* Keep the authoritative action rejection visible and keep actions locked. */ }
@@ -141,7 +141,7 @@ Page({
     try {
       const conversation = await api.confirmConversation(this.data.conversation.id);
       if (!this._destroyed) {
-        this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId)));
+        this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId, this.data.match)));
         if (conversation.won) this.showConfirmedTip();
         else wx.showToast({ title: '已确认，等待对方', icon: 'none' });
       }

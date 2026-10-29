@@ -125,6 +125,14 @@ test('发起方打开球局卡片时读取胜出或最近活跃的聊天', async
   assert.equal(row.peerName, '小周');
 });
 
+test('发起方按球局读取分页的多球友聊天列表', async () => {
+  let request;
+  const c = client(o => { request = o; return ok([{ id: 19, matchId: 70, peerName: '小周' }]); }, 'session');
+  const rows = await c.api.getMatchConversations(70, 2, 10);
+  assert.match(request.url, /\/v1\/matches\/70\/conversations\?page=2&pageSize=10$/);
+  assert.equal(rows[0].peerName, '小周');
+});
+
 test('对返回的全部约局按距离排序，后返回的近处约局不会被截掉', async () => {
   const rows = Array.from({ length: 101 }, (_, index) => ({
     id: index + 1, startsAt: '2030-01-01T10:00:00Z', gameType: '中式八球',

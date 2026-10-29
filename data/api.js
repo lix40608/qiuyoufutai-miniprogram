@@ -117,6 +117,9 @@ module.exports = {
     return withLogin(`/v1/me/conversations${query}`).then(rows => rows.map(normalizeConversation));
   },
   getLatestMatchConversation: (matchId) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/conversations/latest`).then(conversation => conversation ? normalizeConversation(conversation) : null),
+  getMatchConversations(matchId, page = 1, pageSize = 10) {
+    return withLogin(`/v1/matches/${encodeURIComponent(matchId)}/conversations?page=${Math.max(1, Number(page) || 1)}&pageSize=${Math.min(10, Math.max(1, Number(pageSize) || 10))}`).then(rows => rows.map(normalizeConversation));
+  },
   getConversation: (id, markRead = false) => withLogin(`/v1/conversations/${encodeURIComponent(id)}${markRead ? '?markRead=true' : ''}`).then(normalizeConversation),
   markConversationRead: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/read`, { method: 'POST' }),
   getNotifications: () => withLogin('/v1/me/notifications'),
@@ -132,7 +135,7 @@ module.exports = {
     // Bound concurrent detail reads rather than sending hundreds of requests at once.
     for (let offset = 0; offset < conversations.length; offset += 4) {
       const batch = await Promise.all(conversations.slice(offset, offset + 4).map(async item =>
-        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, unreadCount: item.unreadCount })));
+        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, lastMessage: item.lastMessage, hostConfirmed: item.hostConfirmed, guestConfirmed: item.guestConfirmed, hostConfirmedAt: item.hostConfirmedAt, guestConfirmedAt: item.guestConfirmedAt, unreadCount: item.unreadCount })));
       records.push(...batch);
     }
     return records;

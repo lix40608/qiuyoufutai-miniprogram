@@ -22,6 +22,12 @@ function start(page) {
       if (Array.isArray(page.data.matches)) page.setData({ matches: page.data.matches.map(row => Object.assign({}, row, { chatUnreadCount: unreadByMatchId[String(row.id)] || 0 })) });
       if (page.data.latestActive) page.setData({ latestActive: Object.assign({}, page.data.latestActive, { chatUnreadCount: unreadByMatchId[String(page.data.latestActive.id)] || 0 }) });
       if (Array.isArray(page.data.chatted)) page.setData({ chatted: page.data.chatted.map(row => Object.assign({}, row, { unreadCount: unreadByConversationId[String(row.conversationId)] || 0 })) });
+      if (Array.isArray(page.data.records)) {
+        const update = rows => rows.map(row => Object.assign({}, row, row.conversationId
+          ? { unreadCount: unreadByConversationId[String(row.conversationId)] || 0 }
+          : { chatUnreadCount: unreadByMatchId[String(row.id)] || 0 }));
+        page.setData({ records: update(page.data.records), visibleRecords: update(page.data.visibleRecords || []) });
+      }
     }).finally(() => {
       if (page._unreadActive && page._unreadGeneration === generation) page._unreadTimer = setTimeout(refresh, 15000);
     });

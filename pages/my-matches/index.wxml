@@ -24,7 +24,7 @@
   </view>
 
   <view wx:elif="{{visibleRecords.length}}">
-    <view wx:for="{{visibleRecords}}" wx:key="rowKey" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" data-chat-first="{{activeView === 'created' && item.status !== 'draft'}}" bindtap="openRecord">
+    <view wx:for="{{visibleRecords}}" wx:key="rowKey" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" bindtap="openRecord">
       <view class="card-top">
           <view class="tag">{{item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已过期' : item.status === 'matched' ? '已组局' : '组局中'}}</view>
         <view wx:if="{{item.status !== 'draft'}}" class="muted">{{item.displayEnded ? '公开展示已结束 · 记录仍保留' : ''}}</view>
@@ -38,6 +38,7 @@
       <view class="card-actions">
         <button wx:if="{{item.status === 'draft'}}" class="primary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="draft">继续编辑</button>
         <button wx:if="{{activeView === 'created' && item.status === 'recruiting'}}" class="primary-button cancel-button" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
+        <button wx:if="{{activeView === 'created' && item.status !== 'draft'}}" class="primary-button chat-list-button" catchtap="openMatchChats" data-id="{{item.id}}">{{item.displayEnded ? '查看聊天' : '进入聊天'}}<text wx:if="{{item.chatUnreadCount}}" class="chat-list-unread">{{item.chatUnreadCount > 99 ? '99+' : item.chatUnreadCount}}</text></button>
       </view>
     </view>
     <view class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>

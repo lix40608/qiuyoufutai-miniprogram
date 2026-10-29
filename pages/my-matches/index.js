@@ -1,4 +1,5 @@
 const api = require('../../data/api');
+const unread = require('../../data/unread');
 
 Page({
   data: {
@@ -21,7 +22,8 @@ Page({
     visibleRecords: [],
     page: 1,
     hasMore: true,
-    loadingMore: false
+    loadingMore: false,
+    unreadByMatchId: {}
   },
 
   onLoad(query) {
@@ -29,8 +31,10 @@ Page({
   },
 
   onShow() {
+    unread.start(this);
     this.refreshRecords();
   },
+  onHide() { unread.stop(this); },
 
   onPullDownRefresh() {
     this.refreshRecords();
@@ -51,7 +55,8 @@ Page({
       if (requestId !== this._requestId || this.data.activeView !== activeView) return;
       if (append && !records.length) return this.setData({ loadingMore: false, hasMore: false });
       const merged = (append ? this.data.records.concat(records) : records).map(item => Object.assign({}, item, {
-        rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`
+        rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`,
+        chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0
       }));
       this.setData({ records: merged, visibleRecords: this.filterRecords(merged), page, hasMore: records.length === 10, loading: false, loadingMore: false });
     }).catch((error) => {
@@ -85,21 +90,15 @@ Page({
   },
 
   openRecord(event) {
-    const { id, status, conversationId, chatFirst } = event.currentTarget.dataset;
+    const { id, status, conversationId } = event.currentTarget.dataset;
     if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${conversationId}` });
     if (status === 'draft') {
       wx.navigateTo({ url: `/pages/publish/index?draftId=${encodeURIComponent(id)}` });
       return;
     }
-    if (chatFirst) {
-      api.getLatestMatchConversation(id).then(conversation => {
-        if (conversation) wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversation.id)}` });
-        else wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(id)}` });
-      }).catch(error => wx.showToast({ title: error.message || '暂时无法打开聊天', icon: 'none' }));
-      return;
-    }
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
   },
+  openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
 
   cancelRecord(event) {
     const { id } = event.currentTarget.dataset;

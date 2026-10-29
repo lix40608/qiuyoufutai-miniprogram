@@ -1,0 +1,21 @@
+.match-chats-page { padding-bottom: 60rpx; }
+.match-summary { padding: 24rpx; margin-bottom: 28rpx; }
+.summary-line,.peer-heading { display:flex; align-items:center; justify-content:space-between; gap:16rpx; }
+.game-tag { padding:7rpx 12rpx; border-radius:9rpx; background:#eaf3e9; color:#24775c; font-size:21rpx; }
+.match-state,.peer-state { color:#7d9286; font-size:21rpx; }
+.match-title { margin-top:16rpx; color:#173b31; font-size:29rpx; font-weight:700; }
+.match-meta { margin-top:9rpx; color:#7d9086; font-size:22rpx; }
+.section-title { display:flex; justify-content:space-between; align-items:center; margin:30rpx 4rpx 16rpx; color:#173b31; font-size:27rpx; font-weight:700; }
+.section-count { color:#91a197; font-size:21rpx; font-weight:400; }
+.peer-row { display:flex; align-items:center; gap:20rpx; padding:22rpx; margin-bottom:14rpx; }
+.avatar-wrap { position:relative; flex:none; }
+.peer-avatar { display:block; width:82rpx; height:82rpx; border-radius:50%; background:#eef1eb; }
+.peer-unread { position:absolute; top:-8rpx; right:-12rpx; min-width:30rpx; height:30rpx; padding:0 7rpx; box-sizing:border-box; border-radius:20rpx; background:#d8564e; color:white; text-align:center; font-size:18rpx; line-height:30rpx; }
+.peer-info { flex:1; min-width:0; }
+.peer-name { color:#173b31; font-size:27rpx; font-weight:700; }
+.peer-preview { margin-top:8rpx; overflow:hidden; color:#536b5e; font-size:23rpx; text-overflow:ellipsis; white-space:nowrap; }
+.peer-time { margin-top:7rpx; color:#9aa69e; font-size:19rpx; }
+.peer-arrow { flex:none; color:#9aa69e; font-size:38rpx; }
+.list-footer { padding:24rpx 0 34rpx; color:#9aa69e; text-align:center; font-size:21rpx; }
+.retry-button { width:240rpx; margin:24rpx auto 0; border:0; border-radius:14rpx; background:#19745b; color:white; font-size:23rpx; }
+.retry-button::after { border:0; }

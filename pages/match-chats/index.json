@@ -1,0 +1,5 @@
+{
+  "navigationBarTitleText": "球友聊天",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 120
+}

@@ -11,7 +11,8 @@
     "pages/personal-profile/index",
     "pages/avatar-editor/index",
     "pages/user-profile/index",
-    "pages/messages/index"
+    "pages/messages/index",
+    "pages/match-chats/index"
   ],
   "window": {
     "navigationBarTitleText": "球友赴台",

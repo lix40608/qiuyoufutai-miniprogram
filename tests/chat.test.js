@@ -12,11 +12,23 @@ test('confirmation state is relative to the current participant', () => {
   assert.equal(model.conversationState(conversation, 1).showInvite, true);
   assert.equal(model.conversationState(conversation, 3).showInvite, false);
 });
-test('a winning conversation stays open while cancelled and losing conversations close', () => {
+test('ended conversations are read-only while active winning conversations stay open', () => {
   assert.equal(model.conversationState({ ...conversation, status: 'matched', won: true }, 1).closed, false);
   assert.equal(model.conversationState({ ...conversation, status: 'matched', won: false }, 1).closed, true);
   assert.equal(model.conversationState({ ...conversation, status: 'cancelled' }, 1).canConfirm, false);
-  assert.equal(model.conversationState({ ...conversation, displayEnded: true }, 1).closed, false);
+  const ended = model.conversationState({ ...conversation, displayEnded: true }, 1);
+  assert.equal(ended.closed, true);
+  assert.equal(ended.canConfirm, false);
+  assert.match(ended.hint, /已结束/);
+});
+test('旧版会话接口缺少开球时间时仍根据已加载的约局详情锁定过期聊天', () => {
+  const legacyConversation = { ...conversation, startsAt: undefined, displayEnded: undefined };
+  const match = { status: 'recruiting', startsAt: '2020-01-01T20:00:00.000Z' };
+  const state = model.conversationState(legacyConversation, 1, match);
+  assert.equal(state.closed, true);
+  assert.equal(state.canConfirm, false);
+  assert.match(state.hint, /已结束/);
+  assert.equal(state.statusLabel, '已结束');
 });
 function page(api, wx = {}) {
   let definition;
@@ -75,12 +87,13 @@ test('服务端返回同一客户端消息时替换待确认消息', () => {
 test('已取消或落败聊天发送被拒后立即锁定并显示系统提示', async () => {
   for (const state of [
     { code: 'MATCH_CANCELLED', status: 'cancelled', won: false, expected: /约局已取消/ },
-    { code: 'CONVERSATION_CLOSED', status: 'matched', won: false, expected: /其他聊天完成组局/ }
+    { code: 'CONVERSATION_CLOSED', status: 'matched', won: false, expected: /其他聊天完成组局/ },
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /公开展示期限已结束/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({
       sendMessage: async () => { throw error; },
-      getConversation: async () => ({ ...conversation, status: state.status, won: state.won })
+      getConversation: async () => ({ ...conversation, status: state.status, won: state.won, displayEnded: state.displayEnded })
     });
     p._ready = true; p._userId = 1; p.data.loading = false; p.data.draft = '继续吗';
     await p.sendMessage();
@@ -95,12 +108,13 @@ test('已取消或落败聊天发送被拒后立即锁定并显示系统提示',
 test('停留在旧会话时点确认，服务端拒绝后也关闭确认和发送并提示原因', async () => {
   for (const state of [
     { code: 'MATCH_CANCELLED', status: 'cancelled', expected: /约局已取消/ },
-    { code: 'CONVERSATION_CLOSED', status: 'matched', expected: /其他聊天完成组局/ }
+    { code: 'CONVERSATION_CLOSED', status: 'matched', expected: /其他聊天完成组局/ },
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /公开展示期限已结束/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({
       confirmConversation: async () => { throw error; },
-      getConversation: async () => ({ ...conversation, status: state.status, won: false })
+      getConversation: async () => ({ ...conversation, status: state.status, won: false, displayEnded: state.displayEnded })
     }, { showToast() {} });
     p.sync = async () => {};
     p.data.canConfirm = true;
@@ -136,7 +150,15 @@ test('消息中心分聊天和通知，聊天列表使用对方头像并以黑�
   const styles = fs.readFileSync('pages/messages/index.wxss', 'utf8');
   assert.match(source, /data-tab="chat"/);
   assert.match(source, /data-tab="notification"/);
-  assert.match(source, /item\.peerAvatar \|\| '\/assets\/eight-ball\.png'/);
+  assert.match(source, /conversation\.peerAvatar \|\| '\/assets\/eight-ball\.png'/);
   assert.match(source, /item\.title/);
   assert.match(styles, /\.conversation-avatar\s*\{[^}]*border-radius:\s*50%/);
+});
+
+test('结束的我聊过卡片显示查看聊天且聊天页隐藏输入区', () => {
+  const group = fs.readFileSync('pages/group/index.wxml', 'utf8');
+  const chat = fs.readFileSync('pages/chat/index.wxml', 'utf8');
+  assert.match(group, /item\.displayEnded \? '查看聊天' : '进入聊天'/);
+  assert.match(chat, /wx:if="\{\{!closed\}\}" class="composer"/);
+  assert.match(chat, /wx:if="\{\{closed && !systemNotice\}\}" class="closed-banner"/);
 });

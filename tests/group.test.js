@@ -21,30 +21,27 @@ function loadAllMatches(api, wx) {
   return definition;
 }
 
-test('发起的约局卡片优先进入最近聊天，没有聊天时才回到详情', async () => {
+test('发起的约局卡片点击进入详情，进入聊天按钮打开按对局筛选的列表', async () => {
   const destinations = [];
-  const page = loadGroup({ getLatestMatchConversation: async () => ({ id: 55 }) }, {
+  const page = loadGroup({}, {
     navigateTo: options => destinations.push(options.url)
   });
-  page.openRecord({ currentTarget: { dataset: { id: 7, status: 'matched', chatFirst: true } } });
-  await new Promise(setImmediate);
-  assert.equal(destinations[0], '/pages/chat/index?id=55');
-
-  const noChatPage = loadGroup({ getLatestMatchConversation: async () => null }, {
-    navigateTo: options => destinations.push(options.url)
-  });
-  noChatPage.openRecord({ currentTarget: { dataset: { id: 8, status: 'recruiting', chatFirst: true } } });
-  await new Promise(setImmediate);
-  assert.equal(destinations[1], '/pages/detail/index?id=8');
+  page.openRecord({ currentTarget: { dataset: { id: 7, status: 'matched' } } });
+  page.openMatchChats({ currentTarget: { dataset: { id: 7 } } });
+  assert.equal(destinations[0], '/pages/detail/index?id=7');
+  assert.equal(destinations[1], '/pages/match-chats/index?matchId=7');
 });
 
 test('发起的球局卡片不再显示查看详情按钮，我聊过的卡片标明聊天对象', () => {
   const group = fs.readFileSync('pages/group/index.wxml', 'utf8');
   const allMatches = fs.readFileSync('pages/my-matches/index.wxml', 'utf8');
-  assert.match(group, /data-chat-first="true"/);
+  assert.doesNotMatch(group, /data-chat-first=/);
+  assert.match(group, /进入聊天<text wx:if="\{\{latestActive\.chatUnreadCount\}\}" class="chat-unread-badge"/);
+  assert.match(group, /class="primary-button chat-entry-button" catchtap="openMatchChats"/);
   assert.doesNotMatch(group, />查看详情</);
   assert.match(group, /与 \{\{item\.peerName \|\| '球友'\}\} 聊天/);
-  assert.match(allMatches, /data-chat-first="\{\{activeView === 'created' && item\.status !== 'draft'\}\}"/);
+  assert.doesNotMatch(allMatches, /data-chat-first=/);
+  assert.match(allMatches, /class="primary-button chat-list-button" catchtap="openMatchChats"/);
   assert.doesNotMatch(allMatches, />查看详情</);
   assert.match(allMatches, /wx:key="rowKey"/);
 });
@@ -66,12 +63,13 @@ test('首页默认选中全部玩法，通知入口用图标并在有未读时�
   assert.match(fs.readFileSync('pages/group/index.wxml', 'utf8'), /item\.unreadCount.*action-unread-dot/);
 });
 
-test('全部约球中的发起记录卡片也直接打开最近聊天', async () => {
-  let destination;
-  const page = loadAllMatches({ getLatestMatchConversation: async () => ({ id: 91 }) }, {
-    navigateTo: options => { destination = options.url; }
+test('全部约球中的发起记录卡片点击进详情，聊天按钮进球友列表', () => {
+  const destinations = [];
+  const page = loadAllMatches({}, {
+    navigateTo: options => destinations.push(options.url)
   });
-  page.openRecord({ currentTarget: { dataset: { id: 7, status: 'recruiting', chatFirst: true } } });
-  await new Promise(setImmediate);
-  assert.equal(destination, '/pages/chat/index?id=91');
+  page.openRecord({ currentTarget: { dataset: { id: 7, status: 'recruiting' } } });
+  page.openMatchChats({ currentTarget: { dataset: { id: 7 } } });
+  assert.equal(destinations[0], '/pages/detail/index?id=7');
+  assert.equal(destinations[1], '/pages/match-chats/index?matchId=7');
 });

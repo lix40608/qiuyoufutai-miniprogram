@@ -1,10 +1,12 @@
 const api = require('../../data/api');
 const locationStore = require('../../data/location-store');
+const unread = require('../../data/unread');
 
 Page({
   data: { activeView: 'created', loading: true, loadingMore: false, hasMore: true, page: 1, loadError: '', latestActive: null, latestDraft: null, chatted: [] },
 
   onShow() {
+    unread.start(this);
     const app = getApp();
     if (app.globalData.showCreatedMatches) {
       app.globalData.showCreatedMatches = false;
@@ -12,6 +14,7 @@ Page({
     }
     this.refresh();
   },
+  onHide() { unread.stop(this); },
   onUnload() { this._requestId = (this._requestId || 0) + 1; },
 
   refresh() {
@@ -53,17 +56,11 @@ Page({
   openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
   publish() { wx.navigateTo({ url: '/pages/publish/index' }); },
   allMatches() { wx.navigateTo({ url: '/pages/my-matches/index' }); },
+  openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
   openRecord(event) {
-    const { id, status, conversationId, chatFirst } = event.currentTarget.dataset;
+    const { id, status, conversationId } = event.currentTarget.dataset;
     if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversationId)}` });
     if (status === 'draft') return wx.navigateTo({ url: `/pages/publish/index?draftId=${encodeURIComponent(id)}` });
-    if (chatFirst) {
-      api.getLatestMatchConversation(id).then(conversation => {
-        if (conversation) wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversation.id)}` });
-        else wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(id)}` });
-      }).catch(error => wx.showToast({ title: error.message || '暂时无法打开聊天', icon: 'none' }));
-      return;
-    }
     wx.navigateTo({ url: `/pages/detail/index?id=${encodeURIComponent(id)}` });
   },
   cancelRecord(event) {
