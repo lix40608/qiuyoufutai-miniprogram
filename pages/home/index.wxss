@@ -1,7 +1,12 @@
 .home-page { padding-top: 24rpx; padding-bottom: 48rpx; }
 .home-heading { margin-bottom: 26rpx; }
 .brand { font-size: 40rpx; font-weight: 800; }
-.location { margin-top: 6rpx; }
+.home-heading > view:first-child { flex: 1; min-width: 0; margin-right: 18rpx; }
+.location-entry { display: inline-flex; align-items: center; gap: 8rpx; max-width: 100%; margin-top: 6rpx; padding: 8rpx 0; color: #197257; font-size: 24rpx; font-weight: 700; }
+.location-marker { font-size: 30rpx; }
+.location-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.location-arrow { flex: none; font-size: 32rpx; line-height: 24rpx; }
+.location-clear { flex: none; margin-left: 12rpx; padding: 6rpx; color: #718178; font-size: 21rpx; font-weight: 400; }
 .location-privacy { margin-top: 5rpx; color: #9aa59e; font-size: 19rpx; }
 .message-entry { padding: 12rpx 20rpx; border-radius: 22rpx; background: #e3eee0; color: #197257; font-weight: 700; }
 .hero { position: relative; overflow: hidden; padding: 34rpx 30rpx; border-radius: 34rpx; color: #fff; background: linear-gradient(135deg,#20775d,#6f9e86); }
@@ -33,3 +38,5 @@
 .profile-arrow { color: #8b978f; font-size: 30rpx; }
 .card-actions { display: flex; gap: 12rpx; margin-top: 22rpx; }
 .action-button { flex: 1; margin: 0; padding: 0 12rpx; min-height: 72rpx; line-height: 72rpx; font-size: 24rpx; }
+.home-list-hint { padding: 54rpx 12rpx; text-align: center; font-size: 24rpx; }
+.home-retry { color: #197257; font-weight: 700; }

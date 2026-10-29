@@ -8,6 +8,7 @@ Page({
     selectedGameType: '中式八球',
     userLocation: null,
     locationLabel: '选择位置查看附近球友',
+    isLoading: true,
     loadError: ''
   },
 
@@ -20,10 +21,16 @@ Page({
   },
 
   refreshMatches() {
+    const requestId = this._requestId = (this._requestId || 0) + 1;
+    this.setData({ isLoading: true });
     api.searchMatches({ userLocation: this.data.userLocation }).then((matches) => {
-      this.setData({ matches: matches.slice(0, 2), loadError: '' });
-    }).catch((error) => this.setData({ matches: [], loadError: error.message || '暂时无法连接服务' }));
+      if (requestId === this._requestId) this.setData({ matches: matches.slice(0, 2), isLoading: false, loadError: '' });
+    }).catch((error) => {
+      if (requestId === this._requestId) this.setData({ matches: [], isLoading: false, loadError: error.message || '暂时无法连接服务' });
+    });
   },
+
+  onUnload() { this._requestId = (this._requestId || 0) + 1; },
 
   openMatch(event) {
     const { id } = event.currentTarget.dataset;
@@ -42,8 +49,13 @@ Page({
 
   showMessages() { navigation.openMessages(); },
 
+  clearLocation() {
+    locationStore.clearUserLocation();
+    this.setData({ userLocation: null, locationLabel: '选择位置查看附近球友' }, () => this.refreshMatches());
+  },
+
   showLocation() {
-    locationStore.openLocationActions((userLocation) => {
+    locationStore.chooseUserLocation((userLocation) => {
       this.setData({
         userLocation,
         locationLabel: userLocation ? userLocation.label : '选择位置查看附近球友'

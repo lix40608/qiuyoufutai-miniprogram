@@ -89,6 +89,17 @@ function chooseMapLocationFromCurrent(onSuccess) {
   });
 }
 
+// 优先以当前位置打开地图；定位失败时仍尝试打开地图供用户手动选点。
+function chooseUserLocation(onChange) {
+  const select = (initialLocation) => chooseMapLocation(initialLocation, (location) => {
+    onChange(saveUserLocation(Object.assign({}, location, {
+      label: location.name || location.address || '地图所选位置',
+      source: 'map'
+    })));
+  });
+  wx.getLocation({ type: 'gcj02', success: select, fail: () => select(null) });
+}
+
 function openLocationActions(onChange) {
   wx.showActionSheet({
     itemList: ['自动定位当前位置', '在地图上选择位置', '清除位置'],
@@ -117,4 +128,4 @@ function openLocationActions(onChange) {
   });
 }
 
-module.exports = { getUserLocation, saveUserLocation, clearUserLocation, distanceKm, formatDistance, openLocationActions, chooseMapLocation, chooseMapLocationFromCurrent, handleLocationError };
+module.exports = { getUserLocation, saveUserLocation, clearUserLocation, distanceKm, formatDistance, openLocationActions, chooseMapLocation, chooseMapLocationFromCurrent, chooseUserLocation, handleLocationError };

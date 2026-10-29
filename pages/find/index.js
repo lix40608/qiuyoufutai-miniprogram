@@ -98,8 +98,13 @@ Page({
 
   showMessages() { navigation.openMessages(); },
 
+  clearLocation() {
+    locationStore.clearUserLocation();
+    this.setData({ userLocation: null, hasLocation: false, locationLabel: '选择位置查看附近球友' }, () => this.refreshMatches());
+  },
+
   showLocation() {
-    locationStore.openLocationActions((userLocation) => {
+    locationStore.chooseUserLocation((userLocation) => {
       this.setData({
         userLocation,
         hasLocation: Boolean(userLocation),

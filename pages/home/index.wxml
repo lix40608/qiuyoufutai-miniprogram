@@ -2,7 +2,7 @@
   <view class="home-heading row">
     <view>
       <view class="brand">球友赴台</view>
-      <view class="muted location" bindtap="showLocation">{{locationLabel}}　⌄</view>
+      <view class="location-entry" bindtap="showLocation"><text class="location-marker">⌖</text><text class="location-label">{{locationLabel}}</text><text class="location-arrow">›</text><text wx:if="{{userLocation}}" class="location-clear" catchtap="clearLocation">清除</text></view>
       <view class="location-privacy">位置仅保存在本机，用于估算直线距离</view>
     </view>
     <view class="message-entry" bindtap="showMessages">消息</view>
@@ -30,26 +30,32 @@
     <view class="text-link" bindtap="goFind">查看全部 ›</view>
   </view>
 
-  <view wx:if="{{loadError}}" class="empty-state"><view class="empty-title">暂时无法加载约球</view><view class="muted">{{loadError}}</view></view>
-  <view wx:for="{{matches}}" wx:key="id" class="match-card" data-id="{{item.id}}" bindtap="openMatch">
-    <view class="row"><view class="tag">{{item.gameType}}</view><view class="fee">{{item.feeLabel}}</view></view>
-    <view class="match-title">{{item.title}}</view>
-    <view class="muted">{{item.startLabel}} · {{item.venue}}</view>
-    <view class="muted distance">{{item.distanceLabel}}{{item.area ? ' · ' + item.area : ''}}</view>
-    <view class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
-      <view class="host-avatar">
-        <image wx:if="{{item.hostAvatar}}" class="host-avatar-image" src="{{item.hostAvatar}}" mode="aspectFill" />
-        <view wx:else class="eight-ball"><text>8</text></view>
-      </view>
-      <view class="host-copy">
-        <view class="host-primary"><text class="host-name">{{item.hostName}}</text><text wx:if="{{item.hostAge}}">{{item.hostAge}}岁</text><text wx:if="{{item.hostGender}}">{{item.hostGender}}</text></view>
-        <view wx:if="{{item.hostIntro}}" class="muted host-intro">{{item.hostIntro}}</view>
-      </view>
-      <view class="profile-arrow">›</view>
-    </view>
-    <view class="card-actions">
-      <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
-      <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊</button>
-    </view>
+  <view wx:if="{{isLoading}}" class="home-list-hint muted">正在加载约球…</view>
+  <view wx:elif="{{loadError}}" class="home-list-hint muted">
+    暂时无法加载约球，<text class="home-retry" bindtap="refreshMatches">点此重试</text>
   </view>
+  <view wx:elif="{{!matches.length}}" class="home-list-hint muted">暂时没有招募中的约局</view>
+  <block wx:else>
+    <view wx:for="{{matches}}" wx:key="id" class="match-card" data-id="{{item.id}}" bindtap="openMatch">
+      <view class="row"><view class="tag">{{item.gameType}}</view><view class="fee">{{item.feeLabel}}</view></view>
+      <view class="match-title">{{item.title}}</view>
+      <view class="muted">{{item.startLabel}} · {{item.venue}}</view>
+      <view class="muted distance">{{item.distanceLabel}}{{item.area ? ' · ' + item.area : ''}}</view>
+      <view class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
+        <view class="host-avatar">
+          <image wx:if="{{item.hostAvatar}}" class="host-avatar-image" src="{{item.hostAvatar}}" mode="aspectFill" />
+          <view wx:else class="eight-ball"><text>8</text></view>
+        </view>
+        <view class="host-copy">
+          <view class="host-primary"><text class="host-name">{{item.hostName}}</text><text wx:if="{{item.hostAge}}">{{item.hostAge}}岁</text><text wx:if="{{item.hostGender}}">{{item.hostGender}}</text></view>
+          <view wx:if="{{item.hostIntro}}" class="muted host-intro">{{item.hostIntro}}</view>
+        </view>
+        <view class="profile-arrow">›</view>
+      </view>
+      <view class="card-actions">
+        <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
+        <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊</button>
+      </view>
+    </view>
+  </block>
 </view>

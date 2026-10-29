@@ -70,6 +70,17 @@ test('chat endpoints send only an explicit confirmation request when called', as
   assert.equal(calls[1].url.endsWith('/v1/conversations/12/confirm'), true);
 });
 
+test('对返回的全部约局按距离排序，后返回的近处约局不会被截掉', async () => {
+  const rows = Array.from({ length: 101 }, (_, index) => ({
+    id: index + 1, startsAt: '2030-01-01T10:00:00Z', gameType: '中式八球',
+    venueLatitude: index === 100 ? 30 : 31, venueLongitude: 120
+  }));
+  const c = client(() => ok(rows), 'session');
+  const matches = await c.api.searchMatches({ userLocation: { latitude: 30, longitude: 120 } });
+  assert.equal(matches.length, 101);
+  assert.equal(matches[0].id, 101);
+});
+
 test('avatar upload renews an expired token and returns a server URL', async () => {
   // Upload is a separate WeChat transport and must recover the same way as JSON requests.
   let uploads = 0;

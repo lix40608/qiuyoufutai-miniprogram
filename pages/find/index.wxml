@@ -2,7 +2,12 @@
   <view class="find-heading row">
     <view>
       <view class="page-title">附近约球</view>
-      <view class="muted location" bindtap="showLocation">{{locationLabel}}　⌄</view>
+      <view class="location-entry" bindtap="showLocation">
+        <text class="location-entry-marker">⌖</text>
+        <text class="location-entry-label">{{locationLabel}}</text>
+        <text class="location-entry-arrow">›</text>
+        <text wx:if="{{hasLocation}}" class="location-clear" catchtap="clearLocation">清除</text>
+      </view>
       <view class="location-privacy">位置仅保存在本机，用于估算直线距离</view>
     </view>
     <view class="message-entry" bindtap="showMessages">消息</view>
