@@ -1,24 +1,34 @@
-.profile-editor-page { padding-top: 34rpx; padding-bottom: 64rpx; }
-.page-intro { margin-top: 10rpx; line-height: 1.5; }
-.section-title { margin: 28rpx 4rpx 4rpx; font-size: 28rpx; font-weight: 800; }
-.form-card { padding: 10rpx 24rpx 26rpx; }
-.archive-form { margin-top: 14rpx; }
-.field-title { margin: 24rpx 0 12rpx; font-size: 25rpx; font-weight: 700; }
-.profile-input { box-sizing: border-box; width: 100%; height: 78rpx; padding: 0 18rpx; border: 1rpx solid #dfe5da; border-radius: 15rpx; background: #fff; color: #173128; font-size: 25rpx; line-height: 78rpx; }
-.choice-row { display: flex; flex-wrap: wrap; gap: 14rpx; }
-.choice-chip { padding: 13rpx 22rpx; border: 1rpx solid #dfe5da; border-radius: 28rpx; background: #f2f4ee; color: #52645b; font-size: 23rpx; }
-.choice-chip.selected { border-color: #197257; background: #e4f0e7; color: #197257; font-weight: 700; }
-.profile-action-button { flex: 1; height: 68rpx; margin: 0; padding: 0; border: 1rpx solid #b9d6c6; border-radius: 15rpx; background: #fffefa; color: #197257; font-size: 22rpx; line-height: 68rpx; }
-.avatar-setting { display: flex; align-items: center; gap: 22rpx; }
-.avatar-preview { width: 128rpx; height: 128rpx; flex: none; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 4rpx solid #dfe5da; border-radius: 50%; background: #eef1eb; }
+.profile-editor-page { padding-top: 16rpx; padding-bottom: 64rpx; }
+.section-title { margin: 28rpx 4rpx 16rpx; color: #173128; font-size: 28rpx; font-weight: 800; }
+.profile-group { overflow: hidden; padding: 0 24rpx; border: 1rpx solid #dfe5da; border-radius: 24rpx; background: #fffefa; }
+.avatar-row, .field-row { display: flex; align-items: center; min-height: 94rpx; border-bottom: 1rpx solid #edf0ea; }
+.avatar-row { min-height: 132rpx; }
+.row-hover { background: #f1f6ef; }
+.row-label { flex: none; color: #30473c; font-size: 25rpx; font-weight: 700; }
+.required, .field-error { color: #c54f43; }
+.row-input { flex: 1; min-width: 0; height: 90rpx; padding-left: 24rpx; color: #173128; font-size: 25rpx; text-align: right; }
+.row-unit { padding-left: 8rpx; color: #718178; font-size: 23rpx; }
+.row-arrow { margin-left: 14rpx; color: #98a69d; font-size: 38rpx; }
+.avatar-preview { width: 84rpx; height: 84rpx; margin-left: auto; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eef1eb; }
 .avatar-image { width: 100%; height: 100%; }
-.eight-ball { width: 108rpx; height: 108rpx; display: flex; align-items: center; justify-content: center; border: 4rpx solid #393d3b; border-radius: 50%; background: radial-gradient(circle at 32% 24%, #686d69 0, #222523 30%, #080909 72%); box-shadow: inset -8rpx -11rpx 18rpx rgba(0,0,0,.45), inset 5rpx 7rpx 10rpx rgba(255,255,255,.12); }
-.eight-ball text { width: 46rpx; height: 46rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f5f5f2; color: #111; font-size: 30rpx; font-weight: 800; }
-.avatar-actions { flex: 1; }
-.reset-avatar { margin: 12rpx 0 0; padding: 0; background: transparent; color: #718178; font-size: 22rpx; line-height: 1.4; text-align: left; }
-.intro-input { box-sizing: border-box; width: 100%; min-height: 150rpx; padding: 16rpx 18rpx; border: 1rpx solid #dfe5da; border-radius: 15rpx; background: #fff; font-size: 24rpx; line-height: 1.5; }
+.eight-ball { width: 78rpx; height: 78rpx; display: flex; align-items: center; justify-content: center; border: 3rpx solid #393d3b; border-radius: 50%; background: radial-gradient(circle at 32% 24%, #686d69 0, #222523 30%, #080909 72%); }
+.eight-ball text { width: 34rpx; height: 34rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f5f5f2; color: #111; font-size: 23rpx; font-weight: 800; }
+.gender-row { border-bottom: 0; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.gender-row .choice-row { margin-left: auto; }
+.choice-chip { padding: 12rpx 22rpx; border: 1rpx solid #dfe5da; border-radius: 28rpx; background: #f2f4ee; color: #52645b; font-size: 23rpx; }
+.choice-chip.selected { border-color: #197257; background: #e4f0e7; color: #197257; font-weight: 700; }
+.field-error { padding: 8rpx 0 12rpx; text-align: right; font-size: 22rpx; }
+.archive-group { padding-top: 24rpx; padding-bottom: 20rpx; }
+.archive-label { color: #30473c; font-size: 25rpx; font-weight: 700; }
 .optional { margin-left: 8rpx; color: #8b968e; font-size: 21rpx; font-weight: 400; }
-.game-options { margin-top: 4rpx; }
-.save-actions { display: flex; gap: 14rpx; margin-top: 22rpx; }
+.game-options { margin-top: 18rpx; }
+.archive-divider { height: 1rpx; margin: 26rpx 0; background: #edf0ea; }
+.intro-input { box-sizing: border-box; width: 100%; min-height: 140rpx; margin-top: 14rpx; padding: 16rpx; border-radius: 15rpx; background: #f5f7f2; font-size: 24rpx; line-height: 1.5; }
+.intro-count { margin-top: 6rpx; color: #9aa59e; font-size: 20rpx; text-align: right; }
+.save-actions { display: flex; gap: 14rpx; margin-top: 26rpx; }
 .save-actions button { flex: 1; margin: 0; font-size: 25rpx; }
-.local-note { margin-top: 16rpx; text-align: center; }
+
+/* 用球面高光、暗部和柔和投影表现黑八的材质。 */
+.eight-ball{box-sizing:border-box;border:1rpx solid #25292a;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -5rpx -7rpx 12rpx rgba(0,0,0,.65),inset 2rpx 2rpx 5rpx rgba(255,255,255,.13),0 3rpx 7rpx rgba(0,0,0,.2)}
+.eight-ball text{background:radial-gradient(circle at 35% 30%,#fff 0%,#e8e7df 72%,#b8bab4 100%);color:#171b1a;box-shadow:inset -2rpx -2rpx 4rpx rgba(0,0,0,.18)}

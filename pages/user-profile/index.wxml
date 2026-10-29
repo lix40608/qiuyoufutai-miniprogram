@@ -2,7 +2,7 @@
   <view class="card profile-hero">
     <view class="profile-avatar">
       <image wx:if="{{profile.avatarPath}}" class="profile-avatar-image" src="{{profile.avatarPath}}" mode="aspectFill" />
-      <view wx:else class="eight-ball"><text>8</text></view>
+      <image wx:else class="eight-ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
     </view>
     <view class="profile-identity">
       <view class="profile-nickname">{{profile.nickname || '球友'}}</view>

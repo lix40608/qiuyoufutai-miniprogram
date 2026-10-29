@@ -128,4 +128,22 @@ function openLocationActions(onChange) {
   });
 }
 
-module.exports = { getUserLocation, saveUserLocation, clearUserLocation, distanceKm, formatDistance, openLocationActions, chooseMapLocation, chooseMapLocationFromCurrent, chooseUserLocation, handleLocationError };
+// 卡片和详情页使用相同的坐标检查，避免缺失坐标被转换成 0。
+function openVenueLocation(match) {
+  const latitude = match && match.venueLatitude;
+  const longitude = match && match.venueLongitude;
+  if (latitude == null || longitude == null || latitude === '' || longitude === '' || !Number.isFinite(Number(latitude)) || !Number.isFinite(Number(longitude))) {
+    wx.showToast({ title: '该球房暂无地图坐标', icon: 'none' });
+    return;
+  }
+  wx.openLocation({
+    latitude: Number(latitude),
+    longitude: Number(longitude),
+    name: match.venue || match.venueName || '约球球房',
+    address: match.venueAddress || match.area || '',
+    scale: 16,
+    fail: () => wx.showToast({ title: '暂时无法打开地图', icon: 'none' })
+  });
+}
+
+module.exports = { getUserLocation, saveUserLocation, clearUserLocation, distanceKm, formatDistance, openLocationActions, chooseMapLocation, chooseMapLocationFromCurrent, chooseUserLocation, handleLocationError, openVenueLocation };

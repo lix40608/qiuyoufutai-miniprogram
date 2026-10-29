@@ -1,0 +1,23 @@
+<view class="page group-page">
+  <view class="heading"><view class="eyebrow">MY GAMES</view><view class="title">我的约球</view></view>
+  <view class="publish-entry" bindtap="publish"><view class="publish-copy"><view class="publish-title">发布约球</view><view class="publish-subtitle">选择球房和时间，发起一场约球</view></view><view class="publish-arrow">↗</view></view>
+  <view class="tabs"><view class="tab {{activeView === 'created' ? 'active' : ''}}" data-view="created" bindtap="selectView">我发起的</view><view class="tab {{activeView === 'chatted' ? 'active' : ''}}" data-view="chatted" bindtap="selectView">我聊过的</view></view>
+  <view wx:if="{{loading}}" class="empty">正在加载约球…</view>
+  <view wx:elif="{{loadError}}" class="empty">{{loadError}} <text class="retry" bindtap="refresh">重新加载</text></view>
+  <block wx:elif="{{activeView === 'created'}}">
+    <view class="section"><text>进行中</text><text class="section-hint">最近更新</text></view>
+    <view wx:if="{{latestActive}}" class="match-card" data-id="{{latestActive.id}}" data-status="{{latestActive.status}}" bindtap="openRecord">
+      <view class="summary-head"><view class="summary-tag">{{latestActive.gameType}}</view><view class="badge">{{latestActive.status === 'matched' ? '已组局' : '招募中'}}</view></view>
+      <view class="event-venue"><view class="event-venue-copy"><view class="venue-label-row"><text class="event-label">球房</text><view wx:if="{{latestActive.distanceLabel}}" class="distance-entry" catchtap="openVenue" data-match="{{latestActive}}"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{latestActive.distanceLabel}}</text></view><view wx:elif="{{!hasUserLocation}}" class="distance-entry" catchtap="chooseLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-title-row"><view class="event-venue-name">{{latestActive.venueName || '球房待选择'}}</view></view></view></view>
+      <view class="event-time-row"><view class="event-clock">◷</view><view><view class="event-label">开球时间</view><view class="event-time-value">{{latestActive.startLabel}}</view></view></view>
+      <view class="summary-meta">费用 {{latestActive.feeLabel}}</view>
+      <view wx:if="{{latestActive.level}}" class="summary-extra">水平：{{latestActive.level}}</view>
+      <view wx:if="{{latestActive.note}}" class="summary-extra">备注：{{latestActive.note}}</view>
+      <view class="match-actions"><button class="detail" catchtap="openRecord" data-id="{{latestActive.id}}" data-status="{{latestActive.status}}">查看详情</button><button wx:if="{{latestActive.status === 'recruiting'}}" class="manage" catchtap="cancelRecord" data-id="{{latestActive.id}}">取消约球</button></view>
+    </view><view wx:else class="empty">暂无进行中的约球</view>
+    <view class="section"><text>草稿</text><text class="section-hint">最近编辑</text></view>
+    <view wx:if="{{latestDraft}}" class="draft" bindtap="openRecord" data-id="{{latestDraft.id}}" data-status="draft"><view class="draft-icon">✎</view><view class="draft-copy"><view class="draft-title">{{latestDraft.title}}</view><view class="draft-subtitle">{{latestDraft.venueName || '地点待选择'}} · 编辑中</view></view><view class="arrow">›</view></view><view wx:else class="empty">暂无草稿</view>
+    <view class="all-entry" bindtap="allMatches"><text>全部约球</text><text>查看全部 ›</text></view>
+  </block>
+  <block wx:else><view class="section">聊过的约球</view><view wx:if="{{!chatted.length}}" class="empty">还没有聊过的约球</view><view wx:for="{{chatted}}" wx:key="conversationId" class="match-card chatted" bindtap="openRecord" data-conversation-id="{{item.conversationId}}"><view class="summary-head"><view class="summary-tag">{{item.gameType}}</view><view class="badge">{{item.displayEnded ? '已结束' : item.status === 'matched' ? '已组局' : '组局中'}}</view></view><view class="event-venue"><view class="event-venue-copy"><view class="venue-label-row"><text class="event-label">球房</text><view wx:if="{{item.distanceLabel}}" class="distance-entry" catchtap="openVenue" data-match="{{item}}"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{item.distanceLabel}}</text></view><view wx:elif="{{!hasUserLocation}}" class="distance-entry" catchtap="chooseLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-title-row"><view class="event-venue-name">{{item.venueName || '球房待选择'}}</view></view></view></view><view class="event-time-row"><view class="event-clock">◷</view><view><view class="event-label">开球时间</view><view class="event-time-value">{{item.startLabel}}</view></view></view><view class="match-bottom"><text>费用 {{item.feeLabel}}</text><text class="detail">查看聊天</text></view></view></block>
+</view>

@@ -5,6 +5,7 @@ const locationStore = require('../../data/location-store');
 Page({
   data: {
     matches: [],
+    currentUserId: null,
     selectedGameType: '中式八球',
     userLocation: null,
     locationLabel: '选择位置查看附近球友',
@@ -13,6 +14,7 @@ Page({
   },
 
   onShow() {
+    api.getProfile().then(profile => this.setData({ currentUserId: profile.userId })).catch(() => this.setData({ currentUserId: null }));
     const userLocation = locationStore.getUserLocation();
     this.setData({
       userLocation,
@@ -38,6 +40,8 @@ Page({
   },
 
   openChat(event) { navigation.openChat(this, event); },
+
+  openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
 
   showDeferredFeature(event) { navigation.openChat(this, event); },
 
@@ -68,7 +72,7 @@ Page({
   },
 
   goPublish() {
-    wx.switchTab({ url: '/pages/publish/index' });
+    wx.navigateTo({ url: '/pages/publish/index' });
   },
 
   openHostProfile(event) {

@@ -146,7 +146,7 @@ module.exports = {
         const distance = options.userLocation ? locationStore.distanceKm(options.userLocation, { latitude: match.venueLatitude, longitude: match.venueLongitude }) : null;
         return Object.assign({}, match, {
           distanceValue: distance,
-          distanceLabel: Number.isFinite(distance) ? `直线约 ${locationStore.formatDistance(distance)}` : (options.userLocation ? '球房位置待完善，暂无法计算距离' : '')
+          distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : ''
         });
       }).sort((a, b) => {
         if (options.userLocation) {

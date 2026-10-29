@@ -26,6 +26,15 @@
 .fee { color: #c78339; font-size: 24rpx; font-weight: 700; }
 .local-badge { margin-left: auto; color: #718178; font-size: 20rpx; }
 .distance { margin-top: 6rpx; }
+.match-info { display: flex; align-items: baseline; gap: 14rpx; margin-top: 10rpx; font-size: 23rpx; }
+.info-label { flex: none; color: #91a097; }
+.info-value { color: #53665c; }
+.venue-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.venue-entry { align-items: center; min-height: 52rpx; padding: 0 12rpx; margin-left: -12rpx; border-radius: 12rpx; color: #1b765c; background: #f0f5ed; }
+.venue-entry .venue-value { color: #1b765c; }
+.venue-marker { font-size: 29rpx; }
+.venue-arrow { color: #63917e; font-size: 30rpx; }
+.info-distance { flex: none; max-width: 45%; overflow: hidden; color: #718178; font-size: 20rpx; text-overflow: ellipsis; white-space: nowrap; }
 .host-row { display: flex; align-items: center; gap: 14rpx; margin-top: 18rpx; padding-top: 16rpx; border-top: 1rpx solid #dfe5da; }
 .host-avatar { width: 68rpx; height: 68rpx; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2rpx solid #dfe5da; border-radius: 50%; background: #eef1eb; }
 .host-avatar-image { width: 100%; height: 100%; }
@@ -40,3 +49,34 @@
 .action-button { flex: 1; margin: 0; padding: 0 12rpx; min-height: 72rpx; line-height: 72rpx; font-size: 24rpx; }
 .home-list-hint { padding: 54rpx 12rpx; text-align: center; font-size: 24rpx; }
 .home-retry { color: #197257; font-weight: 700; }
+
+.own-match { margin-left: 12rpx; color: #247a60; background: #eaf3e9; border-radius: 8rpx; padding: 4rpx 9rpx; font-size: 20rpx; font-weight: 500; }
+
+.card-header{margin-bottom:18rpx}.key-time{font-size:34rpx;font-weight:700;color:#193c30;line-height:1.4}.key-venue{display:flex;align-items:center;gap:10rpx;margin-top:14rpx;padding:14rpx 16rpx;background:#f0f5ed;border-radius:12rpx;color:#1b765c}.key-venue .venue-name{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:26rpx;font-weight:600}.match-extra{margin-top:13rpx;font-size:23rpx;color:#718178;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.note-preview{color:#89978e}
+
+.key-time{display:flex;align-items:baseline;gap:18rpx;font-size:27rpx;font-weight:600;color:#234638}.time-label{font-size:22rpx;font-weight:400;color:#83958b;flex:none}
+
+/* 以球房和开球时间为卡片主信息，附加说明保持次级。 */
+.match-card{padding:26rpx;border-color:#e2eae2;border-radius:28rpx;box-shadow:0 8rpx 24rpx rgba(35,76,54,.045)}.card-header{margin-bottom:23rpx}.event-venue{display:flex;align-items:center;gap:16rpx}.event-venue-copy{min-width:0;flex:1}.event-label{font-size:20rpx;font-weight:500;color:#91a197;line-height:1.3}.event-venue-name{font-size:32rpx;font-weight:700;color:#17392f;line-height:1.35;margin-top:6rpx;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.event-map{flex:none;color:#258364;font-size:21rpx;font-weight:600}.event-time-row{display:flex;align-items:center;gap:13rpx;margin-top:20rpx;padding:17rpx 18rpx;background:#f0f6f0;border-radius:16rpx}.event-clock{width:44rpx;height:44rpx;line-height:44rpx;text-align:center;border-radius:50%;background:#dceee0;color:#21775c;font-size:30rpx}.event-time-copy{flex:1;min-width:0}.event-time-value{margin-top:3rpx;color:#235440;font-size:25rpx;font-weight:650}.event-distance{max-width:36%;font-size:20rpx;color:#779184;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.host-row{border-color:#eff3ee}.match-extra{font-size:22rpx;margin-top:14rpx}
+
+.card-header>view:last-child{display:flex;align-items:center;gap:12rpx}.fee{font-size:21rpx;color:#9a7750;font-weight:600}.own-match{margin-left:0}.venue-distance{color:#568473}.event-time-row{padding:12rpx 16rpx;margin-top:16rpx}.event-clock{width:38rpx;height:38rpx;line-height:38rpx;font-size:25rpx}.event-label{font-size:20rpx}.event-time-value{font-size:24rpx}.extra-label{display:inline-block;color:#9aa9a0;margin-right:12rpx;font-size:20rpx}.profile-arrow{font-size:21rpx;color:#82988b}.host-intro{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.venue-title-row{display:flex;align-items:baseline;gap:16rpx;min-width:0;margin-top:6rpx}.venue-title-row .event-venue-name{flex:1;min-width:0;margin-top:0}.venue-title-row .event-map{line-height:1.35;white-space:nowrap}
+
+.venue-label-row{display:flex;align-items:center;gap:12rpx}.venue-distance{display:inline-block;padding:5rpx 10rpx;border-radius:9rpx;background:#e4f1e5;color:#1c7355;font-size:22rpx;font-weight:700;line-height:1.35}
+
+.venue-distance{padding:0;background:transparent;border-radius:0;color:#397b62;font-size:22rpx;font-weight:600}.distance-prompt{color:#54836f;font-size:21rpx;padding:8rpx 4rpx}
+
+.distance-entry{display:inline-flex;align-items:center;gap:9rpx;min-height:44rpx;padding:0 6rpx;color:#397b62;font-size:22rpx;font-weight:600;line-height:1}.pin-icon{position:relative;box-sizing:border-box;width:20rpx;height:20rpx;border:3rpx solid currentColor;border-radius:50% 50% 50% 0;transform:rotate(-45deg);flex:none;margin:0 2rpx 4rpx}.pin-dot{position:absolute;width:5rpx;height:5rpx;border-radius:50%;background:currentColor;top:4rpx;left:4rpx}
+
+.location-pin{color:#197257;width:23rpx;height:23rpx;margin-right:4rpx}.location-pin .pin-dot{width:6rpx;height:6rpx;top:5rpx;left:5rpx}
+
+.location-clear{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:44rpx;height:44rpx;margin-left:4rpx;padding:0;color:#98a79d;font-size:28rpx;font-weight:400;line-height:1}
+
+/* 用球面高光、暗部和柔和投影表现黑八的材质。 */
+.eight-ball{box-sizing:border-box;border:1rpx solid #25292a;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -5rpx -7rpx 12rpx rgba(0,0,0,.65),inset 2rpx 2rpx 5rpx rgba(255,255,255,.13),0 3rpx 7rpx rgba(0,0,0,.2)}
+.eight-ball text{background:radial-gradient(circle at 35% 30%,#fff 0%,#e8e7df 72%,#b8bab4 100%);color:#171b1a;box-shadow:inset -2rpx -2rpx 4rpx rgba(0,0,0,.18)}
+
+.ball{display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:2rpx solid #303637;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -8rpx -10rpx 16rpx rgba(0,0,0,.6),0 10rpx 18rpx rgba(16,43,33,.25)}.ball text{display:flex;align-items:center;justify-content:center;width:48rpx;height:48rpx;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#deded7 85%);color:#161a19;font-size:34rpx;line-height:1;font-weight:800;box-shadow:inset -2rpx -2rpx 4rpx rgba(0,0,0,.2)}
+
+.ball-image{position:absolute;top:32rpx;right:24rpx;width:132rpx;height:132rpx}

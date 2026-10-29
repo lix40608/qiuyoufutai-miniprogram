@@ -16,6 +16,7 @@ Page({
     gameTypes: ['全部玩法', '中式八球', '中式九球', '斯诺克'],
     selectedGameType: '全部玩法',
     matches: [],
+    currentUserId: null,
     hasLocation: false,
     userLocation: null,
     locationLabel: '选择位置查看附近球友',
@@ -28,6 +29,7 @@ Page({
   },
 
   onShow() {
+    api.getProfile().then(profile => this.setData({ currentUserId: profile.userId })).catch(() => this.setData({ currentUserId: null }));
     const app = getApp();
     if (app.globalData.pendingGameType) {
       this.setData({ selectedGameType: app.globalData.pendingGameType });
@@ -68,6 +70,8 @@ Page({
     const { id } = event.currentTarget.dataset;
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
   },
+
+  openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
 
   clearSearch() {
     this.setData({ searchText: '' }, () => this.refreshMatches());

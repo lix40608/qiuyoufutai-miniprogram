@@ -15,7 +15,7 @@ Page({
     genderOptions: ['男', '女'],
     gameTypeOptions: makeGameTypeOptions([]),
     pendingAvatarPath: '',
-    resetAvatar: false,
+    errors: {},
     resumePublish: false
   },
 
@@ -35,7 +35,7 @@ Page({
 
   onPersonalInput(event) {
     const field = event.currentTarget.dataset.field;
-    this.setData({ [`personal.${field}`]: event.detail.value });
+    this.setData({ [`personal.${field}`]: event.detail.value, [`errors.${field}`]: '' });
   },
 
   onArchiveInput(event) {
@@ -44,7 +44,7 @@ Page({
   },
 
   selectGender(event) {
-    this.setData({ 'personal.gender': event.currentTarget.dataset.value });
+    this.setData({ 'personal.gender': event.currentTarget.dataset.value, 'errors.gender': '' });
   },
 
   toggleGameType(event) {
@@ -54,21 +54,17 @@ Page({
     this.setData({ 'archive.gameTypes': next, gameTypeOptions: makeGameTypeOptions(next) });
   },
 
-  chooseAvatar() {
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album'],
-      success: (result) => {
-        const path = result.tempFilePaths && result.tempFilePaths[0];
-        if (path) this.setData({ pendingAvatarPath: path, resetAvatar: false });
+  openAvatarEditor() {
+    const avatarPath = this.data.pendingAvatarPath || this.data.personal.avatarPath || '';
+    wx.navigateTo({
+      url: '/pages/avatar-editor/index',
+      events: {
+        avatarSelected: (selection) => {
+          this.setData({ pendingAvatarPath: selection.path || '' });
+        }
       },
-      fail: () => wx.showToast({ title: '未选择照片', icon: 'none' })
+      success: (result) => result.eventChannel.emit('avatarInitial', { avatarPath })
     });
-  },
-
-  useDefaultAvatar() {
-    this.setData({ pendingAvatarPath: '', resetAvatar: true });
   },
 
   cancelEdit() {
@@ -80,9 +76,16 @@ Page({
     if (this._saving) return;
     const personal = this.data.personal;
     const age = Number(personal.age);
-    if (!personal.nickname.trim()) return wx.showToast({ title: '请填写昵称', icon: 'none' });
-    if (!Number.isInteger(age) || age < 1 || age > 120) return wx.showToast({ title: '请填写有效年龄', icon: 'none' });
-    if (!personal.gender) return wx.showToast({ title: '请选择性别', icon: 'none' });
+    const errors = {
+      nickname: !(personal.nickname || '').trim() ? '请填写昵称' : '',
+      age: !Number.isInteger(age) || age < 1 || age > 120 ? '请填写 1 至 120 岁的年龄' : '',
+      gender: !personal.gender ? '请选择性别' : ''
+    };
+    this.setData({ errors });
+    if (errors.nickname || errors.age || errors.gender) {
+      wx.showToast({ title: '请完善必填资料', icon: 'none' });
+      return;
+    }
     const archive = Object.assign({}, this.data.archive, {
       intro: (this.data.archive.intro || '').trim(),
       gameTypes: this.data.archive.gameTypes || []
@@ -105,6 +108,6 @@ Page({
       api.uploadAvatar(this.data.pendingAvatarPath).then(persist).catch((error) => { this._saving = false; wx.showModal({ title: '头像未保存', content: error.message || '无法上传这张照片，请重试。', showCancel: false }); });
       return;
     }
-    persist(this.data.resetAvatar ? '' : (personal.avatarPath || ''));
+    persist(personal.avatarPath || '');
   }
 });

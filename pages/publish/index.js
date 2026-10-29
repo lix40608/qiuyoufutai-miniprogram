@@ -6,11 +6,12 @@ function datePart(date) {
 }
 
 function defaultForm() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const start = new Date();
+  // 默认选择当前时间之后的下一个半小时，跨午夜时自然进入次日。
+  start.setMinutes(Math.floor(start.getMinutes() / 30) * 30 + 30, 0, 0);
   return {
     id: '', gameType: '中式八球', venueName: '', venueArea: '', venueAddress: '', venueLatitude: '', venueLongitude: '',
-    date: datePart(tomorrow), time: '19:30', level: '', feeLabel: 'AA', note: ''
+    date: datePart(start), time: `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`, level: '', feeLabel: 'AA', note: ''
   };
 }
 
@@ -26,10 +27,17 @@ Page({
     feeTypes: ['AA', '免付台费', '抢台费'],
     minDate: datePart(new Date()),
     form: defaultForm(),
+    formErrors: { venue: '', time: '' },
+    savingDraft: false,
     submitting: false
   },
 
+  onLoad(query) {
+    if (query.draftId) this.loadDraft(query.draftId);
+  },
+
   onShow() {
+    this.setData({ minDate: datePart(new Date()) });
     const app = getApp();
     let resumingDraft = false;
     if (app.globalData.editDraftId) {
@@ -97,17 +105,18 @@ Page({
         'form.venueArea': address || location.name || '地图所选位置',
         'form.venueAddress': address,
         'form.venueLatitude': location.latitude,
-        'form.venueLongitude': location.longitude
+        'form.venueLongitude': location.longitude,
+        'formErrors.venue': ''
       });
     });
   },
 
   selectDate(event) {
-    this.setData({ 'form.date': event.detail.value });
+    this.setData({ 'form.date': event.detail.value, 'formErrors.time': '' });
   },
 
   selectTime(event) {
-    this.setData({ 'form.time': event.detail.value });
+    this.setData({ 'form.time': event.detail.value, 'formErrors.time': '' });
   },
 
   onTextInput(event) {
@@ -118,25 +127,45 @@ Page({
   saveDraft() {
     if (this.data.submitting || this._savingDraft) return;
     this._savingDraft = true;
+    this.setData({ savingDraft: true });
     const form = Object.assign({}, this.data.form, { requestKey: this.data.form.requestKey || `draft-${Date.now()}-${Math.random().toString(36).slice(2)}` });
+    const submittedSnapshot = JSON.stringify(form);
     this.setData({ form });
     api.saveDraft(form).then((draft) => {
+      // 保存期间的新编辑不能被服务端返回的旧快照覆盖。
+      if (JSON.stringify(this.data.form) !== submittedSnapshot) {
+        this.setData({ 'form.id': draft.id });
+        wx.showToast({ title: '草稿已保存，请保存新修改', icon: 'none' });
+        return;
+      }
       const startsAt = draft.startAt;
       this.setData({ form: Object.assign({}, this.data.form, draft, { date: `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, '0')}-${String(startsAt.getDate()).padStart(2, '0')}`, time: `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` }) });
-      wx.showToast({ title: '草稿已保存', icon: 'success' });
-    }).catch((error) => wx.showModal({ title: '草稿未保存', content: error.message || '服务暂时不可用，内容仍保留在页面中。', showCancel: false })).finally(() => { this._savingDraft = false; });
+      // 跳转成功后清空表单，跳转失败时保留已保存的草稿供继续操作。
+      wx.redirectTo({
+        url: '/pages/my-matches/index?filter=draft',
+        success: () => {
+          this.setData({ form: defaultForm(), formErrors: { venue: '', time: '' } });
+          wx.showToast({ title: '草稿已保存', icon: 'success' });
+        },
+        fail: () => wx.showModal({ title: '草稿已保存', content: '暂时无法打开我的约局，可稍后在「编辑中」继续编辑。', showCancel: false })
+      });
+    }).catch((error) => wx.showModal({ title: '草稿未保存', content: error.message || '服务暂时不可用，内容仍保留在页面中。', showCancel: false })).finally(() => { this._savingDraft = false; this.setData({ savingDraft: false }); });
   },
 
   publishMatch() {
     if (this.data.submitting || this._savingDraft) return;
     if (!this.data.form.venueName) {
-      wx.showToast({ title: '请选择球房', icon: 'none' });
+      this.setData({ 'formErrors.venue': '请选择球房后再发布' });
+      wx.pageScrollTo({ selector: '#venue-field', duration: 300 });
       return;
     }
-    if (!this.data.form.date || !this.data.form.time || startTimestamp(this.data.form) <= Date.now()) {
-      wx.showToast({ title: '开球时间须晚于当前时间', icon: 'none' });
+    const startsAt = this.data.form.date && this.data.form.time ? startTimestamp(this.data.form) : NaN;
+    if (!Number.isFinite(startsAt) || startsAt <= Date.now()) {
+      this.setData({ 'formErrors.time': '请选择晚于当前时间的开球时间' });
+      wx.pageScrollTo({ selector: '#time-field', duration: 300 });
       return;
     }
+    this.setData({ formErrors: { venue: '', time: '' } });
     this.setData({ submitting: true });
     api.getProfile().then((profile) => {
       if (!profile.nickname || !profile.age || !profile.gender) {
@@ -149,15 +178,11 @@ Page({
       return api.publishMatch(form);
     }).then((published) => {
       if (!published) return;
-      this.setData({ form: defaultForm(), submitting: false });
-      wx.showModal({
-        title: '发布成功',
-        content: '这场约局已发布，附近球友可以查看。',
-        confirmText: '查看详情',
-        cancelText: '留在发布页',
-        success: (result) => {
-          if (result.confirm) wx.navigateTo({ url: `/pages/detail/index?id=${published.id}` });
-        }
+      this.setData({ form: defaultForm(), formErrors: { venue: '', time: '' }, submitting: false });
+      wx.redirectTo({
+        url: '/pages/my-matches/index?filter=active',
+        success: () => wx.showToast({ title: '发布成功', icon: 'success' }),
+        fail: () => wx.showModal({ title: '发布成功', content: '暂时无法打开我的约局，可稍后在「组局中」查看。', showCancel: false })
       });
     }).catch((error) => {
       this.setData({ submitting: false });

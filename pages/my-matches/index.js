@@ -7,14 +7,22 @@ Page({
       { label: '我聊过的', value: 'chatted' }
     ],
     filters: [
+      { label: '全部', value: 'all' },
       { label: '编辑中', value: 'draft' },
       { label: '组局中', value: 'active' },
+      { label: '已组局', value: 'matched' },
       { label: '已过期', value: 'expired' }
     ],
     activeView: 'created',
-    activeFilter: 'active',
+    activeFilter: 'all',
+    loading: true,
+    loadError: '',
     records: [],
     visibleRecords: []
+  },
+
+  onLoad(query) {
+    if (query.filter === 'draft' || query.filter === 'active') this.setData({ activeView: 'created', activeFilter: query.filter });
   },
 
   onShow() {
@@ -27,22 +35,29 @@ Page({
 
   refreshRecords() {
     const activeView = this.data.activeView;
+    const requestId = this._requestId = (this._requestId || 0) + 1;
+    this.setData({ loading: true, loadError: '' });
     const request = activeView === 'created' ? api.getMyMatches() : api.getChattedMatches();
     request.then((records) => {
-      if (this.data.activeView !== activeView) return;
+      if (requestId !== this._requestId || this.data.activeView !== activeView) return;
       const filteredRecords = records;
       const visibleRecords = this.filterRecords(filteredRecords);
-      this.setData({ records: filteredRecords, visibleRecords });
-    }).catch((error) => wx.showModal({ title: '读取失败', content: error.message || '无法读取约局记录，请稍后重试。', showCancel: false })).finally(() => wx.stopPullDownRefresh());
+      this.setData({ records: filteredRecords, visibleRecords, loading: false });
+    }).catch((error) => {
+      if (requestId !== this._requestId) return;
+      this.setData({ loading: false, loadError: error.message || '无法读取约局记录，请稍后重试。' });
+    }).finally(() => wx.stopPullDownRefresh());
   },
 
   filterRecords(records) {
     return records.filter((record) => {
       if (this.data.activeView === 'chatted') return true;
       if (record.status === 'cancelled') return false;
+      if (this.data.activeFilter === 'all') return true;
       if (this.data.activeFilter === 'draft') return record.status === 'draft';
       if (this.data.activeFilter === 'expired') return record.status !== 'draft' && record.displayEnded;
-      return record.status !== 'draft' && record.status !== 'cancelled' && !record.displayEnded;
+      if (this.data.activeFilter === 'matched') return record.status === 'matched' && !record.displayEnded;
+      return record.status === 'recruiting' && !record.displayEnded;
     });
   },
 
@@ -58,8 +73,7 @@ Page({
     const { id, status, conversationId } = event.currentTarget.dataset;
     if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${conversationId}` });
     if (status === 'draft') {
-      getApp().globalData.editDraftId = id;
-      wx.switchTab({ url: '/pages/publish/index' });
+      wx.navigateTo({ url: `/pages/publish/index?draftId=${encodeURIComponent(id)}` });
       return;
     }
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
@@ -83,6 +97,6 @@ Page({
   },
 
   goPublish() {
-    wx.switchTab({ url: '/pages/publish/index' });
+    wx.navigateTo({ url: '/pages/publish/index' });
   }
 });

@@ -1,18 +1,17 @@
 <view wx:if="{{match}}" class="page detail-page">
   <view class="card">
-    <view class="row"><view class="tag">{{match.status === 'matched' ? '已组局' : match.status === 'cancelled' ? '已取消' : match.displayEnded ? '公开展示已结束' : '招募中'}}</view><view class="fee">{{match.feeLabel}}</view></view>
-    <view class="match-title">{{match.title}}</view>
-    <view class="muted">{{match.gameType}} · {{match.startLabel}}</view>
+    <view class="detail-top"><view class="tag">{{match.gameType}}</view><view class="status">{{match.status === 'cancelled' ? '已取消' : match.displayEnded ? '已过期' : match.status === 'matched' ? '已组局' : '招募中'}}</view></view>
+    <view class="venue-label-row"><text class="detail-label">球房</text><view wx:if="{{distanceLabel}}" class="distance-entry" bindtap="openMap"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{distanceLabel}}</text></view><view wx:elif="{{!hasUserLocation}}" class="distance-entry distance-prompt" bindtap="chooseLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-name">{{match.venue || '球房待选择'}}</view>
+    <view class="time-block"><view class="time-icon">◷</view><view><view class="detail-label">开球时间</view><view class="time-value">{{match.startLabel}}</view></view></view>
     <map wx:if="{{hasVenueLocation}}" class="venue-map" latitude="{{match.venueLatitude}}" longitude="{{match.venueLongitude}}" scale="15" markers="{{markers}}" bindtap="openMap" />
     <view wx:else class="map-preview no-map"><view class="map-caption">暂无球房地图坐标</view></view>
-    <view class="row venue-row"><view class="venue-name">{{match.venue}}</view><view class="text-link" bindtap="openMap">查看位置 ›</view></view>
-    <view class="muted">{{match.area}}</view>
-    <view wx:if="{{match.note}}" class="match-note">{{match.note}}</view>
-    <view class="divider"></view>
-    <view class="host-row" catchtap="openHostProfile" data-user-id="{{match.hostUserId}}">
+    <view class="address-row"><view class="address-heading"><view class="detail-label">球房地址</view><view wx:if="{{hasVenueLocation}}" class="text-link" bindtap="openMap">查看地图 ›</view></view><view class="address-value">{{match.venueAddress || match.area || '暂无详细地址'}}</view></view>
+    <view class="detail-information"><view wx:if="{{match.feeLabel}}" class="info-row"><text class="info-label">费用方式</text><text>{{match.feeLabel}}</text></view><view wx:if="{{match.level}}" class="info-row"><text class="info-label">水平偏好</text><text>{{match.level}}</text></view><view wx:if="{{match.note}}" class="info-row"><text class="info-label">备注</text><text class="info-note">{{match.note}}</text></view></view>
+    <view wx:if="{{!isHost}}" class="divider"></view>
+    <view wx:if="{{!isHost}}" class="host-row" catchtap="openHostProfile" data-user-id="{{match.hostUserId}}">
       <view class="host-avatar">
         <image wx:if="{{match.hostAvatar}}" class="host-avatar-image" src="{{match.hostAvatar}}" mode="aspectFill" />
-        <view wx:else class="eight-ball"><text>8</text></view>
+        <image wx:else class="eight-ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
       </view>
       <view class="host-copy">
         <view class="host-primary"><text class="host-name">{{match.hostName}}</text><text wx:if="{{match.hostAge}}">{{match.hostAge}}岁</text><text wx:if="{{match.hostGender}}">{{match.hostGender}}</text></view>
@@ -22,12 +21,8 @@
     </view>
   </view>
 
-  <view wx:if="{{match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
+  <view wx:if="{{!isHost && match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
     <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>
-  </view>
-  <view wx:if="{{match.status === 'matched'}}" class="contact-row">
-    <button class="contact-button" disabled>☎ 联系对方</button>
-    <view class="muted">电话联系暂未开通，可从消息继续沟通</view>
   </view>
 </view>

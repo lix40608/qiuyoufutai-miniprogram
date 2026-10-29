@@ -2,8 +2,8 @@
   <view class="home-heading row">
     <view>
       <view class="brand">球友赴台</view>
-      <view class="location-entry" bindtap="showLocation"><text class="location-marker">⌖</text><text class="location-label">{{locationLabel}}</text><text class="location-arrow">›</text><text wx:if="{{userLocation}}" class="location-clear" catchtap="clearLocation">清除</text></view>
-      <view class="location-privacy">位置仅保存在本机，用于估算直线距离</view>
+      <view class="location-entry" bindtap="showLocation"><view class="pin-icon location-pin"><view class="pin-dot"></view></view><text class="location-label">{{locationLabel}}</text><text class="location-arrow">›</text></view>
+      <view class="location-privacy">用于查找附近约局</view>
     </view>
     <view class="message-entry" bindtap="showMessages">消息</view>
   </view>
@@ -13,7 +13,7 @@
     <view class="hero-title">想打球？<br />附近有人等你</view>
     <view class="hero-copy">同城约球 · 玩法合拍 · 说走就走</view>
     <button class="hero-button" bindtap="goPublish">＋ 发起一场约球</button>
-    <view class="ball">8</view>
+    <image class="ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
   </view>
 
   <view class="section-heading row">
@@ -37,22 +37,23 @@
   <view wx:elif="{{!matches.length}}" class="home-list-hint muted">暂时没有招募中的约局</view>
   <block wx:else>
     <view wx:for="{{matches}}" wx:key="id" class="match-card" data-id="{{item.id}}" bindtap="openMatch">
-      <view class="row"><view class="tag">{{item.gameType}}</view><view class="fee">{{item.feeLabel}}</view></view>
-      <view class="match-title">{{item.title}}</view>
-      <view class="muted">{{item.startLabel}} · {{item.venue}}</view>
-      <view class="muted distance">{{item.distanceLabel}}{{item.area ? ' · ' + item.area : ''}}</view>
-      <view class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
+      <view class="row card-header"><view class="tag">{{item.gameType}}</view><view><text wx:if="{{currentUserId != null && item.hostUserId != null && currentUserId == item.hostUserId}}" class="own-match">我发起的</text><text wx:if="{{item.feeLabel}}" class="fee">费用 {{item.feeLabel}}</text></view></view>
+      <view class="event-venue"><view class="event-venue-copy"><view class="venue-label-row"><text class="event-label">球房</text><view wx:if="{{item.distanceLabel}}" class="distance-entry" catchtap="openVenue" data-match="{{item}}"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{item.distanceLabel}}</text></view><view wx:elif="{{!userLocation}}" class="distance-entry distance-prompt" catchtap="showLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-title-row"><view class="event-venue-name">{{item.venue || '球房待选择'}}</view></view></view></view>
+      <view class="event-time-row"><view class="event-clock">◷</view><view class="event-time-copy"><view class="event-label">开球时间</view><view class="event-time-value">{{item.startLabel}}</view></view></view>
+      <view wx:if="{{item.level}}" class="match-extra"><text class="extra-label">水平</text>{{item.level}}</view>
+      <view wx:if="{{item.note}}" class="match-extra note-preview"><text class="extra-label">备注</text>{{item.note}}</view>
+      <view wx:if="{{currentUserId == null || item.hostUserId == null || currentUserId != item.hostUserId}}" class="host-row" catchtap="openHostProfile" data-user-id="{{item.hostUserId}}">
         <view class="host-avatar">
           <image wx:if="{{item.hostAvatar}}" class="host-avatar-image" src="{{item.hostAvatar}}" mode="aspectFill" />
-          <view wx:else class="eight-ball"><text>8</text></view>
+          <image wx:else class="eight-ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
         </view>
         <view class="host-copy">
           <view class="host-primary"><text class="host-name">{{item.hostName}}</text><text wx:if="{{item.hostAge}}">{{item.hostAge}}岁</text><text wx:if="{{item.hostGender}}">{{item.hostGender}}</text></view>
           <view wx:if="{{item.hostIntro}}" class="muted host-intro">{{item.hostIntro}}</view>
         </view>
-        <view class="profile-arrow">›</view>
+        <view class="profile-arrow">查看资料 ›</view>
       </view>
-      <view class="card-actions">
+      <view wx:if="{{currentUserId != null && item.hostUserId != null && currentUserId != item.hostUserId}}" class="card-actions">
         <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
         <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊</button>
       </view>

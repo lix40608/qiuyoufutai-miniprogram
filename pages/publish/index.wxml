@@ -8,8 +8,8 @@
       <view wx:for="{{gameTypes}}" wx:key="*this" class="option-chip {{form.gameType === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectGameType">{{item}}</view>
     </view>
 
-    <view class="field-label">球房 <text class="required">*</text></view>
-    <view class="venue-select-card {{form.venueName ? 'venue-selected' : ''}}" hover-class="venue-select-hover" bindtap="chooseVenueOnMap">
+    <view id="venue-field" class="field-label">球房 <text class="required">*</text></view>
+    <view class="venue-select-card {{form.venueName ? 'venue-selected' : ''}} {{formErrors.venue ? 'field-invalid' : ''}}" hover-class="venue-select-hover" bindtap="chooseVenueOnMap">
       <view class="venue-icon"><view class="venue-pin"></view></view>
       <view class="venue-copy">
         <view class="venue-title">{{form.venueName || '选择球房'}}</view>
@@ -17,12 +17,14 @@
       </view>
       <view class="venue-action">{{form.venueName ? '更换' : '选择'}}</view>
     </view>
+    <view wx:if="{{formErrors.venue}}" class="field-error">{{formErrors.venue}}</view>
 
-    <view class="field-label">开球时间 <text class="required">*</text></view>
-    <view class="datetime-row">
+    <view id="time-field" class="field-label">开球时间 <text class="required">*</text></view>
+    <view class="datetime-row {{formErrors.time ? 'time-invalid' : ''}}">
       <picker mode="date" start="{{minDate}}" value="{{form.date}}" bindchange="selectDate"><view class="picker-field">{{form.date}}</view></picker>
       <picker mode="time" value="{{form.time}}" bindchange="selectTime"><view class="picker-field">{{form.time}}</view></picker>
     </view>
+    <view wx:if="{{formErrors.time}}" class="field-error">{{formErrors.time}}</view>
 
     <view class="field-label">水平偏好或说明 <text class="optional">选填</text></view>
     <input class="text-field" maxlength="40" placeholder="例如：水平随意，轻松打几局" value="{{form.level}}" data-field="level" bindinput="onTextInput" />
@@ -38,7 +40,7 @@
   </view>
 
   <view class="form-actions">
-    <button class="primary-button secondary-button" bindtap="saveDraft">保存草稿</button>
-    <button class="primary-button publish-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="publishMatch">发布约球</button>
+    <button class="primary-button secondary-button" loading="{{savingDraft}}" disabled="{{savingDraft || submitting}}" bindtap="saveDraft">{{savingDraft ? '保存中' : '保存草稿'}}</button>
+    <button class="primary-button publish-button" loading="{{submitting}}" disabled="{{submitting || savingDraft}}" bindtap="publishMatch">发布约球</button>
   </view>
 </view>

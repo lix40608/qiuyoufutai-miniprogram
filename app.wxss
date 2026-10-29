@@ -75,3 +75,5 @@ button::after {
   border: 2rpx solid #b9d6c6;
   background: var(--color-card);
 }
+
+.eight-ball-image{width:100%;height:100%;display:block}

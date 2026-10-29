@@ -1,0 +1,13 @@
+<view class="page avatar-editor-page">
+  <view class="avatar-stage">
+    <view class="avatar-preview">
+      <image wx:if="{{avatarPath}}" class="avatar-image" src="{{avatarPath}}" mode="aspectFill" />
+      <image wx:else class="eight-ball-image" src="/assets/eight-ball.png" mode="aspectFit" />
+    </view>
+  </view>
+  <view class="avatar-options">
+    <view class="avatar-option" bindtap="chooseAvatar" hover-class="option-hover"><text>从相册选择</text><text class="option-arrow">›</text></view>
+  </view>
+  <view class="avatar-note">返回后点击“保存资料”生效</view>
+  <button class="primary-button confirm-button" bindtap="confirmAvatar">确定</button>
+</view>

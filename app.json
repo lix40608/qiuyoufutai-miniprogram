@@ -2,12 +2,14 @@
   "pages": [
     "pages/home/index",
     "pages/find/index",
+    "pages/group/index",
     "pages/publish/index",
     "pages/me/index",
     "pages/detail/index",
     "pages/my-matches/index",
     "pages/chat/index",
     "pages/personal-profile/index",
+    "pages/avatar-editor/index",
     "pages/user-profile/index",
     "pages/messages/index"
   ],
@@ -42,8 +44,8 @@
         "text": "找球"
       },
       {
-        "pagePath": "pages/publish/index",
-        "text": "发布"
+        "pagePath": "pages/group/index",
+        "text": "约球"
       },
       {
         "pagePath": "pages/me/index",
