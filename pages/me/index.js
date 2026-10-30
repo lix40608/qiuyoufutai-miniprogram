@@ -37,7 +37,13 @@ Page({
     wx.navigateTo({ url: '/pages/personal-profile/index?section=personal' });
   },
 
+  editContactProfile() { wx.navigateTo({ url: '/pages/personal-profile/index?section=personal' }); },
+
   showMessages() { wx.navigateTo({ url: '/pages/messages/index' }); },
+
+  openLegal(event) {
+    wx.navigateTo({ url: `/pages/legal/index?type=${event.currentTarget.dataset.type}` });
+  },
 
   showDeferredFeature(event) {
     wx.showToast({ title: event.currentTarget.dataset.message, icon: 'none' });

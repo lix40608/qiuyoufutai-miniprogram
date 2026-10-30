@@ -28,6 +28,8 @@
 .intro-count { margin-top: 6rpx; color: #9aa59e; font-size: 20rpx; text-align: right; }
 .save-actions { display: flex; gap: 14rpx; margin-top: 26rpx; }
 .save-actions button { flex: 1; margin: 0; font-size: 25rpx; }
+.contact-profile-group { padding-bottom:20rpx; }
+.contact-privacy-note { padding:16rpx 0 4rpx; color:#89968d; font-size:21rpx; line-height:1.55; }
 
 /* 用球面高光、暗部和柔和投影表现黑八的材质。 */
 .eight-ball{box-sizing:border-box;border:1rpx solid #25292a;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -5rpx -7rpx 12rpx rgba(0,0,0,.65),inset 2rpx 2rpx 5rpx rgba(255,255,255,.13),0 3rpx 7rpx rgba(0,0,0,.2)}

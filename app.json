@@ -1,5 +1,7 @@
 {
   "pages": [
+    "pages/legal-consent/index",
+    "pages/legal/index",
     "pages/home/index",
     "pages/find/index",
     "pages/group/index",

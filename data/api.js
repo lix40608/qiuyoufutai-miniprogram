@@ -1,4 +1,7 @@
 const TOKEN_KEY = 'qiuyou-futai.session-token.v1';
+const LEGAL_ACCEPTANCE_KEY = 'qiuyou-futai.legal-acceptance.v1';
+const USER_AGREEMENT_VERSION = '2026-10-31-v1';
+const PRIVACY_POLICY_VERSION = '2026-10-31-v1';
 // 微信云托管测试服务；正式发布前替换为生产环境地址。
 const API_BASE_URL = 'https://springboot-r9wn-336416-13-1518350960.sh.run.tcloudbase.com';
 
@@ -27,13 +30,17 @@ function request(path, options = {}) {
 }
 
 function ensureLogin() {
+  if (!hasCurrentLegalAcceptance()) {
+    redirectToLegalConsent();
+    return Promise.reject(legalConsentRequiredError());
+  }
   if (wx.getStorageSync(TOKEN_KEY)) return Promise.resolve();
   if (loginPromise) return loginPromise;
   loginPromise = new Promise((resolve, reject) => {
     wx.login({
       success(result) {
         if (!result.code) return reject(new Error('微信登录失败，请重试'));
-        request('/v1/auth/login', { method: 'POST', data: { code: result.code } }).then((session) => {
+        request('/v1/auth/login', { method: 'POST', data: loginPayload(result.code) }).then((session) => {
           if (!session || !session.token) throw new Error('登录会话无效，请重试');
           wx.setStorageSync(TOKEN_KEY, session.token);
           resolve();
@@ -43,6 +50,12 @@ function ensureLogin() {
     });
   }).finally(() => { loginPromise = null; });
   return loginPromise;
+}
+
+function redirectToLegalConsent() {
+  const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+  const current = pages.length ? pages[pages.length - 1].route : '';
+  if (current !== 'pages/legal-consent/index') wx.redirectTo({ url: '/pages/legal-consent/index' });
 }
 
 function withLogin(path, options) {
@@ -83,8 +96,32 @@ function normalizeMatch(match) {
 
 module.exports = {
   ensureLogin,
+  legalVersions: () => ({ userAgreementVersion: USER_AGREEMENT_VERSION, privacyPolicyVersion: PRIVACY_POLICY_VERSION }),
+  hasCurrentLegalAcceptance,
+  acceptLegalTerms() {
+    const consent = Object.assign(loginPayload(), { adultConfirmed: true });
+    const token = wx.getStorageSync(TOKEN_KEY);
+    const saveAcceptance = token
+      ? request('/v1/me/legal-acceptance', { method: 'POST', data: consent }).catch((error) => {
+        if (error.statusCode !== 401) throw error;
+        return loginWithConsent();
+      })
+      : loginWithConsent();
+    return saveAcceptance.then((session) => {
+      if (session && session.token) wx.setStorageSync(TOKEN_KEY, session.token);
+      wx.setStorageSync(LEGAL_ACCEPTANCE_KEY, {
+        userAgreementVersion: USER_AGREEMENT_VERSION,
+        privacyPolicyVersion: PRIVACY_POLICY_VERSION,
+        adultConfirmed: true
+      });
+    });
+  },
   getProfile: () => withLogin('/v1/me/profile').then(normalizeProfile),
   saveProfile: (profile) => withLogin('/v1/me/profile', { method: 'PUT', data: Object.assign({}, profile, { gender: genderValue(profile.gender), age: profile.age === '' ? null : Number(profile.age), avatarUrl: stripBaseUrl(Object.prototype.hasOwnProperty.call(profile, 'avatarUrl') ? profile.avatarUrl : (profile.avatarPath || '')) }) }).then(normalizeProfile),
+  getMyWechatContact: () => withLogin('/v1/me/wechat-contact'),
+  saveMyWechatContact: (wechatId) => withLogin('/v1/me/wechat-contact', { method: 'PUT', data: { wechatId: (wechatId || '').trim() } }),
+  getMatchContactSharing: (matchId) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/contact-sharing`),
+  setMatchContactSharing: (matchId, share) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/contact-sharing`, { method: 'PUT', data: { share: Boolean(share) } }),
   uploadAvatar(path) {
     const upload = () => new Promise((resolve, reject) => {
       const token = wx.getStorageSync(TOKEN_KEY);
@@ -179,6 +216,47 @@ module.exports = {
     });
   }
 };
+
+function hasCurrentLegalAcceptance() {
+  const acceptance = wx.getStorageSync(LEGAL_ACCEPTANCE_KEY);
+  return Boolean(acceptance && acceptance.adultConfirmed === true
+    && acceptance.userAgreementVersion === USER_AGREEMENT_VERSION
+    && acceptance.privacyPolicyVersion === PRIVACY_POLICY_VERSION);
+}
+
+function loginPayload(code) {
+  const consent = {
+    userAgreementVersion: USER_AGREEMENT_VERSION,
+    privacyPolicyVersion: PRIVACY_POLICY_VERSION,
+    adultConfirmed: true
+  };
+  if (code) consent.code = code;
+  return consent;
+}
+
+function loginWithConsent() {
+  if (loginPromise) return loginPromise;
+  loginPromise = new Promise((resolve, reject) => {
+    wx.login({
+      success(result) {
+        if (!result.code) return reject(new Error('微信登录失败，请重试'));
+        request('/v1/auth/login', { method: 'POST', data: loginPayload(result.code) }).then((session) => {
+          if (!session || !session.token) throw new Error('登录会话无效，请重试');
+          wx.setStorageSync(TOKEN_KEY, session.token);
+          resolve(session);
+        }).catch(reject);
+      },
+      fail: () => reject(new Error('微信登录失败，请重试'))
+    });
+  }).finally(() => { loginPromise = null; });
+  return loginPromise;
+}
+
+function legalConsentRequiredError() {
+  const error = new Error('请先阅读并同意用户协议和隐私政策，并确认已满18周岁');
+  error.code = 'LEGAL_CONSENT_REQUIRED';
+  return error;
+}
 
 function absoluteAvatarUrl(url) {
   return url && url[0] === '/' ? `${API_BASE_URL}${url}` : url;

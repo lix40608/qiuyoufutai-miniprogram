@@ -70,6 +70,78 @@ button::after {
   font-weight: 700;
 }
 
+.page .match-action-row {
+  display: flex;
+  align-items: stretch;
+  gap: 14rpx;
+  box-sizing: border-box;
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx 24rpx;
+  border-top: 1rpx solid #f0f4ef;
+}
+
+.page .match-action-row .match-action-button {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 80rpx;
+  margin: 0;
+  padding: 0 24rpx;
+  border: 1rpx solid transparent;
+  border-radius: 18rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.page .match-action-row .match-action-chat {
+  position: relative;
+  padding: 0 58rpx;
+  border-color: #d7e8dc;
+  background: #e7f2eb;
+  color: #1b6b52;
+}
+
+.page .match-action-row .match-action-cancel {
+  border-color: #efdfd9;
+  background: #fbf2ef;
+  color: #9b6258;
+}
+
+.page .match-action-row .match-action-label {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.page .match-action-row .match-action-unread {
+  position: absolute;
+  top: 50%;
+  right: 14rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 34rpx;
+  height: 34rpx;
+  padding: 0 9rpx;
+  transform: translateY(-50%);
+  border: 2rpx solid #fffefa;
+  border-radius: 999rpx;
+  background: #d65b55;
+  box-shadow: 0 3rpx 8rpx rgba(128, 48, 43, .16);
+  color: #fff;
+  font-size: 18rpx;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .secondary-button {
   color: var(--color-green);
   border: 2rpx solid #b9d6c6;

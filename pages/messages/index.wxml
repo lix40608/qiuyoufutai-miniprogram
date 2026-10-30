@@ -12,13 +12,12 @@
     <view wx:for="{{conversationGroups}}" wx:key="matchId" class="card match-conversation-group">
       <view class="match-group-head">
         <view class="match-group-title">{{item.gameType}} · {{item.venueName || '球房待选择'}}</view>
-        <view class="match-group-meta">{{item.timeLabel}}<text wx:if="{{item.unreadCount}}" class="group-unread">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</text></view>
+        <view class="match-group-meta">{{item.timeLabel}}</view>
       </view>
       <view wx:for="{{item.conversations}}" wx:for-item="conversation" wx:key="id" class="conversation-row" data-id="{{conversation.id}}" bindtap="openConversation">
         <image class="conversation-avatar" src="{{conversation.peerAvatar || '/assets/eight-ball.png'}}" mode="aspectFill" />
-        <view wx:if="{{conversation.unreadCount}}" class="unread-badge">{{conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}}</view>
         <view class="conversation-main"><view class="conversation-name">{{conversation.peerName || '球友'}}<text class="conversation-status">{{conversation.stateLabel}}</text></view><view class="conversation-preview">{{conversation.preview}}</view></view>
-        <view class="conversation-arrow">›</view>
+        <view class="conversation-tail"><view wx:if="{{conversation.unreadCount}}" class="unread-badge">{{conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}}</view><view class="conversation-arrow">›</view></view>
       </view>
     </view>
   </block>

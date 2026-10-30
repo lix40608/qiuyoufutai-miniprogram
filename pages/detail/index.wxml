@@ -21,12 +21,21 @@
     </view>
   </view>
 
-  <view wx:if="{{match}}" class="card contact-card">
+  <view wx:if="{{match && match.status === 'matched' && contactSharingError}}" class="card contact-card"><view class="contact-hint">本场联系信息暂时无法读取，请稍后重试。</view></view>
+  <view wx:if="{{match && match.status === 'matched' && contactSharing}}" class="card contact-card">
     <view class="contact-copy">
-      <view class="contact-title">联系对方</view>
-      <view class="contact-hint">{{contactHint}}</view>
+      <view class="contact-title">本场微信联系</view>
+      <view wx:if="{{contactSharing.peerWechatId}}" class="contact-hint">对方微信号：{{contactSharing.peerWechatId}}</view>
+      <view wx:elif="{{contactSharing.peerShared}}" class="contact-hint">对方已授权，但暂未填写微信号</view>
+      <view wx:else class="contact-hint">对方暂未授权分享微信号</view>
     </view>
-    <button class="contact-action contact-action-disabled" bindtap="contactOther">联系对方</button>
+    <button wx:if="{{contactSharing.peerWechatId}}" class="contact-action" bindtap="copyPeerWechatId">复制微信号</button>
+    <text wx:else class="contact-peer-state">等待对方授权</text>
+  </view>
+  <view wx:if="{{match && match.status === 'matched' && contactSharing}}" class="contact-sharing-control">
+    <text>{{contactSharing.shared ? '你已授权本场对方查看你的微信号' : (contactSharing.canShare ? '授权后，对方可在本场详情复制你的微信号' : '填写微信号后，可授权本场对方查看')}}</text>
+    <text wx:if="{{contactSharing.canShare || contactSharing.shared}}" class="contact-sharing-link" bindtap="toggleContactSharing">{{contactSharing.shared ? '撤回授权' : '授权分享'}}</text>
+    <text wx:else class="contact-sharing-link" bindtap="openWechatProfile">去填写</text>
   </view>
   <view wx:if="{{!isHost && match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>

@@ -1,5 +1,12 @@
 <view class="page me-page">
   <view class="page-title">我的</view>
+  <view class="legal-entry-card card">
+    <view class="legal-entry-title">协议与隐私</view>
+    <view class="legal-entry-links">
+      <view class="legal-entry-link" data-type="terms" bindtap="openLegal">用户协议 <text>›</text></view>
+      <view class="legal-entry-link" data-type="privacy" bindtap="openLegal">隐私政策 <text>›</text></view>
+    </view>
+  </view>
   <view class="section-title">个人资料</view>
   <view class="card personal-card" bindtap="editPersonalProfile">
     <view class="personal-avatar">
@@ -33,7 +40,7 @@
   </view>
 
   <view class="section-title settings-title">设置</view>
-  <view class="card menu-card" bindtap="showDeferredFeature" data-message="手机号绑定服务尚未开通">
-    <view><view>手机号绑定</view><view class="muted">双方确认组局后用于联系 · 暂未开通</view></view><view class="muted">›</view>
+  <view class="card menu-card" bindtap="editContactProfile">
+    <view><view>微信号</view><view class="muted">选填，仅可按单场约局授权分享</view></view><view class="muted">管理 ›</view>
   </view>
 </view>

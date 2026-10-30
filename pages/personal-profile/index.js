@@ -20,12 +20,13 @@ Page({
   },
 
   onLoad(query) {
-    api.getProfile().then((profile) => {
+    Promise.all([api.getProfile(), api.getMyWechatContact()]).then(([profile, contact]) => {
       const personal = Object.assign({}, emptyPersonal, profile);
       const archive = Object.assign({}, emptyArchive, profile);
       archive.gameTypes = Array.isArray(archive.gameTypes) ? archive.gameTypes : [];
       this.setData({
         personal,
+        wechatId: contact.wechatId || '',
         archive,
         gameTypeOptions: makeGameTypeOptions(archive.gameTypes),
         resumePublish: query.resumePublish === '1'
@@ -42,6 +43,8 @@ Page({
     const field = event.currentTarget.dataset.field;
     this.setData({ [`archive.${field}`]: event.detail.value });
   },
+
+  onWechatIdInput(event) { this.setData({ wechatId: event.detail.value }); },
 
   selectGender(event) {
     this.setData({ 'personal.gender': event.currentTarget.dataset.value, 'errors.gender': '' });
@@ -76,9 +79,15 @@ Page({
     if (this._saving) return;
     const personal = this.data.personal;
     const age = Number(personal.age);
+    const wechatId = (this.data.wechatId || '').trim();
+    const invalidWechatId = wechatId && !/^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(wechatId);
+    if (invalidWechatId) {
+      wx.showToast({ title: '微信号格式不正确', icon: 'none' });
+      return;
+    }
     const errors = {
       nickname: !(personal.nickname || '').trim() ? '请填写昵称' : '',
-      age: !Number.isInteger(age) || age < 1 || age > 120 ? '请填写 1 至 120 岁的年龄' : '',
+      age: !Number.isInteger(age) || age < 18 || age > 120 ? '仅限年满18周岁用户使用' : '',
       gender: !personal.gender ? '请选择性别' : ''
     };
     this.setData({ errors });
@@ -98,7 +107,7 @@ Page({
         age,
         intro: archive.intro,
         gameTypes: archive.gameTypes
-      })).then(() => {
+      })).then(() => api.saveMyWechatContact(wechatId)).then(() => {
         wx.showToast({ title: '资料已保存', icon: 'success' });
         wx.navigateBack();
       }).catch((error) => wx.showModal({ title: '资料未保存', content: error.message || '服务暂时不可用，请重试。', showCancel: false })).finally(() => { this._saving = false; });

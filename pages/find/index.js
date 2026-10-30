@@ -5,7 +5,6 @@ const locationStore = require('../../data/location-store');
 
 const ageFilters = [
   { label: '不限年龄', min: 0, max: Infinity },
-  { label: '18岁以下', min: 0, max: 17 },
   { label: '18–25岁', min: 18, max: 25 },
   { label: '26–35岁', min: 26, max: 35 },
   { label: '36–45岁', min: 36, max: 45 },

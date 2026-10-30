@@ -1,0 +1,6 @@
+.legal-page { padding-top: 34rpx; padding-bottom: 64rpx; }
+.legal-heading { color:#173d32; font-size:42rpx; font-weight:800; text-align:center; }
+.legal-version { margin:12rpx 0 28rpx; color:#8b968e; font-size:22rpx; text-align:center; }
+.legal-section { padding:26rpx; }
+.legal-section-title { margin-bottom:16rpx; color:#197257; font-size:28rpx; font-weight:800; }
+.legal-paragraph { margin-top:14rpx; color:#485b51; font-size:24rpx; line-height:1.75; }

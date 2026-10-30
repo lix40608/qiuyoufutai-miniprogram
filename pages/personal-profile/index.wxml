@@ -16,7 +16,7 @@
     <view wx:if="{{errors.nickname}}" class="field-error">{{errors.nickname}}</view>
     <view class="field-row">
       <view class="row-label">年龄 <text class="required">*</text></view>
-      <input class="row-input" type="number" maxlength="3" placeholder="填写年龄" value="{{personal.age}}" data-field="age" bindinput="onPersonalInput" />
+      <input class="row-input" type="number" maxlength="3" placeholder="18周岁及以上" value="{{personal.age}}" data-field="age" bindinput="onPersonalInput" />
       <text wx:if="{{personal.age}}" class="row-unit">岁</text>
     </view>
     <view wx:if="{{errors.age}}" class="field-error">{{errors.age}}</view>
@@ -27,6 +27,14 @@
       </view>
     </view>
     <view wx:if="{{errors.gender}}" class="field-error">{{errors.gender}}</view>
+  </view>
+  <view class="section-title">约球联系方式</view>
+  <view class="profile-group contact-profile-group">
+    <view class="field-row">
+      <view class="row-label">微信号 <text class="optional">选填</text></view>
+      <input class="row-input" maxlength="20" placeholder="填写微信号" value="{{wechatId}}" bindinput="onWechatIdInput" />
+    </view>
+    <view class="contact-privacy-note">微信号不会公开展示。双方确认组局后，你可在该场详情单独授权对方查看；不填写不影响使用站内聊天。</view>
   </view>
   <view id="archive-section" class="section-title">球员档案</view>
   <view class="profile-group archive-group">

@@ -27,8 +27,22 @@ test('旧版会话接口缺少开球时间时仍根据已加载的约局详情�
   const state = model.conversationState(legacyConversation, 1, match);
   assert.equal(state.closed, true);
   assert.equal(state.canConfirm, false);
-  assert.match(state.hint, /已结束/);
-  assert.equal(state.statusLabel, '已结束');
+  assert.match(state.hint, /招募已结束.*未能组局/);
+  assert.equal(state.statusLabel, '招募结束');
+});
+test('只读提示说明实际球局结果，而不是公开展示期限', () => {
+  const expiredRecruitment = model.conversationState({ ...conversation, displayEnded: true }, 1);
+  assert.equal(expiredRecruitment.statusLabel, '招募结束');
+  assert.match(expiredRecruitment.hint, /招募已结束.*未能组局.*聊天记录仍可查看/);
+  assert.doesNotMatch(expiredRecruitment.hint, /公开展示期限/);
+
+  const completed = model.conversationState({ ...conversation, status: 'matched', won: true, displayEnded: true }, 1);
+  assert.equal(completed.statusLabel, '已组局');
+  assert.match(completed.hint, /本场已组局.*聊天记录仍可查看/);
+
+  const cancelled = model.conversationState({ ...conversation, status: 'cancelled' }, 1);
+  assert.equal(cancelled.statusLabel, '已取消');
+  assert.match(cancelled.hint, /约球已取消.*聊天记录仍可查看/);
 });
 function page(api, wx = {}) {
   let definition;
@@ -130,9 +144,9 @@ test('服务端返回同一客户端消息时替换待确认消息', () => {
 
 test('已取消或落败聊天发送被拒后立即锁定并显示系统提示', async () => {
   for (const state of [
-    { code: 'MATCH_CANCELLED', status: 'cancelled', won: false, expected: /约局已取消/ },
-    { code: 'CONVERSATION_CLOSED', status: 'matched', won: false, expected: /其他聊天完成组局/ },
-    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /公开展示期限已结束/ }
+    { code: 'MATCH_CANCELLED', status: 'cancelled', won: false, expected: /约球已取消/ },
+    { code: 'CONVERSATION_CLOSED', status: 'matched', won: false, expected: /其他球友组局.*本次未能组局/ },
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束.*未能组局/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({
@@ -151,9 +165,9 @@ test('已取消或落败聊天发送被拒后立即锁定并显示系统提示',
 
 test('停留在旧会话时点确认，服务端拒绝后也关闭确认和发送并提示原因', async () => {
   for (const state of [
-    { code: 'MATCH_CANCELLED', status: 'cancelled', expected: /约局已取消/ },
-    { code: 'CONVERSATION_CLOSED', status: 'matched', expected: /其他聊天完成组局/ },
-    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /公开展示期限已结束/ }
+    { code: 'MATCH_CANCELLED', status: 'cancelled', expected: /约球已取消/ },
+    { code: 'CONVERSATION_CLOSED', status: 'matched', expected: /其他球友组局.*本次未能组局/ },
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束.*未能组局/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({

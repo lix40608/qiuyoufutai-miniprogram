@@ -148,14 +148,20 @@ Page({
   },
   async lockClosedConversation(error, actionLabel) {
     if (!['MATCH_CANCELLED', 'CONVERSATION_CLOSED', 'MATCH_ALREADY_WON', 'MATCH_DISPLAY_ENDED'].includes(error.code)) return false;
-    const cancelled = error.code === 'MATCH_CANCELLED';
-    const reason = cancelled ? '约局已取消' : error.code === 'MATCH_DISPLAY_ENDED' ? '本场公开展示期限已结束' : '本场已由其他聊天完成组局';
-    const notice = `${reason}。${actionLabel}；本聊天的确认和发送已关闭，你仍可查看历史记录。`;
+    const noticeFor = conversation => {
+      const latest = error.code === 'MATCH_DISPLAY_ENDED' ? Object.assign({}, conversation, { displayEnded: true }) : conversation;
+      const reason = model.conversationState(latest, this._userId, this.data.match || {}).hint;
+      return `${reason}。${actionLabel}；本聊天的确认和发送已关闭，你仍可查看历史记录。`;
+    };
+    const notice = noticeFor(this.data.conversation || {});
     this.setData({ closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice' });
     try {
       const conversation = await api.getConversation(this.data.conversation.id);
-      if (!this._destroyed) this.setData(Object.assign({ conversation }, model.conversationState(conversation, this._userId, this.data.match), {
-        closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice'
+      const updatedNotice = noticeFor(conversation);
+      if (!this._destroyed) this.setData(Object.assign({ conversation }, model.conversationState(
+        error.code === 'MATCH_DISPLAY_ENDED' ? Object.assign({}, conversation, { displayEnded: true }) : conversation,
+        this._userId, this.data.match || {}), {
+        closed: true, canConfirm: false, showInvite: false, hint: updatedNotice, systemNotice: updatedNotice, scrollTarget: 'closure-notice'
       }));
     } catch (_) { /* Keep the authoritative action rejection visible and keep actions locked. */ }
     return true;

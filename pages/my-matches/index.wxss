@@ -8,13 +8,11 @@
 .filter-chip { padding: 12rpx 17rpx; border-radius: 26rpx; background: #e7ebe2; color: #52645b; font-size: 21rpx; }
 .filter-chip.active { background: #197257; color: #fff; }
 .match-card { margin-top: 18rpx; padding: 24rpx; border: 1rpx solid #dfe5da; border-radius: 24rpx; background: #fffefa; }
+.my-matches-page .match-card { overflow: hidden; }
 .card-top { display: flex; align-items: center; justify-content: space-between; }
 .match-title { margin: 17rpx 0 9rpx; font-size: 29rpx; font-weight: 800; }
 .venue-line { margin-top: 6rpx; }
-.card-actions { display: flex; gap: 12rpx; margin-top: 18rpx; }
-.card-actions button { flex: 1; margin: 0; font-size: 23rpx; }
-.cancel-button { background: #f2e8df; color: #805a43; }
-.card-actions .cancel-button { flex: 0 0 38%; margin-left: auto; }
+.my-matches-page .match-action-row { margin-right: -24rpx; margin-bottom: -24rpx; margin-left: -24rpx; }
 .empty-state { padding: 110rpx 18rpx 60rpx; text-align: center; }
 .empty-icon { margin-bottom: 15rpx; color: #93aa9b; font-size: 70rpx; }
 .empty-title { margin-bottom: 10rpx; font-size: 29rpx; font-weight: 800; }

@@ -15,10 +15,12 @@ function conversationState(conversation, userId, match = {}) {
     showInvite: !ended && peerConfirmed && !mineConfirmed && conversation.status === 'recruiting',
     closed: ended,
     canConfirm: !displayEnded && conversation.status === 'recruiting' && !mineConfirmed,
-    hint: displayEnded && !cancelled && !lost ? '本场公开展示期限已结束，聊天记录仍可查看' : cancelled ? '约局已取消，聊天记录仍保留' : lost ? '发起人已与其他球友组局，记录仍可查看'
+    hint: cancelled ? '本场约球已取消，聊天记录仍可查看' : lost ? '发起人已与其他球友组局，本次未能组局，聊天记录仍可查看'
+      : displayEnded && conversation.status === 'matched' && conversation.won ? '本场已组局，聊天记录仍可查看'
+      : displayEnded ? '本场招募已结束，未能组局，聊天记录仍可查看'
       : conversation.won ? '双方已确认，可前往约局详情联系对方' : mineConfirmed ? '你已确认，等待对方'
       : peerConfirmed ? '对方已确认，聊清楚后再确认' : '先聊清楚时间和安排；确定参加后，点击确认组局。',
-    statusLabel: cancelled ? '已取消' : lost ? '本次未组局' : displayEnded ? '已结束' : conversation.won ? '已组局' : '招募中'
+    statusLabel: cancelled ? '已取消' : lost ? '本次未组局' : conversation.status === 'matched' && conversation.won ? '已组局' : displayEnded ? '招募结束' : '招募中'
   };
 }
 
