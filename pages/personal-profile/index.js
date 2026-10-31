@@ -31,6 +31,7 @@ Page({
         gameTypeOptions: makeGameTypeOptions(archive.gameTypes),
         resumePublish: query.resumePublish === '1'
       });
+      this._wechatIdDraft = contact.wechatId || '';
     }).catch((error) => wx.showToast({ title: error.message || '读取资料失败', icon: 'none' }));
   },
 
@@ -44,7 +45,7 @@ Page({
     this.setData({ [`archive.${field}`]: event.detail.value });
   },
 
-  onWechatIdInput(event) { this.setData({ wechatId: event.detail.value }); },
+  onWechatIdInput(event) { this._wechatIdDraft = event.detail.value; },
 
   selectGender(event) {
     this.setData({ 'personal.gender': event.currentTarget.dataset.value, 'errors.gender': '' });
@@ -79,7 +80,7 @@ Page({
     if (this._saving) return;
     const personal = this.data.personal;
     const age = Number(personal.age);
-    const wechatId = (this.data.wechatId || '').trim();
+    const wechatId = (this._wechatIdDraft == null ? this.data.wechatId : this._wechatIdDraft || '').trim();
     const invalidWechatId = wechatId && !/^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(wechatId);
     if (invalidWechatId) {
       wx.showToast({ title: '微信号格式不正确', icon: 'none' });

@@ -37,8 +37,10 @@ Page({
         personalMeta,
         archive: Object.assign({}, emptyArchive, profile),
         archiveConfigured: Boolean(profile.intro || (profile.gameTypes || []).length),
-        wechatId: contact.wechatId || ''
+        wechatId: contact.wechatId || '',
+        wechatDraft: contact.wechatId || ''
       });
+      this._wechatDraft = contact.wechatId || '';
     }).catch((error) => wx.showToast({ title: error.message || '读取资料失败', icon: 'none' }));
   },
 
@@ -46,24 +48,33 @@ Page({
     wx.navigateTo({ url: '/pages/personal-profile/index?section=personal' });
   },
 
-  openWechatEditor() { this.setData({ wechatDraft: this.data.wechatId || '', wechatEditorVisible: true }); },
+  openWechatEditor() {
+    this._wechatDraft = this.data.wechatId || '';
+    this.setData({ wechatDraft: this._wechatDraft, wechatEditorVisible: true, keyboardVisible: false });
+  },
 
-  closeWechatEditor() { if (!this.data.savingWechat) this.setData({ wechatEditorVisible: false }); },
+  closeWechatEditor() { if (!this.data.savingWechat) this.setData({ wechatEditorVisible: false, keyboardVisible: false }); },
 
   stopModalTap() {},
 
-  onWechatInput(event) { this.setData({ wechatDraft: event.detail.value }); },
+  onWechatInput(event) { this._wechatDraft = event.detail.value; },
+
+  onWechatKeyboardHeightChange(event) {
+    const keyboardVisible = Number(event.detail.height) > 0;
+    if (keyboardVisible !== this.data.keyboardVisible) this.setData({ keyboardVisible });
+  },
 
   saveWechatId() {
     if (this.data.savingWechat) return;
-    const wechatId = (this.data.wechatDraft || '').trim();
+    const wechatId = (this._wechatDraft == null ? this.data.wechatDraft : this._wechatDraft || '').trim();
     if (wechatId && !/^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(wechatId)) {
       wx.showToast({ title: '微信号需为6至20位，以字母开头', icon: 'none' });
       return;
     }
     this.setData({ savingWechat: true });
     api.saveMyWechatContact(wechatId).then((result) => {
-      this.setData({ wechatId: result.wechatId || '', wechatDraft: result.wechatId || '', wechatEditorVisible: false });
+      this._wechatDraft = result.wechatId || '';
+      this.setData({ wechatId: this._wechatDraft, wechatDraft: this._wechatDraft, wechatEditorVisible: false, keyboardVisible: false });
       wx.showToast({ title: '微信号已保存', icon: 'success' });
     }).catch((error) => wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' }))
       .finally(() => this.setData({ savingWechat: false }));

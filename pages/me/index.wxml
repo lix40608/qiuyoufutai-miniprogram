@@ -51,7 +51,7 @@
     <view class="wechat-row">
       <view class="wechat-copy">
         <view class="wechat-label">微信号</view>
-        <view class="wechat-hint">仅在你授权后向本场球友展示</view>
+        <view class="wechat-hint">双方确认组局后，本场球友可查看并复制</view>
       </view>
       <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
     </view>
@@ -67,10 +67,10 @@
   </view>
 
   <view wx:if="{{wechatEditorVisible}}" class="modal-mask" catchtap="closeWechatEditor">
-    <view class="wechat-editor-modal" catchtap="stopModalTap">
+    <view class="wechat-editor-modal {{keyboardVisible ? 'keyboard-open' : ''}}" catchtap="stopModalTap">
       <view class="modal-title">填写微信号</view>
-      <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" bindinput="onWechatInput" />
-      <view class="wechat-modal-hint">微信号仅用于约球后的联系。你可以按单场授权对方查看；不会公开展示。</view>
+      <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
+      <view class="wechat-modal-hint">填写并保存后，双方确认组局时，本场对方可查看并复制；不会公开展示。</view>
       <view class="modal-actions"><button class="modal-secondary" bindtap="closeWechatEditor">取消</button><button class="modal-primary" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
     </view>
   </view>

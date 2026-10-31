@@ -19,5 +19,5 @@
   <view wx:if="{{error}}" class="gate-error">{{error}}</view>
   <button class="primary-button gate-submit" loading="{{submitting}}" disabled="{{submitting || !agreementChecked}}" bindtap="agreeAndCreateAccount">微信一键登录</button>
   <view class="gate-exit" bindtap="exitMiniProgram">不同意并退出</view>
-  <view class="gate-footnote">微信号是否向某场约局的对方展示，会在该场详情页另行征求你的授权。</view>
+  <view class="gate-footnote">微信号为选填；填写并保存后，仅在双方确认组局时向本场对方展示。</view>
 </view>

@@ -1,7 +1,7 @@
 const TOKEN_KEY = 'qiuyou-futai.session-token.v1';
 const LEGAL_ACCEPTANCE_KEY = 'qiuyou-futai.legal-acceptance.v1';
-const USER_AGREEMENT_VERSION = '2026-10-31-v2';
-const PRIVACY_POLICY_VERSION = '2026-10-31-v2';
+const USER_AGREEMENT_VERSION = '2026-10-31-v3';
+const PRIVACY_POLICY_VERSION = '2026-10-31-v3';
 // 微信云托管测试服务；正式发布前替换为生产环境地址。
 const API_BASE_URL = 'https://springboot-r9wn-336416-13-1518350960.sh.run.tcloudbase.com';
 
@@ -126,7 +126,6 @@ module.exports = {
   getMyWechatContact: () => withLogin('/v1/me/wechat-contact'),
   saveMyWechatContact: (wechatId) => withLogin('/v1/me/wechat-contact', { method: 'PUT', data: { wechatId: (wechatId || '').trim() } }),
   getMatchContactSharing: (matchId) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/contact-sharing`),
-  setMatchContactSharing: (matchId, share) => withLogin(`/v1/matches/${encodeURIComponent(matchId)}/contact-sharing`, { method: 'PUT', data: { share: Boolean(share) } }),
   uploadAvatar(path) {
     const upload = () => new Promise((resolve, reject) => {
       const token = wx.getStorageSync(TOKEN_KEY);

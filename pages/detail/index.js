@@ -44,31 +44,6 @@ Page({
     navigation.openChat(this, event);
   },
 
-  toggleContactSharing() {
-    const match = this.data.match;
-    const sharing = this.data.contactSharing;
-    if (!match || !sharing) return;
-    if (!sharing.canShare && !sharing.shared) {
-      wx.showModal({ title: '先填写微信号', content: '请先到「我的-个人资料」填写微信号，再回来授权本场对方查看。', showCancel: false });
-      return;
-    }
-    const next = !sharing.shared;
-    const update = () => api.setMatchContactSharing(match.id, next).then(() => api.getMatchContactSharing(match.id)).then((contactSharing) => {
-      this.setData({ contactSharing });
-      wx.showToast({ title: next ? '已授权本场查看' : '已撤回本场授权', icon: 'none' });
-    }).catch((error) => wx.showToast({ title: error.message || '操作失败，请重试', icon: 'none' }));
-    if (next) {
-      wx.showModal({
-        title: '授权分享微信号',
-        content: '仅向本场已确认组局的对方展示你的微信号，对方可复制保存。复制后无法收回副本，确定授权吗？',
-        confirmText: '确认授权',
-        success: (result) => { if (result.confirm) update(); }
-      });
-    } else {
-      wx.showModal({ title: '撤回本场授权？', content: '撤回后对方将不能再从本场详情查看你的微信号；已复制的信息无法收回。', confirmText: '撤回授权', success: (result) => { if (result.confirm) update(); } });
-    }
-  },
-
   copyPeerWechatId() {
     const wechatId = this.data.contactSharing && this.data.contactSharing.peerWechatId;
     if (!wechatId) return;
