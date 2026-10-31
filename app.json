@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/welcome/index",
     "pages/legal-consent/index",
     "pages/legal/index",
     "pages/about/index",

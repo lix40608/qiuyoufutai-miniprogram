@@ -1,4 +1,15 @@
 <view class="page group-page">
+  <block wx:if="{{!loggedIn}}">
+    <view class="guest-group-heading"><view class="guest-group-title-page">我的约球</view><view class="guest-group-subtitle">发布、沟通和管理你的每一场球</view></view>
+    <view class="guest-group-hero"><image src="/assets/eight-ball.png" mode="aspectFit"/><view class="guest-group-eyeline">YOUR GAMES</view><view class="guest-group-title">登录后，继续你的球局</view><view class="guest-group-copy">发布约球、查看聊过的球局，也能及时跟进组局状态。</view><button class="guest-group-login" bindtap="openGuestLogin" data-kind="group">微信一键登录</button></view>
+    <view class="section-title guest-group-section-title">登录后可管理</view>
+    <view class="guest-group-link locked" bindtap="openGuestLogin" data-kind="group"><view>我发起的<view class="muted">管理招募中、已组局和已结束的球局</view></view><text>›</text></view>
+    <view class="guest-group-link locked" bindtap="openGuestLogin" data-kind="group"><view>我聊过的<view class="muted">按对局查看发起聊天和确认邀请的球友</view></view><text>›</text></view>
+    <view class="guest-group-link locked" bindtap="openGuestLogin" data-kind="group"><view>草稿<view class="muted">保存尚未发布的约球信息</view></view><text>›</text></view>
+    <view class="section-title guest-group-section-title">先看看附近球局</view>
+    <view class="guest-group-link" bindtap="browseMatches"><view>逛逛附近的约球<view class="muted">先浏览公开球局，找到合适的再登录联系</view></view><text>›</text></view>
+  </block>
+  <block wx:else>
   <view class="heading"><view class="eyebrow">MY GAMES</view><view class="title">我的约球</view></view>
   <view class="publish-entry" bindtap="publish"><view class="publish-copy"><view class="publish-title">发布约球</view><view class="publish-subtitle">选择球房和时间，发起一场约球</view></view><view class="publish-arrow">↗</view></view>
   <view class="tabs"><view class="tab {{activeView === 'created' ? 'active' : ''}}" data-view="created" bindtap="selectView">我发起的</view><view class="tab {{activeView === 'chatted' ? 'active' : ''}}" data-view="chatted" bindtap="selectView">我聊过的</view></view>
@@ -20,4 +31,6 @@
     <view class="all-entry" bindtap="allMatches"><text>全部约球</text><text>查看全部 ›</text></view>
   </block>
   <block wx:else><view class="section">聊过的约球</view><view wx:if="{{!chatted.length}}" class="empty">还没有聊过的约球</view><view wx:for="{{chatted}}" wx:key="conversationId" class="match-card chatted" bindtap="openRecord" data-conversation-id="{{item.conversationId}}"><view class="summary-head"><view class="summary-tag">{{item.gameType}}</view><view class="badge">{{item.displayEnded ? '已结束' : item.status === 'matched' ? '已组局' : '组局中'}}</view></view><view class="partner-label">与 {{item.peerName || '球友'}} 聊天</view><view class="event-venue"><view class="event-venue-copy"><view class="venue-label-row"><text class="event-label">球房</text><view wx:if="{{item.distanceLabel}}" class="distance-entry" catchtap="openVenue" data-match="{{item}}"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{item.distanceLabel}}</text></view><view wx:elif="{{!hasUserLocation}}" class="distance-entry" catchtap="chooseLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-title-row"><view class="event-venue-name">{{item.venueName || '球房待选择'}}</view></view></view></view><view class="event-time-row"><view class="event-clock">◷</view><view><view class="event-label">开球时间</view><view class="event-time-value">{{item.startLabel}}</view></view></view><view class="match-bottom"><text>费用 {{item.feeLabel}}</text><view class="detail chat-link">{{item.displayEnded ? '查看聊天' : '进入聊天'}}<view wx:if="{{item.unreadCount}}" class="action-unread-dot"></view> ›</view></view></view><view wx:if="{{chatted.length}}" class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view></block>
+  </block>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>

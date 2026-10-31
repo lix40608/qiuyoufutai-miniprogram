@@ -6,6 +6,7 @@ const emptyArchive = { intro: '', gameTypes: [] };
 
 Page({
   data: {
+    loggedIn: false,
     personal: emptyPersonal,
     archive: emptyArchive,
     wechatId: '',
@@ -15,6 +16,9 @@ Page({
   },
 
   onShow() {
+    const loggedIn = api.isLoggedIn();
+    this.setData({ loggedIn });
+    if (!loggedIn) { unread.stop(this); return; }
     unread.start(this);
     this.refreshPage();
   },
@@ -84,7 +88,7 @@ Page({
         api.logout().then(() => {
           wx.removeStorageSync('qiuyou-futai.session-token.v1');
           wx.removeStorageSync('qiuyou-futai.legal-acceptance.v1');
-          wx.reLaunch({ url: '/pages/legal-consent/index' });
+          wx.reLaunch({ url: '/pages/welcome/index' });
         }).catch((error) => wx.showToast({ title: error.message || '退出失败，请重试', icon: 'none' }));
       }
     });
@@ -102,7 +106,7 @@ Page({
         api.deleteAccount().then(() => {
           wx.removeStorageSync('qiuyou-futai.session-token.v1');
           wx.removeStorageSync('qiuyou-futai.legal-acceptance.v1');
-          wx.reLaunch({ url: '/pages/legal-consent/index' });
+          wx.reLaunch({ url: '/pages/welcome/index' });
         }).catch((error) => wx.showToast({ title: error.message || '注销失败，请重试', icon: 'none' }));
       }
     });
@@ -110,5 +114,22 @@ Page({
 
   showDeferredFeature(event) {
     wx.showToast({ title: event.currentTarget.dataset.message, icon: 'none' });
+  },
+
+  openGuestLogin(event) {
+    this._pendingGuestAction = event && event.currentTarget.dataset.kind || 'me';
+    this.selectComponent('#loginGuide').open({ kind: this._pendingGuestAction });
+  },
+
+  goGuestBrowse(event) {
+    const tab = event.currentTarget.dataset.tab;
+    wx.switchTab({ url: `/pages/${tab}/index` });
+  },
+
+  onLoginSuccess() {
+    const action = this._pendingGuestAction; this._pendingGuestAction = null;
+    this.setData({ loggedIn: true });
+    if (action === 'messages') return wx.navigateTo({ url: '/pages/messages/index' });
+    this.onShow();
   }
 });

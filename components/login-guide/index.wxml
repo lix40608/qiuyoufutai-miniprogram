@@ -1,0 +1,12 @@
+<view wx:if="{{visible}}" class="login-mask" catchtap="close">
+  <view class="login-sheet" catchtap="stopTap">
+    <view class="login-grab"></view>
+    <view class="login-brand"><image src="/assets/eight-ball.png" mode="aspectFit" /><text>球友赴台</text></view>
+    <view class="login-title">{{title}}</view>
+    <view class="login-description">{{description}}</view>
+    <view class="login-consent" bindtap="toggleConsent"><view class="login-check {{accepted ? 'checked' : ''}}">{{accepted ? '✓' : ''}}</view><text>我已阅读并同意</text><text class="login-link" data-type="terms" catchtap="openLegal">《用户协议》</text><text>和</text><text class="login-link" data-type="privacy" catchtap="openLegal">《隐私政策》</text></view>
+    <view wx:if="{{error}}" class="login-error">{{error}}</view>
+    <button class="login-submit" loading="{{submitting}}" disabled="{{!accepted || submitting}}" bindtap="login">微信一键登录</button>
+    <view class="login-cancel" bindtap="close">暂不登录，继续浏览</view>
+  </view>
+</view>

@@ -10,7 +10,7 @@
       </view>
       <view class="location-privacy">用于查找附近约局</view>
     </view>
-    <view class="message-entry" bindtap="showMessages"><view class="bell-icon"><view class="bell-top"></view><view class="bell-base"></view></view><view wx:if="{{unreadCount}}" class="message-unread"></view></view>
+    <view class="message-entry" bindtap="showMessages"><view class="bell-icon"><view class="bell-top"></view><view class="bell-base"></view></view><view wx:if="{{loggedIn && unreadCount}}" class="message-unread"></view></view>
   </view>
 
   <view class="search-box">
@@ -55,7 +55,7 @@
         </view>
         <view class="profile-arrow">查看资料 ›</view>
       </view>
-      <view wx:if="{{currentUserId != null && item.hostUserId != null && currentUserId != item.hostUserId}}" class="card-actions">
+      <view wx:if="{{!loggedIn || currentUserId == null || item.hostUserId == null || currentUserId != item.hostUserId}}" class="card-actions">
         <button class="primary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="confirm">确认组局</button>
         <button class="primary-button secondary-button action-button" catchtap="showDeferredFeature" data-id="{{item.id}}" data-focus="chat">去聊聊<view wx:if="{{item.chatUnreadCount}}" class="action-unread-dot"></view></button>
       </view>
@@ -66,4 +66,5 @@
     <view class="muted">{{loadError || '试试切换玩法或搜索条件'}}</view>
   </view>
   <view wx:if="{{matches.length}}" class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>

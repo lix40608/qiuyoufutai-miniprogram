@@ -1,7 +1,7 @@
 const TOKEN_KEY = 'qiuyou-futai.session-token.v1';
 const LEGAL_ACCEPTANCE_KEY = 'qiuyou-futai.legal-acceptance.v1';
-const USER_AGREEMENT_VERSION = '2026-10-31-v1';
-const PRIVACY_POLICY_VERSION = '2026-10-31-v1';
+const USER_AGREEMENT_VERSION = '2026-10-31-v2';
+const PRIVACY_POLICY_VERSION = '2026-10-31-v2';
 // 微信云托管测试服务；正式发布前替换为生产环境地址。
 const API_BASE_URL = 'https://springboot-r9wn-336416-13-1518350960.sh.run.tcloudbase.com';
 
@@ -15,7 +15,7 @@ function request(path, options = {}) {
       method: options.method || 'GET',
       timeout: 15000,
       data: options.data,
-      header: Object.assign({ 'content-type': 'application/json' }, token ? { Authorization: `Bearer ${token}` } : {}, options.header || {}),
+      header: Object.assign({ 'content-type': 'application/json' }, token && !options.anonymous ? { Authorization: `Bearer ${token}` } : {}, options.header || {}),
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) return resolve(response.data.data);
         if (response.statusCode === 401 && wx.getStorageSync(TOKEN_KEY) === token) wx.removeStorageSync(TOKEN_KEY);
@@ -95,11 +95,12 @@ function normalizeMatch(match) {
 }
 
 module.exports = {
+  isLoggedIn: () => Boolean(wx.getStorageSync(TOKEN_KEY) && hasCurrentLegalAcceptance()),
   ensureLogin,
   legalVersions: () => ({ userAgreementVersion: USER_AGREEMENT_VERSION, privacyPolicyVersion: PRIVACY_POLICY_VERSION }),
   hasCurrentLegalAcceptance,
   acceptLegalTerms() {
-    const consent = Object.assign(loginPayload(), { adultConfirmed: true });
+    const consent = loginPayload();
     const token = wx.getStorageSync(TOKEN_KEY);
     const saveAcceptance = token
       ? request('/v1/me/legal-acceptance', { method: 'POST', data: consent }).catch((error) => {
@@ -111,8 +112,7 @@ module.exports = {
       if (session && session.token) wx.setStorageSync(TOKEN_KEY, session.token);
       wx.setStorageSync(LEGAL_ACCEPTANCE_KEY, {
         userAgreementVersion: USER_AGREEMENT_VERSION,
-        privacyPolicyVersion: PRIVACY_POLICY_VERSION,
-        adultConfirmed: true
+        privacyPolicyVersion: PRIVACY_POLICY_VERSION
       });
     });
   },
@@ -170,7 +170,7 @@ module.exports = {
   getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}`),
   sendMessage: (id, content, clientId) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content, clientId } }),
   confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
-  getPublicMatches: (query = '') => withLogin(`/v1/matches${query}`).then((rows) => rows.map(normalizeMatch)),
+  getPublicMatches: (query = '') => request(`/v1/matches${query}`, { anonymous: true }).then((rows) => rows.map(normalizeMatch)),
   async getChattedMatches(page, pageSize) {
     const conversations = await this.getConversations(page, pageSize);
     const records = [];
@@ -188,7 +188,7 @@ module.exports = {
       : '';
     return withLogin(`/v1/me/matches${query}`).then((rows) => rows.map(normalizeMatch));
   },
-  getMatch: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}`).then(normalizeMatch),
+  getMatch: (id) => request(`/v1/matches/${encodeURIComponent(id)}`, { anonymous: true }).then(normalizeMatch),
   saveDraft: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}` : '/v1/matches', { method: form.id ? 'PUT' : 'POST', data: toMatchPayload(form, 'draft'), header: form.id ? {} : { 'X-Idempotency-Key': form.requestKey || createRequestKey() } }).then(normalizeMatch),
   publishMatch: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}/publish` : '/v1/matches', { method: 'POST', data: toMatchPayload(form, 'recruiting'), header: { 'X-Idempotency-Key': form.publishRequestKey || createRequestKey() } }).then(normalizeMatch),
   cancelMatch: (id) => withLogin(`/v1/me/matches/${encodeURIComponent(id)}/cancel`, { method: 'POST' }).then(normalizeMatch),
@@ -202,7 +202,7 @@ module.exports = {
     if (Number.isFinite(options.ageMax)) params.push(`ageMax=${options.ageMax}`);
     if (Number.isFinite(options.page)) params.push(`page=${options.page}`);
     if (Number.isFinite(options.pageSize)) params.push(`pageSize=${Math.min(options.pageSize, 10)}`);
-    return withLogin(`/v1/matches${params.length ? `?${params.join('&')}` : ''}`).then((rows) => {
+    return request(`/v1/matches${params.length ? `?${params.join('&')}` : ''}`, { anonymous: true }).then((rows) => {
       const locationStore = require('./location-store');
       return rows.map(normalizeMatch).map((match) => {
         const distance = options.userLocation ? locationStore.distanceKm(options.userLocation, { latitude: match.venueLatitude, longitude: match.venueLongitude }) : null;
@@ -224,7 +224,7 @@ module.exports = {
 
 function hasCurrentLegalAcceptance() {
   const acceptance = wx.getStorageSync(LEGAL_ACCEPTANCE_KEY);
-  return Boolean(acceptance && acceptance.adultConfirmed === true
+  return Boolean(acceptance
     && acceptance.userAgreementVersion === USER_AGREEMENT_VERSION
     && acceptance.privacyPolicyVersion === PRIVACY_POLICY_VERSION);
 }
@@ -232,8 +232,7 @@ function hasCurrentLegalAcceptance() {
 function loginPayload(code) {
   const consent = {
     userAgreementVersion: USER_AGREEMENT_VERSION,
-    privacyPolicyVersion: PRIVACY_POLICY_VERSION,
-    adultConfirmed: true
+    privacyPolicyVersion: PRIVACY_POLICY_VERSION
   };
   if (code) consent.code = code;
   return consent;

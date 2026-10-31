@@ -14,3 +14,15 @@
 .chat-link{position:relative;display:flex;align-items:center;gap:8rpx}.match-actions .chat-entry-button{position:relative;display:flex;align-items:center;justify-content:center;box-sizing:border-box;flex:1 1 0;min-width:0;min-height:80rpx;padding:0 58rpx;border:1rpx solid #d7e8dc!important;border-radius:18rpx;background:#e7f2eb!important;color:#1b6b52!important;font-size:24rpx;font-weight:700;line-height:1.2;text-align:center}.match-actions .chat-entry-button::after{border:0}.chat-entry-label{display:block;width:100%;text-align:center}.chat-unread-badge{position:absolute;top:50%;right:14rpx;display:inline-flex;align-items:center;justify-content:center;min-width:34rpx;height:34rpx;box-sizing:border-box;padding:0 9rpx;transform:translateY(-50%);border:2rpx solid #fff;border-radius:999rpx;background:#d65b55;box-shadow:0 3rpx 8rpx rgba(128,48,43,.16);color:#fff;font-size:18rpx;font-weight:700;line-height:1;text-align:center;white-space:nowrap}.action-unread-dot{width:14rpx;height:14rpx;border:3rpx solid #fffefa;border-radius:50%;background:#d8564e;box-sizing:content-box}
 .partner-label { padding: 16rpx 28rpx 0; color: #70857a; font-size: 22rpx; }
 .match-actions .manage { display:flex; align-items:center; justify-content:center; box-sizing:border-box; flex:1 1 0; min-width:0; min-height:80rpx; margin-left:0; padding:0 24rpx; border:1rpx solid #e1e9df; border-radius:18rpx; color:#687f72; font-size:24rpx; font-weight:650; line-height:1.2; text-align:center; }
+.guest-group-heading{margin:4rpx 0 18rpx}.guest-group-title-page{color:#173d32;font-size:42rpx;line-height:1.2;font-weight:800}.guest-group-subtitle{margin-top:8rpx;color:#718178;font-size:22rpx;line-height:1.5}
+.guest-group-hero{position:relative;overflow:hidden;margin-top:20rpx;padding:26rpx 24rpx;border:1rpx solid #cfe2d6;border-radius:24rpx;background:#e5f0e7}
+.guest-group-hero image{position:absolute;top:24rpx;right:20rpx;width:94rpx;height:94rpx}
+.guest-group-eyeline{color:#648473;font-size:19rpx;font-weight:750;letter-spacing:2rpx}
+.guest-group-title{max-width:75%;margin-top:10rpx;color:#173d32;font-size:29rpx;font-weight:800;line-height:1.35}
+.guest-group-copy{max-width:78%;margin-top:10rpx;color:#708278;font-size:21rpx;line-height:1.5}
+.guest-group-login{display:flex;align-items:center;justify-content:center;width:100%;height:68rpx;margin:18rpx 0 0;padding:0;border-radius:15rpx;background:#197257;color:#fff;font-size:22rpx;font-weight:700;line-height:1.2;text-align:center}
+.guest-group-section-title{margin-top:28rpx;margin-bottom:10rpx}
+.guest-group-link{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:12rpx;padding:20rpx 22rpx;border:1rpx solid #e0e7dd;border-radius:18rpx;background:#fffefa;color:#234638;font-size:23rpx;font-weight:700;line-height:1.4}
+.guest-group-link .muted{margin-top:5rpx;font-size:19rpx;font-weight:400;line-height:1.45}
+.guest-group-link.locked{background:#fbfcf9}
+.guest-group-link>text{flex:none;color:#96a59b;font-size:34rpx;line-height:1}

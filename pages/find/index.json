@@ -1,3 +1,4 @@
 {
-  "navigationBarTitleText": "附近约球"
+  "navigationBarTitleText": "附近约球",
+  "usingComponents": {"login-guide":"/components/login-guide/index"}
 }

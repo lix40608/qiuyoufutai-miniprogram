@@ -4,28 +4,30 @@ const locationStore = require('../../data/location-store');
 
 Page({
   data: {
-    match: null
+    match: null,
+    loggedIn: false
   },
 
   onLoad(query) { this._matchId = query.id; },
 
   onShow() {
     // 同时读取当前用户，避免发起人看到参与自己约局的操作。
-    Promise.all([api.getMatch(this._matchId), api.getProfile()]).then(async ([match, profile]) => {
+    const loggedIn = api.isLoggedIn();
+    Promise.all([api.getMatch(this._matchId), loggedIn ? api.getProfile() : Promise.resolve(null)]).then(async ([match, profile]) => {
       const hasVenueLocation = Number.isFinite(Number(match.venueLatitude)) && Number.isFinite(Number(match.venueLongitude))
         && match.venueLatitude !== '' && match.venueLongitude !== ''
         && match.venueLatitude != null && match.venueLongitude != null;
-      const isHost = profile.userId != null && match.hostUserId != null && String(profile.userId) === String(match.hostUserId);
+      const isHost = Boolean(profile && profile.userId != null && match.hostUserId != null && String(profile.userId) === String(match.hostUserId));
       // 与列表共用本地选择的位置，距离为直线估算值。
       const userLocation = locationStore.getUserLocation();
       const distance = locationStore.distanceKm(userLocation, { latitude: match.venueLatitude, longitude: match.venueLongitude });
       const distanceLabel = Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '';
       let contactSharing = null;
       let contactSharingError = false;
-      if (match.status === 'matched') {
+      if (loggedIn && match.status === 'matched') {
         try { contactSharing = await api.getMatchContactSharing(match.id); } catch (_) { contactSharingError = true; }
       }
-      this.setData({ match, isHost, contactSharing, contactSharingError, hasVenueLocation, hasUserLocation: Boolean(userLocation), distanceLabel, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), width: 26, height: 34, title: match.venue }] : [] });
+      this.setData({ match, isHost, loggedIn, contactSharing, contactSharingError, hasVenueLocation, hasUserLocation: Boolean(userLocation), distanceLabel, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), width: 26, height: 34, title: match.venue }] : [] });
     }).catch((error) => wx.showToast({ title: error.message || '这场约局暂不可用', icon: 'none' }));
   },
 
@@ -37,7 +39,10 @@ Page({
     });
   },
 
-  openChat(event) { navigation.openChat(this, event); },
+  openChat(event) {
+    if (!api.isLoggedIn()) { this._pendingGuestAction = { id: this._matchId, focus: event.currentTarget.dataset.focus }; this.selectComponent('#loginGuide').open({ kind: event.currentTarget.dataset.focus === 'confirm' ? 'match' : 'chat' }); return; }
+    navigation.openChat(this, event);
+  },
 
   toggleContactSharing() {
     const match = this.data.match;
@@ -75,7 +80,15 @@ Page({
   openHostProfile(event) {
     const userId = event.currentTarget.dataset.userId;
     if (!userId) return;
+    if (!api.isLoggedIn()) { this._pendingGuestAction = { userId }; this.selectComponent('#loginGuide').open({ kind: 'profile' }); return; }
     wx.navigateTo({ url: `/pages/user-profile/index?id=${encodeURIComponent(userId)}` });
+  },
+
+  onLoginSuccess() {
+    const action = this._pendingGuestAction; this._pendingGuestAction = null;
+    if (!action) return this.onShow();
+    if (action.userId) return wx.navigateTo({ url: `/pages/user-profile/index?id=${encodeURIComponent(action.userId)}` });
+    navigation.openChat(this, { currentTarget: { dataset: { id: action.id, focus: action.focus } } });
   },
 
   openMap() {

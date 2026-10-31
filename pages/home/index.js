@@ -10,6 +10,7 @@ Page({
     hasMore: true,
     loadingMore: false,
     currentUserId: null,
+    loggedIn: false,
     selectedGameType: '全部',
     userLocation: null,
     locationLabel: '选择位置查看附近球友',
@@ -18,8 +19,12 @@ Page({
   },
 
   onShow() {
-    unread.start(this);
-    api.getProfile().then(profile => this.setData({ currentUserId: profile.userId })).catch(() => this.setData({ currentUserId: null }));
+    const loggedIn = api.isLoggedIn();
+    this.setData({ loggedIn, currentUserId: null });
+    if (loggedIn) {
+      unread.start(this);
+      api.getProfile().then(profile => this.setData({ currentUserId: profile.userId })).catch(() => this.setData({ currentUserId: null, loggedIn: false }));
+    } else unread.stop(this);
     const userLocation = locationStore.getUserLocation();
     this.setData({
       userLocation,
@@ -66,18 +71,21 @@ Page({
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
   },
 
-  openChat(event) { navigation.openChat(this, event); },
+  openChat(event) {
+    if (!api.isLoggedIn()) { this._pendingGuestAction = { type: 'chat', id: event.currentTarget.dataset.id, focus: event.currentTarget.dataset.focus }; this.selectComponent('#loginGuide').open({ kind: event.currentTarget.dataset.focus === 'confirm' ? 'match' : 'chat' }); return; }
+    navigation.openChat(this, event);
+  },
 
   openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
 
-  showDeferredFeature(event) { navigation.openChat(this, event); },
+  showDeferredFeature(event) { this.openChat(event); },
 
   selectGameType(event) {
     const gameType = event.currentTarget.dataset.type;
     this.setData({ selectedGameType: gameType }, () => this.refreshMatches());
   },
 
-  showMessages() { navigation.openMessages(); },
+  showMessages() { if (!api.isLoggedIn()) { this._pendingGuestAction = { type: 'messages' }; this.selectComponent('#loginGuide').open({ kind: 'messages' }); return; } navigation.openMessages(); },
 
   clearLocation() {
     locationStore.clearUserLocation();
@@ -99,12 +107,24 @@ Page({
   },
 
   goPublish() {
+    if (!api.isLoggedIn()) { this._pendingGuestAction = { type: 'publish' }; this.selectComponent('#loginGuide').open({ kind: 'publish' }); return; }
     wx.navigateTo({ url: '/pages/publish/index' });
   },
 
   openHostProfile(event) {
     const userId = event.currentTarget.dataset.userId;
     if (!userId) return;
+    if (!api.isLoggedIn()) { this._pendingGuestAction = { type: 'profile', userId }; this.selectComponent('#loginGuide').open({ kind: 'profile' }); return; }
     wx.navigateTo({ url: `/pages/user-profile/index?id=${encodeURIComponent(userId)}` });
+  },
+
+  onLoginSuccess() {
+    this.setData({ loggedIn: true });
+    const action = this._pendingGuestAction; this._pendingGuestAction = null;
+    if (!action) return this.onShow();
+    if (action.type === 'publish') return wx.navigateTo({ url: '/pages/publish/index' });
+    if (action.type === 'messages') return navigation.openMessages();
+    if (action.type === 'profile') return wx.navigateTo({ url: `/pages/user-profile/index?id=${encodeURIComponent(action.userId)}` });
+    if (action.type === 'chat') return navigation.openChat(this, { currentTarget: { dataset: { id: action.id, focus: action.focus } } });
   }
 });

@@ -18,14 +18,16 @@
 .archive-intro { color: #43584d; font-size: 25rpx; line-height: 1.55; }
 .archive-games { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
 .archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }
-.wechat-card { padding: 22rpx 24rpx 18rpx; }
-.wechat-row { display:flex; align-items:center; justify-content:space-between; gap:18rpx; }
-.wechat-label { font-size:26rpx; font-weight:700; }
-.wechat-edit-button { margin:0; padding:8rpx 18rpx; border:1rpx solid #bdd3c5; border-radius:12rpx; background:#edf5ef; color:#197257; font-size:23rpx; font-weight:700; line-height:1.5; }
-.wechat-hint { margin-top:13rpx; color:#718178; font-size:22rpx; line-height:1.55; }
+.wechat-card { padding:26rpx 24rpx; }
+.wechat-row { display:flex; flex-direction:row; align-items:center; justify-content:space-between; width:100%; box-sizing:border-box; gap:18rpx; }
+.wechat-copy { flex:1; min-width:0; }
+.wechat-label { color:#234638; font-size:27rpx; font-weight:750; line-height:1.3; }
+.wechat-hint { margin-top:8rpx; color:#829087; font-size:21rpx; line-height:1.45; }
+.wechat-edit-button { display:flex; flex:none; align-items:center; justify-content:center; box-sizing:border-box; width:150rpx; height:64rpx; padding:0 12rpx; border:1rpx solid #cbded1; border-radius:32rpx; background:#edf5ef; color:#197257; font-size:23rpx; font-weight:700; line-height:1; white-space:nowrap; }
+.wechat-edit-arrow { margin-left:6rpx; color:#67917c; font-size:28rpx; line-height:1; }
 .about-menu { margin-top:18rpx; }
-.account-title { margin-top:40rpx; }
-.account-action-button { display:flex; align-items:center; justify-content:center; width:100%; height:88rpx; margin:16rpx 0 0; border:1rpx solid #dfe5da; border-radius:20rpx; background:#fffefa; color:#385347; font-size:27rpx; font-weight:700; line-height:1; }
+.account-actions { margin-top:34rpx; padding:0 0 28rpx; background:transparent; }
+.account-action-button { display:flex; box-sizing:border-box; align-items:center; justify-content:center; width:100%; min-width:100%; height:88rpx; margin:0; padding:0 24rpx; border:1rpx solid #dfe5da; border-radius:20rpx; background:#fffefa; color:#385347; font-size:27rpx; font-weight:700; line-height:1.2; text-align:center; }
 .delete-account-button { margin-top:14rpx; border-color:#e7c9c5; background:#fff9f8; color:#bd4d46; }
 .modal-mask { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:40rpx; box-sizing:border-box; background:rgba(20,37,30,.48); }
 .wechat-editor-modal { width:100%; padding:34rpx 30rpx 26rpx; border-radius:24rpx; background:#fffefa; box-shadow:0 18rpx 58rpx rgba(19,43,32,.2); }
@@ -33,7 +35,7 @@
 .wechat-input { height:84rpx; margin-top:26rpx; padding:0 22rpx; box-sizing:border-box; border:1rpx solid #dfe5da; border-radius:14rpx; background:#f7f8f4; color:#173128; font-size:27rpx; }
 .wechat-modal-hint { margin-top:16rpx; color:#718178; font-size:22rpx; line-height:1.6; }
 .modal-actions { display:flex; gap:16rpx; margin-top:30rpx; }
-.modal-actions button { flex:1; height:82rpx; margin:0; border-radius:16rpx; font-size:26rpx; font-weight:700; line-height:82rpx; }
+.modal-actions button { display:flex; flex:1 1 0; align-items:center; justify-content:center; box-sizing:border-box; min-width:0; height:82rpx; margin:0; padding:0 16rpx; border-radius:16rpx; font-size:26rpx; font-weight:700; line-height:1.2; text-align:center; }
 .modal-secondary { border:1rpx solid #dfe5da; background:#f7f8f4; color:#65766d; }
 .modal-primary { background:#197257; color:#fffefa; }
 .modal-primary[disabled] { opacity:.6; }
@@ -43,3 +45,17 @@
 .eight-ball text{background:radial-gradient(circle at 35% 30%,#fff 0%,#e8e7df 72%,#b8bab4 100%);color:#171b1a;box-shadow:inset -2rpx -2rpx 4rpx rgba(0,0,0,.18)}
 
 .message-entry{position:relative}.message-side{display:flex;align-items:center;gap:12rpx}.message-unread{width:16rpx;height:16rpx;border-radius:50%;background:#d8564e;box-shadow:0 0 0 3rpx #fff}
+.guest-me-page{padding-top:24rpx;padding-bottom:56rpx}
+.guest-me-hero{position:relative;overflow:hidden;margin-top:22rpx;padding:30rpx;background:#e5f0e7;border-color:#d5e4d8}
+.guest-me-brand{color:#648473;font-size:20rpx;font-weight:700;letter-spacing:1rpx}
+.guest-me-title{margin-top:14rpx;color:#173d32;font-size:36rpx;line-height:1.25;font-weight:850}
+.guest-me-description{margin-top:12rpx;color:#718178;font-size:22rpx;line-height:1.5}
+.guest-me-login{display:flex;align-items:center;justify-content:center;width:100%;height:76rpx;margin:22rpx 0 0;padding:0;border-radius:17rpx;background:#197257;color:#fff;font-size:24rpx;font-weight:700;line-height:1.2;text-align:center}
+.guest-section-title{margin-top:30rpx;margin-bottom:12rpx}
+.guest-action-tile{display:flex;align-items:center;gap:18rpx;min-height:104rpx;padding:20rpx 22rpx}
+.guest-action-tile+.guest-action-tile{margin-top:12rpx}
+.guest-tile-icon{width:54rpx;height:54rpx;flex:none;display:flex;align-items:center;justify-content:center;border-radius:16rpx;background:#e8f1e8;color:#197257;font-size:32rpx}
+.guest-tile-copy{flex:1;min-width:0;color:#234638;font-size:25rpx;font-weight:700}
+.guest-tile-copy .muted{margin-top:5rpx;font-size:20rpx;font-weight:400}
+.guest-about-entry{min-height:100rpx;margin-top:0}
+.guest-about-entry .muted{margin-top:5rpx;font-size:20rpx}

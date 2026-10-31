@@ -1,0 +1,15 @@
+<view class="welcome-page">
+  <view class="welcome-brand"><image src="/assets/eight-ball.png" mode="aspectFit" /><text>球友赴台</text></view>
+  <view class="welcome-eyebrow">同城台球约局</view>
+  <view class="welcome-title">找球友，<br/>约一场好球</view>
+  <view class="welcome-copy">发现附近球局，认识同城球友，一起上桌开球。</view>
+  <view class="welcome-benefits">
+    <view class="benefit-row"><view class="benefit-icon">⌖</view><view><text>发现附近球局</text><text class="benefit-desc">先看看球友正在约什么</text></view></view>
+    <view class="benefit-row"><view class="benefit-icon">＋</view><view><text>发起你的球局</text><text class="benefit-desc">约时间、球房和合适的搭子</text></view></view>
+    <view class="benefit-row"><view class="benefit-icon">↗</view><view><text>沟通并确认安排</text><text class="benefit-desc">和球友聊好时间，再确认组局</text></view></view>
+  </view>
+  <button class="welcome-login" bindtap="openLogin">微信一键登录</button>
+  <button class="welcome-browse" bindtap="browse">先逛逛附近球局　›</button>
+  <view class="welcome-legal"><text data-type="terms" bindtap="openLegal">《用户协议》</text><text> 和 </text><text data-type="privacy" bindtap="openLegal">《隐私政策》</text></view>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
+</view>

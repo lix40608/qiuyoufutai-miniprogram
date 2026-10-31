@@ -41,4 +41,5 @@
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
     <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>
   </view>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>

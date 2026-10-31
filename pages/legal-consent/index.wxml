@@ -9,11 +9,7 @@
     <view class="legal-link" data-type="privacy" bindtap="readDocument"><view><text class="link-title">隐私政策</text><text class="link-desc">我们处理的信息、用途和你的权利</text></view><text class="arrow">{{readPrivacy ? '已读 ✓' : '阅读 ›'}}</text></view>
   </view>
 
-  <view class="check-row" bindtap="toggleAdult">
-    <view class="check {{adultChecked ? 'checked' : ''}}">{{adultChecked ? '✓' : ''}}</view>
-    <text>我确认已年满18周岁，并同意仅以成年人身份使用本小程序</text>
-  </view>
-  <view class="check-row {{(!readTerms || !readPrivacy) ? 'check-disabled' : ''}}" bindtap="toggleAgreement">
+  <view class="check-row" bindtap="toggleAgreement">
     <view class="check {{agreementChecked ? 'checked' : ''}}">{{agreementChecked ? '✓' : ''}}</view>
     <text>我已阅读并同意</text>
     <text class="inline-link" data-type="terms" catchtap="readDocument">《用户协议》</text>
@@ -21,7 +17,7 @@
     <text class="inline-link" data-type="privacy" catchtap="readDocument">《隐私政策》</text>
   </view>
   <view wx:if="{{error}}" class="gate-error">{{error}}</view>
-  <button class="primary-button gate-submit" loading="{{submitting}}" disabled="{{submitting || !readTerms || !readPrivacy || !adultChecked || !agreementChecked}}" bindtap="agreeAndCreateAccount">同意并创建账号</button>
+  <button class="primary-button gate-submit" loading="{{submitting}}" disabled="{{submitting || !agreementChecked}}" bindtap="agreeAndCreateAccount">微信一键登录</button>
   <view class="gate-exit" bindtap="exitMiniProgram">不同意并退出</view>
   <view class="gate-footnote">微信号是否向某场约局的对方展示，会在该场详情页另行征求你的授权。</view>
 </view>

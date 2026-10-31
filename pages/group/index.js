@@ -3,9 +3,12 @@ const locationStore = require('../../data/location-store');
 const unread = require('../../data/unread');
 
 Page({
-  data: { activeView: 'created', loading: true, loadingMore: false, hasMore: true, page: 1, loadError: '', latestActive: null, latestDraft: null, chatted: [] },
+  data: { loggedIn: false, activeView: 'created', loading: true, loadingMore: false, hasMore: true, page: 1, loadError: '', latestActive: null, latestDraft: null, chatted: [] },
 
   onShow() {
+    const loggedIn = api.isLoggedIn();
+    this.setData({ loggedIn });
+    if (!loggedIn) { unread.stop(this); this.setData({ loading: false }); return; }
     unread.start(this);
     const app = getApp();
     if (app.globalData.showCreatedMatches) {
@@ -51,10 +54,12 @@ Page({
     if (this.data.activeView === 'chatted' && !this.data.loading && !this.data.loadingMore && this.data.hasMore) this.loadPage(this.data.page + 1, true);
   },
 
+  openGuestLogin(event) { this.selectComponent('#loginGuide').open({ kind: event.currentTarget.dataset.kind || 'group' }); },
   selectView(event) { this.setData({ activeView: event.currentTarget.dataset.view }, () => this.refresh()); },
   chooseLocation() { locationStore.chooseUserLocation(() => this.refresh()); },
   openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
-  publish() { wx.navigateTo({ url: '/pages/publish/index' }); },
+  publish() { if (!api.isLoggedIn()) { this._pendingPublish = true; this.selectComponent('#loginGuide').open({ kind: 'publish' }); return; } wx.navigateTo({ url: '/pages/publish/index' }); },
+  browseMatches() { wx.switchTab({ url: '/pages/find/index' }); },
   allMatches() { wx.navigateTo({ url: '/pages/my-matches/index' }); },
   openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
   openRecord(event) {
@@ -69,5 +74,6 @@ Page({
       if (!result.confirm) return;
       api.cancelMatch(id).then(() => { this.refresh(); wx.showToast({ title: '已取消', icon: 'success' }); }).catch(error => wx.showModal({ title: '取消失败', content: error.message || '服务暂时不可用，请重试。', showCancel: false }));
     } });
-  }
+  },
+  onLoginSuccess() { const publish = this._pendingPublish; this._pendingPublish = false; this.setData({ loggedIn: true }); if (publish) wx.navigateTo({ url: '/pages/publish/index' }); else this.onShow(); }
 });

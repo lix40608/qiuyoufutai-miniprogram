@@ -9,3 +9,4 @@
 .about-link-title { color:#263d33; font-size:26rpx; font-weight:700; }
 .about-link .muted { margin-top:6rpx; font-size:21rpx; }
 .about-divider { height:1rpx; background:#edf0e9; }
+.version-card{display:flex;align-items:center;justify-content:space-between;min-height:88rpx;color:#40584c;font-size:25rpx;font-weight:650}.version-value{color:#89968d;font-size:23rpx;font-weight:400}

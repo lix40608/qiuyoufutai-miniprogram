@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "球友赴台",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {"login-guide":"/components/login-guide/index"}
 }

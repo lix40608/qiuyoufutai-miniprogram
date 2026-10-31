@@ -1,4 +1,18 @@
-<view class="page me-page">
+<view wx:if="{{!loggedIn}}" class="page me-page guest-me-page">
+  <view class="guest-me-hero card">
+    <view class="guest-me-brand">球友赴台 · 球友档案</view>
+    <view class="guest-me-title">你的下一场球，<br/>从这里开始</view>
+    <view class="guest-me-description">登录后发布约球、联系球友、查看消息与组局进度。</view>
+    <button class="guest-me-login" bindtap="openGuestLogin" data-kind="me">微信一键登录</button>
+  </view>
+  <view class="section-title guest-section-title">现在就能做</view>
+  <view class="card guest-action-tile" bindtap="goGuestBrowse" data-tab="find"><view class="guest-tile-icon">⌕</view><view class="guest-tile-copy"><view>逛附近的约球</view><view class="muted">看看球友正在约什么局</view></view><text class="muted">›</text></view>
+  <view class="card guest-action-tile" bindtap="goGuestBrowse" data-tab="home"><view class="guest-tile-icon">⌂</view><view class="guest-tile-copy"><view>回到球友首页</view><view class="muted">浏览推荐球局和玩法</view></view><text class="muted">›</text></view>
+  <view class="section-title guest-section-title">关于球友赴台</view>
+  <view class="card menu-card guest-about-entry" bindtap="openAboutUs"><view><view>关于我们</view><view class="muted">用户协议、隐私政策与版本信息</view></view><text class="muted">›</text></view>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
+</view>
+<view wx:else class="page me-page">
   <view class="page-title">我的</view>
   <view class="section-title">个人资料</view>
   <view class="card personal-card" bindtap="editPersonalProfile">
@@ -34,17 +48,23 @@
 
   <view class="section-title settings-title">设置</view>
   <view class="card wechat-card">
-    <view class="wechat-row"><view class="wechat-label">微信号</view><button class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}</button></view>
-    <view class="wechat-hint">仅在双方确认组局后，经你授权向本场对方展示；不会公开显示。</view>
+    <view class="wechat-row">
+      <view class="wechat-copy">
+        <view class="wechat-label">微信号</view>
+        <view class="wechat-hint">仅在你授权后向本场球友展示</view>
+      </view>
+      <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
+    </view>
   </view>
 
   <view class="card menu-card about-menu" bindtap="openAboutUs">
     <view><view>关于我们</view><view class="muted">用户协议、隐私政策与产品信息</view></view><text class="muted">›</text>
   </view>
 
-  <view class="section-title account-title">账号管理</view>
-  <button class="account-action-button logout-button" bindtap="confirmLogout">退出登录</button>
-  <button class="account-action-button delete-account-button" bindtap="confirmDeleteAccount">注销账号</button>
+  <view class="account-actions">
+    <button class="account-action-button logout-button" bindtap="confirmLogout">退出登录</button>
+    <button class="account-action-button delete-account-button" bindtap="confirmDeleteAccount">注销账号</button>
+  </view>
 
   <view wx:if="{{wechatEditorVisible}}" class="modal-mask" catchtap="closeWechatEditor">
     <view class="wechat-editor-modal" catchtap="stopModalTap">
@@ -54,4 +74,5 @@
       <view class="modal-actions"><button class="modal-secondary" bindtap="closeWechatEditor">取消</button><button class="modal-primary" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
     </view>
   </view>
+  <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>
