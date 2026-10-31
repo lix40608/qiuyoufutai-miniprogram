@@ -24,10 +24,17 @@ Page({
       const distanceLabel = Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '';
       let contactSharing = null;
       let contactSharingError = false;
+      let matchConversation = null;
       if (loggedIn && match.status === 'matched') {
-        try { contactSharing = await api.getMatchContactSharing(match.id); } catch (_) { contactSharingError = true; }
+        const [sharingResult, conversationResult] = await Promise.allSettled([
+          api.getMatchContactSharing(match.id),
+          api.getLatestMatchConversation(match.id)
+        ]);
+        if (sharingResult.status === 'fulfilled') contactSharing = sharingResult.value;
+        else contactSharingError = true;
+        if (conversationResult.status === 'fulfilled') matchConversation = conversationResult.value;
       }
-      this.setData({ match, isHost, loggedIn, contactSharing, contactSharingError, hasVenueLocation, hasUserLocation: Boolean(userLocation), distanceLabel, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), width: 26, height: 34, title: match.venue }] : [] });
+      this.setData({ match, isHost, loggedIn, contactSharing, contactSharingError, matchConversation, hasVenueLocation, hasUserLocation: Boolean(userLocation), distanceLabel, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), width: 26, height: 34, title: match.venue }] : [] });
     }).catch((error) => wx.showToast({ title: error.message || '这场约局暂不可用', icon: 'none' }));
   },
 
@@ -42,6 +49,12 @@ Page({
   openChat(event) {
     if (!api.isLoggedIn()) { this._pendingGuestAction = { id: this._matchId, focus: event.currentTarget.dataset.focus }; this.selectComponent('#loginGuide').open({ kind: event.currentTarget.dataset.focus === 'confirm' ? 'match' : 'chat' }); return; }
     navigation.openChat(this, event);
+  },
+
+  openMatchedChat(event) {
+    const conversationId = event.currentTarget.dataset.id;
+    if (!conversationId) return;
+    wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversationId)}` });
   },
 
   copyPeerWechatId() {

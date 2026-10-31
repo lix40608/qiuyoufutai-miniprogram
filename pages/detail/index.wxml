@@ -40,5 +40,8 @@
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
     <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>
   </view>
+  <view wx:if="{{loggedIn && match.status === 'matched' && matchConversation}}" class="card-actions">
+    <button class="primary-button action-button" bindtap="openMatchedChat" data-id="{{matchConversation.id}}">进入聊天</button>
+  </view>
   <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>
