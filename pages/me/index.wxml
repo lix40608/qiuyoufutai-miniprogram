@@ -51,7 +51,8 @@
     <view class="wechat-row">
       <view class="wechat-copy">
         <view class="wechat-label">微信号</view>
-        <view class="wechat-hint">双方确认组局后，本场球友可查看并复制</view>
+        <view wx:if="{{wechatId}}" class="wechat-value">{{wechatId}}</view>
+        <view class="wechat-hint">{{wechatId ? '仅本场组局成功双方可见' : '填写后，本场组局成功的球友可复制联系你'}}</view>
       </view>
       <view class="wechat-actions">
         <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
