@@ -47,18 +47,15 @@
   </view>
 
   <view class="section-title settings-title">设置</view>
-  <view class="card wechat-card">
+  <view class="card wechat-card {{wechatId ? 'wechat-card-filled' : 'wechat-card-empty'}}">
     <view class="wechat-row">
-      <view class="wechat-copy">
-        <view class="wechat-label">微信号</view>
-      </view>
-      <view class="wechat-actions">
-        <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
-      </view>
+      <view class="wechat-label">微信号</view>
+      <view wx:if="{{wechatId}}" class="wechat-edit-link" bindtap="openWechatEditor">修改</view>
+      <view wx:else class="wechat-fill-link" bindtap="openWechatEditor">去填写 <text>›</text></view>
     </view>
     <view wx:if="{{wechatId}}" class="wechat-value">{{wechatId}}</view>
-    <view class="wechat-footer">
-      <view class="wechat-hint">{{wechatId ? '仅本场组局成功双方可见' : '填写后，本场组局成功的球友可复制联系你'}}</view>
+    <view class="wechat-footer {{wechatId ? 'wechat-footer-filled' : ''}}">
+      <view class="wechat-hint">{{wechatId ? '组局成功后，对方可复制联系你' : '填写后，本场组局成功的球友可复制联系你'}}</view>
       <view wx:if="{{wechatId}}" class="wechat-clear-saved" catchtap="clearSavedWechat">清除</view>
     </view>
   </view>
