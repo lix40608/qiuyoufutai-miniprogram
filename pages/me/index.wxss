@@ -20,7 +20,7 @@
 .archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }
 .wechat-card { padding:22rpx 24rpx; }
 .wechat-row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; }
-.wechat-label { color:#748279; font-size:23rpx; font-weight:650; line-height:1.4; }
+.wechat-label { color:#234638; font-size:27rpx; font-weight:750; line-height:1.3; }
 .wechat-edit-link,.wechat-fill-link { display:flex; flex:none; align-items:center; min-height:48rpx; color:#197257; font-size:23rpx; font-weight:650; white-space:nowrap; }
 .wechat-fill-link text { margin-left:4rpx; font-size:28rpx; }
 .wechat-value-row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-top:8rpx; }
