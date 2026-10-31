@@ -12,21 +12,24 @@
 .archive-content { padding-right: 8rpx; }
 .edit-link { flex: none; color: #197257; font-size: 23rpx; font-weight: 700; }
 .menu-card { display: flex; align-items: center; justify-content: space-between; font-size: 26rpx; }
-.section-title { margin: 34rpx 4rpx 4rpx; font-size: 28rpx; font-weight: 800; }
-.message-menu { margin-top: 26rpx; }
-.settings-title { margin-top: 38rpx; }
+.section-title { margin: 40rpx 4rpx 12rpx; font-size: 28rpx; line-height:1.45; font-weight: 800; }
+.message-menu { margin-top: 28rpx; }
+.settings-title { margin-top: 42rpx; }
 .archive-intro { color: #43584d; font-size: 25rpx; line-height: 1.55; }
 .archive-games { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
 .archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }
-.wechat-card { padding:22rpx 24rpx; }
+.wechat-card { padding:28rpx 24rpx; }
 .wechat-copy { flex:1; min-width:0; }
-.wechat-label { color:#315447; font-size:26rpx; font-weight:600; line-height:1.4; }
-.wechat-value { margin-top:6rpx; color:#263e33; font-size:26rpx; font-weight:500; line-height:1.4; overflow-wrap:anywhere; word-break:break-all; }
-.wechat-hint { margin-top:4rpx; color:var(--color-muted); font-size:24rpx; line-height:1.4; }
-.about-menu { margin-top:18rpx; }
-.account-actions { margin-top:34rpx; padding:0 0 28rpx; background:transparent; }
+.wechat-label { color:#315447; font-size:26rpx; font-weight:600; line-height:1.5; }
+.wechat-value { margin-top:12rpx; color:#263e33; font-size:28rpx; font-weight:500; line-height:1.5; overflow-wrap:anywhere; word-break:break-all; }
+.wechat-hint { margin-top:10rpx; color:var(--color-muted); font-size:24rpx; line-height:1.6; }
+.wechat-action { display:flex; flex:none; align-items:center; gap:6rpx; margin-left:18rpx; color:#197257; font-size:24rpx; font-weight:600; line-height:1.4; white-space:nowrap; }
+.wechat-chevron { flex:none; margin-left:18rpx; color:var(--color-muted); font-size:32rpx; line-height:1; }
+.wechat-action .wechat-chevron { margin-left:0; color:#197257; font-size:30rpx; }
+.about-menu { margin-top:22rpx; }
+.account-actions { margin-top:40rpx; padding:0 0 32rpx; background:transparent; }
 .account-action-button { display:flex; box-sizing:border-box; align-items:center; justify-content:center; width:100%; min-width:100%; height:88rpx; margin:0; padding:0 24rpx; border:1rpx solid #dfe5da; border-radius:20rpx; background:#fffefa; color:#385347; font-size:27rpx; font-weight:700; line-height:1.2; text-align:center; }
-.delete-account-button { margin-top:14rpx; border-color:#e7c9c5; background:#fff9f8; color:#bd4d46; }
+.delete-account-button { margin-top:18rpx; border-color:#e7c9c5; background:#fff9f8; color:#bd4d46; }
 .modal-mask { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:40rpx; box-sizing:border-box; background:rgba(20,37,30,.48); }
 .wechat-editor-modal { width:100%; padding:34rpx 30rpx 26rpx; border-radius:24rpx; background:#fffefa; box-shadow:0 18rpx 58rpx rgba(19,43,32,.2); }
 .wechat-editor-modal.keyboard-open { transform:translateY(-140rpx); }

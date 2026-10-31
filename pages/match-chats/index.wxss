@@ -5,6 +5,7 @@
 .match-state,.peer-state { color:#7d9286; font-size:21rpx; }
 .match-title { margin-top:16rpx; color:#173b31; font-size:29rpx; font-weight:700; }
 .match-meta { margin-top:9rpx; color:#7d9086; font-size:22rpx; }
+.match-ended-reason { margin-top:12rpx; color:#77877d; font-size:22rpx; line-height:1.55; }
 .section-title { display:flex; justify-content:space-between; align-items:center; margin:30rpx 4rpx 16rpx; color:#173b31; font-size:27rpx; font-weight:700; }
 .section-count { color:#91a197; font-size:21rpx; font-weight:400; }
 .peer-row { display:flex; align-items:center; gap:20rpx; padding:22rpx; margin-bottom:14rpx; }

@@ -5,6 +5,7 @@ function conversationState(conversation, userId, match = {}) {
   const count = Number(Boolean(conversation.hostConfirmed)) + Number(Boolean(conversation.guestConfirmed));
   const cancelled = conversation.status === 'cancelled';
   const accountClosed = Boolean(conversation.closed);
+  const participantDeleted = conversation.cancelReason === 'PARTICIPANT_DELETED' || match.cancelReason === 'PARTICIPANT_DELETED';
   const lost = conversation.status === 'matched' && !conversation.won;
   const matchedAt = conversation.matchedAt || match.matchedAt;
   const startsAt = conversation.startsAt || match.startsAt;
@@ -16,12 +17,12 @@ function conversationState(conversation, userId, match = {}) {
     showInvite: !ended && peerConfirmed && !mineConfirmed && conversation.status === 'recruiting',
     closed: ended,
     canConfirm: !displayEnded && conversation.status === 'recruiting' && !mineConfirmed,
-    hint: accountClosed ? '对方已注销账号，本段聊天已关闭，历史记录仍可查看' : cancelled ? '本场约球已取消，聊天记录仍可查看' : lost ? '发起人已与其他球友组局，本次未能组局，聊天记录仍可查看'
-      : displayEnded && conversation.status === 'matched' && conversation.won ? '本场已组局，聊天记录仍可查看'
-      : displayEnded ? '本场招募已结束，未能组局，聊天记录仍可查看'
+    hint: participantDeleted ? '对方账号已注销，本场组局已结束，历史聊天可查看' : cancelled ? '本场约球已取消，历史聊天可查看' : accountClosed ? '本段聊天已结束，历史记录可查看' : lost ? '发起人已与其他球友组局，本次未能组局，历史聊天可查看'
+      : displayEnded && conversation.status === 'matched' && conversation.won ? '本场组局已结束，历史聊天可查看'
+      : displayEnded ? '本场招募已结束，历史聊天可查看'
       : conversation.won ? '双方已确认，可前往约局详情联系对方' : mineConfirmed ? '你已确认，等待对方'
       : peerConfirmed ? '对方已确认，聊清楚后再确认' : '先聊清楚时间和安排；确定参加后，点击确认组局。',
-    statusLabel: cancelled ? '已取消' : lost ? '本次未组局' : conversation.status === 'matched' && conversation.won ? '已组局' : displayEnded ? '招募结束' : '招募中'
+    statusLabel: participantDeleted ? '已过期' : cancelled ? '已取消' : lost ? '本次未组局' : conversation.status === 'matched' && conversation.won ? '已组局' : displayEnded ? '招募结束' : '招募中'
   };
 }
 

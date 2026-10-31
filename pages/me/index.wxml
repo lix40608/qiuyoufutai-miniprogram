@@ -51,9 +51,10 @@
     <view class="wechat-copy">
       <view class="wechat-label">微信号</view>
       <view wx:if="{{wechatId}}" class="wechat-value">{{wechatId}}</view>
-      <view class="wechat-hint">{{wechatId ? '组局成功后，对方可复制联系你' : '填写后，本场组局成功的球友可复制联系你'}}</view>
+      <view class="wechat-hint">{{wechatId ? '组局成功后，球友可复制微信联系你' : '填写后，组局成功的球友可复制微信联系你'}}</view>
     </view>
-    <text class="muted">›</text>
+    <view class="wechat-action" wx:if="{{!wechatId}}"><text>去填写</text><text class="wechat-chevron">›</text></view>
+    <text class="wechat-chevron" wx:else>›</text>
   </view>
 
   <view class="card menu-card about-menu" bindtap="openAboutUs">

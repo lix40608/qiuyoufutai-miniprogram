@@ -25,3 +25,4 @@
 .match-card{border-color:#e2eae2;border-radius:28rpx;box-shadow:0 8rpx 24rpx rgba(35,76,54,.045)}.record-venue{padding:0;margin-top:24rpx;background:none}.record-label{font-size:20rpx;font-weight:500;color:#91a197}.record-venue-name{margin-top:6rpx;font-size:32rpx;font-weight:700;color:#17392f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.record-time{align-items:center;gap:13rpx;padding:17rpx 18rpx;background:#f0f6f0;border-radius:16rpx;margin-top:20rpx}.record-clock{width:44rpx;height:44rpx;line-height:44rpx;text-align:center;border-radius:50%;background:#dceee0;color:#21775c;font-size:30rpx}.record-time-value{margin-top:3rpx;color:#235440;font-size:25rpx;font-weight:650}
 .list-footer { padding: 28rpx 0 36rpx; text-align: center; font-size: 22rpx; }
 .chat-partner { margin-bottom: 18rpx; color: #70857a; font-size: 23rpx; }
+.cancel-reason { margin-top: 16rpx; color: #77877d; font-size: 22rpx; line-height: 1.55; }

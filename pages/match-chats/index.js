@@ -23,7 +23,7 @@ Page({
       const conversations = rows.map(item => Object.assign({}, item, {
         preview: item.lastMessage || (item.hostConfirmed && item.guestConfirmed ? '双方已确认组局' : '组局确认邀请'),
         timeLabel: new Date(item.lastMessageAt || item.guestConfirmedAt || item.hostConfirmedAt || item.createdAt).toLocaleString('zh-CN'),
-        stateLabel: item.displayEnded ? '已结束 · 查看记录' : item.status === 'matched' ? (item.won ? '已组局' : '本次未组局') : '招募中'
+        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.displayEnded ? '已结束' : item.status === 'matched' ? (item.won ? '已组局' : '本次未组局') : '招募中'
       }));
       this.setData({ match, conversations: append ? this.data.conversations.concat(conversations) : conversations,
         page, hasMore: rows.length === 10, loading: false, loadingMore: false, loadError: '' });

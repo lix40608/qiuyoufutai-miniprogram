@@ -26,9 +26,9 @@
   <view wx:elif="{{visibleRecords.length}}">
     <view wx:for="{{visibleRecords}}" wx:key="rowKey" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" bindtap="openRecord">
       <view class="card-top">
-          <view class="tag">{{item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已过期' : item.status === 'matched' ? '已组局' : '组局中'}}</view>
-        <view wx:if="{{item.status !== 'draft'}}" class="muted">{{item.displayEnded ? '公开展示已结束 · 记录仍保留' : ''}}</view>
+          <view class="tag">{{item.stateLabel}}</view>
       </view>
+      <view wx:if="{{item.cancelReason === 'PARTICIPANT_DELETED'}}" class="cancel-reason">对方账号已注销，本场组局已结束</view>
       <view wx:if="{{activeView === 'chatted'}}" class="chat-partner">与 {{item.peerName || '球友'}} 聊天</view>
       <view class="record-venue"><view class="record-label">球房</view><view class="record-venue-name">{{item.venueName || '球房待选择'}}</view></view>
       <view class="record-time"><text class="record-clock">◷</text><view><view class="record-label">开球时间</view><view class="record-time-value">{{item.startLabel}}</view></view></view>
