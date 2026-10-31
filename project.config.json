@@ -11,7 +11,12 @@
         "type": "folder"
       }
     ],
-    "include": []
+    "include": [
+      {
+        "value": "components/cancel-match-dialog",
+        "type": "folder"
+      }
+    ]
   },
   "setting": {
     "urlCheck": true,

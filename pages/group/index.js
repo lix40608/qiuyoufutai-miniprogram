@@ -40,10 +40,12 @@ Page({
       const source = append ? this.data.chatted.concat(records) : records;
       const recent = source.map(item => {
         const distance = locationStore.distanceKm(userLocation, { latitude: item.venueLatitude, longitude: item.venueLongitude });
-        return Object.assign({}, item, { distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '', chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0 });
+        const upcoming = Boolean(item.startsAt && Date.parse(item.startsAt) > Date.now());
+        const canCancel = item.status === 'matched' ? upcoming : item.status === 'recruiting' && !item.displayEnded;
+        return Object.assign({}, item, { distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '', chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0, canCancel });
       }).sort((a, b) => (Date.parse(b.lastMessageAt || b.updatedAt) || 0) - (Date.parse(a.lastMessageAt || a.updatedAt) || 0) || Number(b.id) - Number(a.id));
       if (view === 'created') {
-        this.setData({ latestActive: recent.find(item => item.status !== 'draft' && item.status !== 'cancelled' && !item.displayEnded) || null, latestDraft: recent.find(item => item.status === 'draft') || null, loading: false });
+        this.setData({ latestActive: recent.find(item => item.status !== 'draft' && item.status !== 'cancelled' && (!item.displayEnded || item.status === 'matched' && item.canCancel)) || null, latestDraft: recent.find(item => item.status === 'draft') || null, loading: false });
       } else {
         this.setData({ chatted: recent, page, hasMore: records.length === 10, loading: false, loadingMore: false });
       }
@@ -71,10 +73,18 @@ Page({
   },
   cancelRecord(event) {
     const id = event.currentTarget.dataset.id;
-    wx.showModal({ title: '取消这场约局？', content: '取消后将停止招募，聊天不能继续发送或确认。', confirmText: '确认取消', cancelText: '继续招募', success: (result) => {
+    const record = this.data.latestActive;
+    if (!record || String(record.id) !== String(id) || !record.canCancel) return;
+    if (record.status === 'matched') {
+      this.selectComponent('#cancelMatchDialog').open(id);
+      return;
+    }
+    if (record.status !== 'recruiting') return;
+    wx.showModal({ title: '取消这场约局？', content: '取消后将停止招募，聊天不能继续发送或确认。', confirmText: '确认取消', cancelText: '继续招募', success: result => {
       if (!result.confirm) return;
       api.cancelMatch(id).then(() => { this.refresh(); wx.showToast({ title: '已取消', icon: 'success' }); }).catch(error => wx.showModal({ title: '取消失败', content: error.message || '服务暂时不可用，请重试。', showCancel: false }));
     } });
   },
+  onCancelSuccess() { this.refresh(); wx.showToast({ title: '已取消', icon: 'success' }); },
   onLoginSuccess() { const publish = this._pendingPublish; this._pendingPublish = false; this.setData({ loggedIn: true }); if (publish) wx.navigateTo({ url: '/pages/publish/index' }); else this.onShow(); }
 });

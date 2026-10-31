@@ -179,7 +179,7 @@ module.exports = {
   getMatch: (id) => request(`/v1/matches/${encodeURIComponent(id)}`, { anonymous: true }).then(normalizeMatch),
   saveDraft: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}` : '/v1/matches', { method: form.id ? 'PUT' : 'POST', data: toMatchPayload(form, 'draft'), header: form.id ? {} : { 'X-Idempotency-Key': form.requestKey || createRequestKey() } }).then(normalizeMatch),
   publishMatch: (form) => withLogin(form.id ? `/v1/me/matches/${encodeURIComponent(form.id)}/publish` : '/v1/matches', { method: 'POST', data: toMatchPayload(form, 'recruiting'), header: { 'X-Idempotency-Key': form.publishRequestKey || createRequestKey() } }).then(normalizeMatch),
-  cancelMatch: (id) => withLogin(`/v1/me/matches/${encodeURIComponent(id)}/cancel`, { method: 'POST' }).then(normalizeMatch),
+  cancelMatch: (id, reason) => withLogin(`/v1/me/matches/${encodeURIComponent(id)}/cancel`, { method: 'POST', data: reason === undefined ? {} : { reason } }).then(normalizeMatch),
   getUserProfile: (id) => withLogin(`/v1/users/${encodeURIComponent(id)}/profile`).then(normalizeProfile),
   searchMatches(options = {}) {
     const params = [];

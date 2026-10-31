@@ -96,7 +96,7 @@ test('个人资料缺失时显示每个必填字段的提示', () => {
   const page = pageFrom('pages/personal-profile/index.js', {}, { showToast() {} });
   page.saveProfile();
   assert.equal(page.data.errors.nickname, '请填写昵称');
-  assert.equal(page.data.errors.age, '请填写 1 至 120 岁的年龄');
+  assert.equal(page.data.errors.age, '仅限年满18周岁用户使用');
   assert.equal(page.data.errors.gender, '请选择性别');
   page.onPersonalInput({ currentTarget: { dataset: { field: 'nickname' } }, detail: { value: '球友' } });
   assert.equal(page.data.errors.nickname, '');

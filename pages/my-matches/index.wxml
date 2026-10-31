@@ -38,7 +38,10 @@
       <view wx:if="{{activeView === 'created'}}" class="card-actions match-action-row">
         <button wx:if="{{item.status === 'draft'}}" class="primary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="draft">继续编辑</button>
         <button wx:if="{{activeView === 'created' && item.status !== 'draft'}}" class="primary-button match-action-button match-action-chat" catchtap="openMatchChats" data-id="{{item.id}}"><text class="match-action-label">{{item.displayEnded ? '查看聊天' : '进入聊天'}}</text><text wx:if="{{item.chatUnreadCount}}" class="match-action-unread">{{item.chatUnreadCount > 99 ? '99+' : item.chatUnreadCount}}</text></button>
-        <button wx:if="{{activeView === 'created' && item.status === 'recruiting' && !item.displayEnded}}" class="primary-button match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
+        <button wx:if="{{item.canCancel}}" class="primary-button match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
+      </view>
+      <view wx:if="{{activeView === 'chatted' && item.canCancel}}" class="card-actions match-action-row">
+        <button class="primary-button match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{item.id}}" data-conversation-id="{{item.conversationId}}">取消约球</button>
       </view>
     </view>
     <view class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
@@ -49,3 +52,4 @@
     <view class="empty-title">{{activeFilter === 'draft' ? '还没有保存的草稿' : activeFilter === 'expired' ? '还没有过期的约局' : activeFilter === 'matched' ? '还没有已组局的约球' : activeFilter === 'all' ? '还没有约球记录' : '当前没有组局中的约球'}}</view>
   </view>
 </view>
+<cancel-match-dialog id="cancelMatchDialog" bind:success="onCancelSuccess" />

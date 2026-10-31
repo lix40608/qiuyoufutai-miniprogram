@@ -1,0 +1,11 @@
+.cancel-dialog-mask{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:40rpx;background:rgba(17,31,26,.46)}
+.cancel-dialog{box-sizing:border-box;width:100%;max-width:620rpx;padding:34rpx 30rpx 28rpx;border-radius:26rpx;background:#fffefa;box-shadow:0 22rpx 70rpx rgba(17,40,30,.2)}
+.cancel-dialog-title{color:#17392f;font-size:32rpx;font-weight:750;line-height:1.35;text-align:center}
+.cancel-dialog-description{margin-top:14rpx;color:#718178;font-size:23rpx;line-height:1.6}
+.cancel-reason-input{box-sizing:border-box;width:100%;min-height:150rpx;margin-top:22rpx;padding:20rpx;border:1rpx solid #dfe7dd;border-radius:16rpx;background:#f7f8f3;color:#234638;font-size:24rpx;line-height:1.55}
+.cancel-reason-placeholder{color:#9aa79e}
+.cancel-dialog-actions{display:flex;gap:16rpx;margin-top:24rpx}
+.cancel-dialog-button{display:flex;flex:1;align-items:center;justify-content:center;box-sizing:border-box;height:82rpx;margin:0;padding:0;border:1rpx solid transparent;border-radius:16rpx;font-size:24rpx;font-weight:700;line-height:1;text-align:center}
+.cancel-dialog-button::after{border:0}
+.cancel-dialog-secondary{border-color:#dfe7dd;background:#f5f7f2;color:#61756a}
+.cancel-dialog-primary{background:#197257;color:#fff}

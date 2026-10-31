@@ -24,7 +24,7 @@
       <view class="summary-meta">费用 {{latestActive.feeLabel}}</view>
       <view wx:if="{{latestActive.level}}" class="summary-extra">水平：{{latestActive.level}}</view>
       <view wx:if="{{latestActive.note}}" class="summary-extra">备注：{{latestActive.note}}</view>
-      <view class="match-action-row"><button class="primary-button match-action-button match-action-chat" catchtap="openMatchChats" data-id="{{latestActive.id}}"><text class="match-action-label">进入聊天</text><text wx:if="{{latestActive.chatUnreadCount}}" class="match-action-unread">{{latestActive.chatUnreadCount > 99 ? '99+' : latestActive.chatUnreadCount}}</text></button><button class="manage match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{latestActive.id}}" wx:if="{{latestActive.status === 'recruiting'}}">取消约球</button></view>
+      <view class="match-action-row"><button class="primary-button match-action-button match-action-chat" catchtap="openMatchChats" data-id="{{latestActive.id}}"><text class="match-action-label">{{latestActive.displayEnded ? '查看聊天' : '进入聊天'}}</text><text wx:if="{{latestActive.chatUnreadCount}}" class="match-action-unread">{{latestActive.chatUnreadCount > 99 ? '99+' : latestActive.chatUnreadCount}}</text></button><button class="manage match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{latestActive.id}}" wx:if="{{latestActive.canCancel}}">取消约球</button></view>
     </view><view wx:else class="empty">暂无进行中的约球</view>
     <view class="section"><text>草稿</text><text class="section-hint">最近编辑</text></view>
     <view wx:if="{{latestDraft}}" class="draft" bindtap="openRecord" data-id="{{latestDraft.id}}" data-status="draft"><view class="draft-icon">✎</view><view class="draft-copy"><view class="draft-title">{{latestDraft.title}}</view><view class="draft-subtitle">{{latestDraft.venueName || '地点待选择'}} · 编辑中</view></view><view class="arrow">›</view></view><view wx:else class="empty">暂无草稿</view>
@@ -34,3 +34,4 @@
   </block>
   <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>
+<cancel-match-dialog id="cancelMatchDialog" bind:success="onCancelSuccess" />

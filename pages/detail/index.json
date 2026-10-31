@@ -1,5 +1,5 @@
 {
   "navigationBarTitleText": "约局详情",
   "navigationStyle": "default",
-  "usingComponents": {"login-guide":"/components/login-guide/index"}
+  "usingComponents": {"login-guide":"/components/login-guide/index", "cancel-match-dialog":"/components/cancel-match-dialog/index"}
 }

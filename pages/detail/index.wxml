@@ -45,6 +45,8 @@
   </view>
   <view wx:if="{{loggedIn && match.status === 'matched' && matchConversation}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openMatchedChat" data-id="{{matchConversation.id}}">{{match.displayEnded ? '查看聊天' : '进入聊天'}}</button>
+    <button wx:if="{{canCancelMatch}}" class="primary-button secondary-button action-button" bindtap="cancelMatch">取消约球</button>
   </view>
+  <cancel-match-dialog id="cancelMatchDialog" bind:success="onCancelSuccess" />
   <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>

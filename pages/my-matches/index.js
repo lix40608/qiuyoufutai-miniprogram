@@ -57,7 +57,10 @@ Page({
       const merged = (append ? this.data.records.concat(records) : records).map(item => Object.assign({}, item, {
         rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`,
         chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0,
-        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中'
+        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中',
+        canCancel: item.status === 'matched'
+          ? Boolean(item.startsAt && Date.parse(item.startsAt) > Date.now() && (activeView === 'created' || item.won))
+          : activeView === 'created' && item.status === 'recruiting' && !item.displayEnded
       }));
       this.setData({ records: merged, visibleRecords: this.filterRecords(merged), page, hasMore: records.length === 10, loading: false, loadingMore: false });
     }).catch((error) => {
@@ -103,12 +106,18 @@ Page({
   openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
 
   cancelRecord(event) {
-    const { id } = event.currentTarget.dataset;
-    const record = this.data.records.find(item => String(item.id) === String(id));
-    if (!record || record.status !== 'recruiting' || record.displayEnded) return;
+    const { id, conversationId } = event.currentTarget.dataset;
+    const record = this.data.records.find(item => String(item.id) === String(id)
+      && (!conversationId || String(item.conversationId) === String(conversationId)));
+    if (!record || !record.canCancel) return;
+    if (record.status === 'matched') {
+      this.selectComponent('#cancelMatchDialog').open(id);
+      return;
+    }
+    if (record.status !== 'recruiting' || this.data.activeView !== 'created') return;
     wx.showModal({
       title: '取消这场约局？',
-      content: '取消后将从当前列表隐藏，历史约局和已有聊天仍会保留，聊天停止发送与确认。',
+      content: '取消后将停止招募，历史约局和已有聊天仍会保留。',
       confirmText: '确认取消',
       cancelText: '继续招募',
       success: (result) => {
@@ -116,10 +125,12 @@ Page({
         api.cancelMatch(id).then(() => {
           this.refreshRecords();
           wx.showToast({ title: '已取消', icon: 'success' });
-        }).catch((error) => wx.showModal({ title: '取消失败', content: error.message || '服务暂时不可用，状态未更改。', showCancel: false }));
+        }).catch(error => wx.showModal({ title: '取消失败', content: error.message || '服务暂时不可用，状态未更改。', showCancel: false }));
       }
     });
   },
+
+  onCancelSuccess() { this.refreshRecords(); wx.showToast({ title: '已取消', icon: 'success' }); },
 
   goPublish() {
     wx.navigateTo({ url: '/pages/publish/index' });

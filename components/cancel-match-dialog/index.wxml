@@ -1,0 +1,11 @@
+<view wx:if="{{visible}}" class="cancel-dialog-mask" catchtap="close">
+  <view class="cancel-dialog" catchtap="noop">
+    <view class="cancel-dialog-title">取消这场约局</view>
+    <view class="cancel-dialog-description">取消后本场组局和聊天将结束，约局记录仍会保留。填写的原因会通知对方。</view>
+    <textarea class="cancel-reason-input" value="{{reason}}" maxlength="300" placeholder="请填写取消原因" placeholder-class="cancel-reason-placeholder" bindinput="onReasonInput" auto-height="true" />
+    <view class="cancel-dialog-actions">
+      <button class="cancel-dialog-button cancel-dialog-secondary" disabled="{{submitting}}" bindtap="close">再想一想</button>
+      <button class="cancel-dialog-button cancel-dialog-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">确认取消</button>
+    </view>
+  </view>
+</view>
