@@ -64,17 +64,6 @@ Page({
     this.setData({ wechatDraft: '' });
   },
 
-  clearSavedWechat() {
-    if (!this.data.wechatId || this.data.savingWechat) return;
-    this.setData({ savingWechat: true });
-    api.saveMyWechatContact('').then(() => {
-      this._wechatDraft = '';
-      this.setData({ wechatId: '', wechatDraft: '' });
-      wx.showToast({ title: '微信号已清除', icon: 'success' });
-    }).catch((error) => wx.showToast({ title: error.message || '清除失败，请重试', icon: 'none' }))
-      .finally(() => this.setData({ savingWechat: false }));
-  },
-
   onWechatKeyboardHeightChange(event) {
     const keyboardVisible = Number(event.detail.height) > 0;
     if (keyboardVisible !== this.data.keyboardVisible) this.setData({ keyboardVisible });
@@ -83,6 +72,7 @@ Page({
   saveWechatId() {
     if (this.data.savingWechat) return;
     const wechatId = (this._wechatDraft == null ? this.data.wechatDraft : this._wechatDraft || '').trim();
+    const clearingWechat = Boolean(this.data.wechatId) && !wechatId;
     if (wechatId && !/^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(wechatId)) {
       wx.showToast({ title: '微信号需为6至20位，以字母开头', icon: 'none' });
       return;
@@ -91,7 +81,7 @@ Page({
     api.saveMyWechatContact(wechatId).then((result) => {
       this._wechatDraft = result.wechatId || '';
       this.setData({ wechatId: this._wechatDraft, wechatDraft: this._wechatDraft, wechatEditorVisible: false, keyboardVisible: false });
-      wx.showToast({ title: '微信号已保存', icon: 'success' });
+      wx.showToast({ title: clearingWechat ? '微信号已清除' : '微信号已保存', icon: 'success' });
     }).catch((error) => wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' }))
       .finally(() => this.setData({ savingWechat: false }));
   },

@@ -19,16 +19,10 @@
 .archive-games { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
 .archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }
 .wechat-card { padding:22rpx 24rpx; }
-.wechat-row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; }
+.wechat-copy { flex:1; min-width:0; }
 .wechat-label { color:#315447; font-size:26rpx; font-weight:600; line-height:1.4; }
-.wechat-edit-link,.wechat-fill-link { display:flex; flex:none; align-items:center; min-height:48rpx; color:#197257; font-size:23rpx; font-weight:600; white-space:nowrap; }
-.wechat-fill-link text { margin-left:4rpx; font-size:28rpx; }
-.wechat-value-row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-top:8rpx; }
-.wechat-value { flex:1; min-width:0; color:#263e33; font-size:28rpx; font-weight:500; line-height:1.45; overflow-wrap:anywhere; word-break:break-all; }
-.wechat-footer { display:flex; align-items:center; justify-content:space-between; gap:12rpx; margin-top:12rpx; }
-.wechat-footer-filled { margin-top:14rpx; padding-top:12rpx; border-top:1rpx solid #edf0ea; }
-.wechat-hint { flex:1; min-width:0; color:var(--color-muted); font-size:24rpx; line-height:1.45; }
-.wechat-clear-saved { display:flex; flex:none; align-items:center; justify-content:center; min-width:64rpx; height:44rpx; padding:0 4rpx; color:#98a29c; font-size:23rpx; font-weight:400; line-height:1; white-space:nowrap; }
+.wechat-value { margin-top:6rpx; color:#263e33; font-size:26rpx; font-weight:500; line-height:1.4; overflow-wrap:anywhere; word-break:break-all; }
+.wechat-hint { margin-top:4rpx; color:var(--color-muted); font-size:24rpx; line-height:1.4; }
 .about-menu { margin-top:18rpx; }
 .account-actions { margin-top:34rpx; padding:0 0 28rpx; background:transparent; }
 .account-action-button { display:flex; box-sizing:border-box; align-items:center; justify-content:center; width:100%; min-width:100%; height:88rpx; margin:0; padding:0 24rpx; border:1rpx solid #dfe5da; border-radius:20rpx; background:#fffefa; color:#385347; font-size:27rpx; font-weight:700; line-height:1.2; text-align:center; }
