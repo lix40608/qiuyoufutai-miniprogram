@@ -61,6 +61,7 @@ Page({
   publish() { if (!api.isLoggedIn()) { this._pendingPublish = true; this.selectComponent('#loginGuide').open({ kind: 'publish' }); return; } wx.navigateTo({ url: '/pages/publish/index' }); },
   browseMatches() { wx.switchTab({ url: '/pages/find/index' }); },
   allMatches() { wx.navigateTo({ url: '/pages/my-matches/index' }); },
+  openConversation(event) { wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
   openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
   openRecord(event) {
     const { id, status, conversationId } = event.currentTarget.dataset;
