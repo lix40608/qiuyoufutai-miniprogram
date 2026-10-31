@@ -53,7 +53,10 @@
         <view class="wechat-label">微信号</view>
         <view class="wechat-hint">双方确认组局后，本场球友可查看并复制</view>
       </view>
-      <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
+      <view class="wechat-actions">
+        <view class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}<text class="wechat-edit-arrow">›</text></view>
+        <view wx:if="{{wechatId}}" class="wechat-clear-saved" catchtap="clearSavedWechat">清除</view>
+      </view>
     </view>
   </view>
 
@@ -71,7 +74,7 @@
       <view class="modal-title">填写微信号</view>
       <view class="wechat-input-wrap">
         <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
-        <text wx:if="{{wechatDraft}}" class="wechat-clear" catchtap="clearWechatDraft">清空</text>
+        <view wx:if="{{wechatDraft}}" class="wechat-clear" catchtap="clearWechatDraft"><text>×</text></view>
       </view>
       <view class="wechat-modal-hint">填写并保存后，双方确认组局时，本场对方可查看并复制；不会公开展示。</view>
       <view class="modal-actions"><button class="modal-secondary" bindtap="closeWechatEditor">取消</button><button class="modal-primary" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>

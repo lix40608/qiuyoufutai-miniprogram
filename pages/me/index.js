@@ -64,6 +64,17 @@ Page({
     this.setData({ wechatDraft: '' });
   },
 
+  clearSavedWechat() {
+    if (!this.data.wechatId || this.data.savingWechat) return;
+    this.setData({ savingWechat: true });
+    api.saveMyWechatContact('').then(() => {
+      this._wechatDraft = '';
+      this.setData({ wechatId: '', wechatDraft: '' });
+      wx.showToast({ title: '微信号已清除', icon: 'success' });
+    }).catch((error) => wx.showToast({ title: error.message || '清除失败，请重试', icon: 'none' }))
+      .finally(() => this.setData({ savingWechat: false }));
+  },
+
   onWechatKeyboardHeightChange(event) {
     const keyboardVisible = Number(event.detail.height) > 0;
     if (keyboardVisible !== this.data.keyboardVisible) this.setData({ keyboardVisible });
