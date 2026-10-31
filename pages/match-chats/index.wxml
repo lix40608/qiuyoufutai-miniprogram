@@ -1,19 +1,27 @@
 <view class="page match-chats-page">
   <view wx:if="{{match}}" class="match-summary card">
-    <view class="summary-line"><text class="game-tag">{{match.gameType}}</text><text class="match-state">{{match.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : match.status === 'matched' ? '已组局' : match.displayEnded ? '已结束' : '招募中'}}</text></view>
+    <view class="summary-line">
+      <text class="game-tag">{{match.gameType}}</text>
+      <text class="match-state">{{match.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : match.status === 'cancelled' ? '已取消' : match.status === 'matched' ? '已组局' : match.displayEnded ? '已结束' : '招募中'}}</text>
+    </view>
     <view class="match-title">{{match.title}}</view>
     <view class="match-meta">{{match.startLabel}} · {{match.venueName || '球房待选择'}}</view>
     <view wx:if="{{match.cancelReason === 'PARTICIPANT_DELETED'}}" class="match-ended-reason">对方账号已注销，本场组局已结束</view>
   </view>
+
   <view class="section-title">球友聊天<text wx:if="{{!loading}}" class="section-count">{{conversations.length}} 位球友</text></view>
   <view wx:if="{{loadError}}" class="empty-state"><view class="muted">{{loadError}}</view><button class="retry-button" bindtap="retry">重新加载</button></view>
   <view wx:elif="{{loading}}" class="empty-state">正在加载聊天…</view>
-  <view wx:elif="{{!conversations.length}}" class="empty-state"><view class="empty-title">还没有球友发起聊天</view><view class="muted">收到消息或确认邀请后，会显示在这里。</view></view>
-  <view wx:else>
-    <view wx:for="{{conversations}}" wx:key="id" class="peer-row card" data-id="{{item.id}}" bindtap="openConversation">
-      <view class="avatar-wrap"><image class="peer-avatar" src="{{item.peerAvatar || '/assets/eight-ball.png'}}" mode="aspectFill"/><text wx:if="{{item.unreadCount}}" class="peer-unread">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</text></view>
-      <view class="peer-info"><view class="peer-heading"><text class="peer-name">{{item.peerName || '球友'}}</text><text class="peer-state">{{item.stateLabel}}</text></view><view class="peer-preview">{{item.preview}}</view><view class="peer-time">{{item.timeLabel}}</view></view>
-      <text class="peer-arrow">›</text>
+  <view wx:elif="{{!conversations.length}}" class="empty-state"><view class="empty-title">还没有聊天</view><view class="muted">这场约局还没有聊天记录。</view></view>
+  <view wx:else class="card match-conversation-group">
+    <view wx:for="{{conversations}}" wx:key="id" class="conversation-row" data-id="{{item.id}}" bindtap="openConversation">
+      <image class="conversation-avatar" src="{{item.peerAvatar || '/assets/eight-ball.png'}}" mode="aspectFill" />
+      <view class="conversation-main">
+        <view class="conversation-name">{{item.peerName || '球友'}}<text class="conversation-status">{{item.stateLabel}}</text></view>
+        <view class="conversation-preview">{{item.preview}}</view>
+        <view class="muted conversation-time">{{item.timeLabel}}</view>
+      </view>
+      <view class="conversation-tail"><view wx:if="{{item.unreadCount}}" class="unread-badge">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</view><view class="conversation-arrow">›</view></view>
     </view>
     <view class="list-footer">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
   </view>

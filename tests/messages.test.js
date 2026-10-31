@@ -6,7 +6,7 @@ const vm = require('node:vm');
 function loadMessages(api) {
   let definition;
   vm.runInNewContext(fs.readFileSync('pages/messages/index.js', 'utf8'), {
-    Page: value => { definition = value; }, require: () => api,
+    Page: value => { definition = value; }, require: name => name.endsWith('/api') ? api : require('../data/conversation-list'),
     wx: { stopPullDownRefresh() {} }, setTimeout: () => 1, clearTimeout() {}, console
   });
   definition.data = { ...definition.data };
@@ -39,6 +39,6 @@ test('消息列表显示球局分组和会话各自的未读数', () => {
   const source = fs.readFileSync('pages/messages/index.wxml', 'utf8');
   assert.match(source, /wx:for="\{\{conversationGroups\}\}"/);
   assert.match(source, /wx:for="\{\{item\.conversations\}\}"/);
-  assert.match(source, /item\.unreadCount/);
+  assert.match(source, /conversation\.unreadCount/);
   assert.match(source, /conversation\.peerAvatar/);
 });

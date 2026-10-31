@@ -1,4 +1,5 @@
 const api = require('../../data/api');
+const conversationList = require('../../data/conversation-list');
 
 Page({
   data: { match: null, conversations: [], page: 1, hasMore: true, loading: true, loadingMore: false, loadError: '' },
@@ -20,11 +21,7 @@ Page({
     try {
       const [match, rows] = await Promise.all([api.getMatch(this.matchId), api.getMatchConversations(this.matchId, page, 10)]);
       if (requestId !== this._requestId) return;
-      const conversations = rows.map(item => Object.assign({}, item, {
-        preview: item.lastMessage || (item.hostConfirmed && item.guestConfirmed ? '双方已确认组局' : '组局确认邀请'),
-        timeLabel: new Date(item.lastMessageAt || item.guestConfirmedAt || item.hostConfirmedAt || item.createdAt).toLocaleString('zh-CN'),
-        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'matched' ? (item.won ? '已组局' : '本次未组局') : item.displayEnded ? '已结束' : '招募中'
-      }));
+      const conversations = conversationList.groupConversations(rows).reduce((all, group) => all.concat(group.conversations), []);
       this.setData({ match, conversations: append ? this.data.conversations.concat(conversations) : conversations,
         page, hasMore: rows.length === 10, loading: false, loadingMore: false, loadError: '' });
       this._loaded = true;
