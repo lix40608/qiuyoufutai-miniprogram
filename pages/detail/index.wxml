@@ -22,19 +22,21 @@
   </view>
 
   <view wx:if="{{match}}" class="card contact-card">
-    <view class="contact-copy">
-      <view class="contact-title">本场微信联系</view>
-      <view wx:if="{{contactSharingError}}" class="contact-hint">仅最终确认组局双方可查看，暂时无法读取。</view>
-      <view wx:elif="{{contactSharing && contactSharing.peerWechatId}}" class="contact-hint">对方微信号：{{contactSharing.peerWechatId}}</view>
-      <view wx:elif="{{contactSharing && match.status === 'matched'}}" class="contact-hint">对方暂未填写微信号</view>
-      <view wx:elif="{{match.status === 'matched'}}" class="contact-hint">仅最终确认组局双方可查看微信号</view>
-      <view wx:else class="contact-hint">双方确认组局后，最终组局双方可查看并复制</view>
+    <view class="contact-main-row">
+      <view class="contact-copy">
+        <view class="contact-title">本场微信联系</view>
+        <view wx:if="{{contactSharingError}}" class="contact-hint">仅最终确认组局双方可查看，暂时无法读取。</view>
+        <view wx:elif="{{contactSharing && contactSharing.peerWechatId}}" class="contact-hint">对方微信号：{{contactSharing.peerWechatId}}</view>
+        <view wx:elif="{{contactSharing && match.status === 'matched'}}" class="contact-hint">对方暂未填写微信号</view>
+        <view wx:elif="{{match.status === 'matched'}}" class="contact-hint">仅最终确认组局双方可查看微信号</view>
+        <view wx:else class="contact-hint">双方确认组局后，最终组局双方可查看并复制</view>
+      </view>
+      <button class="contact-action {{contactSharing && contactSharing.peerWechatId ? '' : 'contact-action-disabled'}}" disabled="{{!contactSharing || !contactSharing.peerWechatId}}" bindtap="copyPeerWechatId">复制微信号</button>
     </view>
-    <button class="contact-action {{contactSharing && contactSharing.peerWechatId ? '' : 'contact-action-disabled'}}" disabled="{{!contactSharing || !contactSharing.peerWechatId}}" bindtap="copyPeerWechatId">复制微信号</button>
-  </view>
-  <view wx:if="{{match && match.status === 'matched' && contactSharing}}" class="contact-sharing-control">
-    <text>{{contactSharing.canShare ? '你已填写微信号；本场双方可在详情查看并复制' : '填写后，本场双方可在详情查看并复制'}}</text>
-    <text wx:if="{{!contactSharing.canShare}}" class="contact-sharing-link" bindtap="openWechatProfile">去填写</text>
+    <view wx:if="{{match.status === 'matched' && contactSharing && !contactSharing.canShare}}" class="contact-sharing-control">
+      <text class="contact-sharing-copy">填写微信号后，本场双方可在详情查看并复制</text>
+      <text class="contact-sharing-link" bindtap="openWechatProfile">去填写 ›</text>
+    </view>
   </view>
   <view wx:if="{{!isHost && match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openChat" data-focus="confirm">确认组局</button>
