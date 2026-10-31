@@ -59,6 +59,11 @@ Page({
 
   onWechatInput(event) { this._wechatDraft = event.detail.value; },
 
+  clearWechatDraft() {
+    this._wechatDraft = '';
+    this.setData({ wechatDraft: '' });
+  },
+
   onWechatKeyboardHeightChange(event) {
     const keyboardVisible = Number(event.detail.height) > 0;
     if (keyboardVisible !== this.data.keyboardVisible) this.setData({ keyboardVisible });

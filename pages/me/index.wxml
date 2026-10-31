@@ -69,7 +69,10 @@
   <view wx:if="{{wechatEditorVisible}}" class="modal-mask" catchtap="closeWechatEditor">
     <view class="wechat-editor-modal {{keyboardVisible ? 'keyboard-open' : ''}}" catchtap="stopModalTap">
       <view class="modal-title">填写微信号</view>
-      <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
+      <view class="wechat-input-wrap">
+        <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
+        <text wx:if="{{wechatDraft}}" class="wechat-clear" catchtap="clearWechatDraft">清空</text>
+      </view>
       <view class="wechat-modal-hint">填写并保存后，双方确认组局时，本场对方可查看并复制；不会公开展示。</view>
       <view class="modal-actions"><button class="modal-secondary" bindtap="closeWechatEditor">取消</button><button class="modal-primary" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
     </view>
