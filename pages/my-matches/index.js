@@ -59,7 +59,7 @@ Page({
         chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0,
         stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中',
         canCancel: item.status === 'matched'
-          ? Boolean(item.startsAt && Date.parse(item.startsAt) > Date.now() && (activeView === 'created' || item.won))
+          ? Boolean(item.cancellationWindowOpen === true && (activeView === 'created' || item.won))
           : activeView === 'created' && item.status === 'recruiting' && !item.displayEnded
       }));
       this.setData({ records: merged, visibleRecords: this.filterRecords(merged), page, hasMore: records.length === 10, loading: false, loadingMore: false });

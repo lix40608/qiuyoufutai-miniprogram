@@ -40,8 +40,7 @@ Page({
       const source = append ? this.data.chatted.concat(records) : records;
       const recent = source.map(item => {
         const distance = locationStore.distanceKm(userLocation, { latitude: item.venueLatitude, longitude: item.venueLongitude });
-        const upcoming = Boolean(item.startsAt && Date.parse(item.startsAt) > Date.now());
-        const canCancel = item.status === 'matched' ? upcoming : item.status === 'recruiting' && !item.displayEnded;
+        const canCancel = item.status === 'matched' ? item.cancellationWindowOpen === true : item.status === 'recruiting' && !item.displayEnded;
         return Object.assign({}, item, { distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '', chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0, canCancel });
       }).sort((a, b) => (Date.parse(b.lastMessageAt || b.updatedAt) || 0) - (Date.parse(a.lastMessageAt || a.updatedAt) || 0) || Number(b.id) - Number(a.id));
       if (view === 'created') {

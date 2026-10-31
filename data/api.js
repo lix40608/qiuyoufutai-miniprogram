@@ -165,7 +165,7 @@ module.exports = {
     // Bound concurrent detail reads rather than sending hundreds of requests at once.
     for (let offset = 0; offset < conversations.length; offset += 4) {
       const batch = await Promise.all(conversations.slice(offset, offset + 4).map(async item =>
-        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, lastMessage: item.lastMessage, hostConfirmed: item.hostConfirmed, guestConfirmed: item.guestConfirmed, hostConfirmedAt: item.hostConfirmedAt, guestConfirmedAt: item.guestConfirmedAt, unreadCount: item.unreadCount })));
+        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, won: Boolean(item.won), peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, lastMessage: item.lastMessage, hostConfirmed: item.hostConfirmed, guestConfirmed: item.guestConfirmed, hostConfirmedAt: item.hostConfirmedAt, guestConfirmedAt: item.guestConfirmedAt, unreadCount: item.unreadCount })));
       records.push(...batch);
     }
     return records;

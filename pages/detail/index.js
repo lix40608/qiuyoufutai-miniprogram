@@ -34,9 +34,8 @@ Page({
         else contactSharingError = true;
         if (conversationResult.status === 'fulfilled') matchConversation = conversationResult.value;
       }
-      const beforeStart = Boolean(match.startsAt && Date.parse(match.startsAt) > Date.now());
       const isWinningGuest = Boolean(matchConversation && matchConversation.won && String(matchConversation.guestUserId) === String(profile && profile.userId));
-      const canCancelMatch = loggedIn && match.status === 'matched' && beforeStart && (isHost || isWinningGuest);
+      const canCancelMatch = loggedIn && match.status === 'matched' && match.cancellationWindowOpen === true && (isHost || isWinningGuest);
       this.setData({ match, isHost, loggedIn, canCancelMatch, contactSharing, contactSharingError, matchConversation, hasVenueLocation, hasUserLocation: Boolean(userLocation), distanceLabel, markers: hasVenueLocation ? [{ id: 1, latitude: Number(match.venueLatitude), longitude: Number(match.venueLongitude), width: 26, height: 34, title: match.venue }] : [] });
     }).catch((error) => wx.showToast({ title: error.message || '这场约局暂不可用', icon: 'none' }));
   },

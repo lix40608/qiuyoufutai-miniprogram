@@ -163,3 +163,13 @@ test('avatar upload renews an expired token and returns a server URL', async () 
   assert.equal(uploads, 2);
   assert.equal(url.endsWith('/avatars/one.jpg'), true);
 });
+
+test('我聊过的约局保留最终组局标识和服务端取消时限', async () => {
+  const c=client(o => o.url.includes('/conversations')
+    ? ok([{ id: 11, matchId: 7, won: true }])
+    : ok({ id: 7, status: 'matched', cancellationWindowOpen: true, cancellationDeadline: '2026-11-01T06:00:00Z' }), 'session');
+  const records=await c.api.getChattedMatches(1,10);
+  assert.equal(records[0].won,true);
+  assert.equal(records[0].cancellationWindowOpen,true);
+  assert.equal(records[0].cancellationDeadline,'2026-11-01T06:00:00Z');
+});

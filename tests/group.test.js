@@ -123,3 +123,27 @@ test('已组局卡片在聊天只读后仍显示业务状态已组局', async ()
   const detail = fs.readFileSync('pages/detail/index.wxml', 'utf8');
   assert.match(detail, /match\.displayEnded \? '查看聊天' : '进入聊天'/);
 });
+
+test('已组局取消入口使用服务端宽限期，开球后仍可取消且不影响招募规则', async () => {
+  const page=loadAllMatches({ getMyMatches: async () => [
+    { id: 1, status: 'matched', startsAt: new Date(Date.now()-19*60000).toISOString(), cancellationWindowOpen: true },
+    { id: 2, status: 'matched', startsAt: new Date(Date.now()+60000).toISOString(), cancellationWindowOpen: false },
+    { id: 3, status: 'recruiting', displayEnded: false },
+    { id: 4, status: 'recruiting', displayEnded: true }
+  ] }, { stopPullDownRefresh() {} });
+  page.setData=values => Object.assign(page.data,values);
+  await page.loadRecords(1,false);
+  assert.deepEqual(Array.from(page.data.records,item=>item.canCancel),[true,false,true,false]);
+});
+
+test('我聊过的仅最终组局参与者在宽限期内有取消入口', async () => {
+  const page=loadAllMatches({ getChattedMatches: async () => [
+    { id: 1, conversationId: 11, status: 'matched', cancellationWindowOpen: true, won: true },
+    { id: 1, conversationId: 12, status: 'matched', cancellationWindowOpen: true, won: false },
+    { id: 2, conversationId: 13, status: 'matched', cancellationWindowOpen: false, won: true }
+  ] }, { stopPullDownRefresh() {} });
+  page.data.activeView='chatted';
+  page.setData=values => Object.assign(page.data,values);
+  await page.loadRecords(1,false);
+  assert.deepEqual(Array.from(page.data.records,item=>item.canCancel),[true,false,false]);
+});
