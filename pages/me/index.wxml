@@ -53,10 +53,12 @@
       <view wx:if="{{wechatId}}" class="wechat-edit-link" bindtap="openWechatEditor">修改</view>
       <view wx:else class="wechat-fill-link" bindtap="openWechatEditor">去填写 <text>›</text></view>
     </view>
-    <view wx:if="{{wechatId}}" class="wechat-value">{{wechatId}}</view>
+    <view wx:if="{{wechatId}}" class="wechat-value-row">
+      <view class="wechat-value">{{wechatId}}</view>
+      <view class="wechat-clear-saved" catchtap="clearSavedWechat">清除</view>
+    </view>
     <view class="wechat-footer {{wechatId ? 'wechat-footer-filled' : ''}}">
       <view class="wechat-hint">{{wechatId ? '组局成功后，对方可复制联系你' : '填写后，本场组局成功的球友可复制联系你'}}</view>
-      <view wx:if="{{wechatId}}" class="wechat-clear-saved" catchtap="clearSavedWechat">清除</view>
     </view>
   </view>
 

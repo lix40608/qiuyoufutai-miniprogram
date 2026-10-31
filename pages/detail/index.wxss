@@ -36,16 +36,6 @@
 .contact-sharing-control { display:flex; align-items:flex-start; justify-content:space-between; gap:16rpx; min-width:0; margin:16rpx 0 0; padding-top:14rpx; border-top:1rpx solid #edf1eb; color:#89968d; font-size:21rpx; line-height:1.5; }
 .contact-sharing-copy { flex:1; min-width:0; overflow-wrap:anywhere; word-break:break-word; }
 .contact-sharing-link { flex:none; white-space:nowrap; color:#197257; font-weight:700; }
-.detail-wechat-mask { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:40rpx; box-sizing:border-box; background:rgba(20,37,30,.48); }
-.detail-wechat-modal { width:100%; box-sizing:border-box; padding:34rpx 30rpx 26rpx; border-radius:24rpx; background:#fffefa; box-shadow:0 18rpx 58rpx rgba(19,43,32,.2); }
-.detail-wechat-modal.keyboard-open { transform:translateY(-140rpx); }
-.detail-wechat-title { color:#173128; font-size:32rpx; font-weight:800; text-align:center; }
-.detail-wechat-input { width:100%; height:84rpx; margin-top:26rpx; padding:0 22rpx; box-sizing:border-box; border:1rpx solid #dfe5da; border-radius:14rpx; background:#f7f8f4; color:#173128; font-size:27rpx; }
-.detail-wechat-hint { margin-top:16rpx; color:#718178; font-size:22rpx; line-height:1.6; }
-.detail-wechat-actions { display:flex; gap:16rpx; margin-top:30rpx; }
-.detail-wechat-actions button { display:flex; flex:1 1 0; align-items:center; justify-content:center; min-width:0; height:82rpx; margin:0; padding:0 16rpx; box-sizing:border-box; border-radius:16rpx; font-size:26rpx; font-weight:700; line-height:1.2; text-align:center; }
-.detail-wechat-cancel { border:1rpx solid #dfe5da; background:#f7f8f4; color:#65766d; }
-.detail-wechat-save { background:#197257; color:#fffefa; }
 .contact-peer-state { flex:none; color:#8b968e; font-size:22rpx; }
 
 .detail-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:26rpx}.status{color:#287f60;background:#eaf5eb;border-radius:24rpx;padding:7rpx 14rpx;font-size:21rpx}.detail-label{font-size:21rpx;color:#91a197}.venue-name{font-size:34rpx;line-height:1.35;margin-top:8rpx;color:#193c30}.time-block{display:flex;align-items:center;gap:14rpx;margin-top:22rpx;padding:16rpx 18rpx;border-radius:16rpx;background:#f0f6f0}.time-icon{width:42rpx;height:42rpx;line-height:42rpx;text-align:center;border-radius:50%;background:#dceee0;color:#21775c;font-size:28rpx}.time-value{margin-top:4rpx;font-size:26rpx;font-weight:650;color:#235440}.address-row{display:flex;align-items:center;gap:18rpx;margin-top:18rpx}.address-copy{flex:1;min-width:0}.address-value{margin-top:6rpx;color:#536a5c;font-size:24rpx;line-height:1.5}.text-link{flex:none}.detail-information{margin-top:22rpx}.info-row{display:flex;align-items:flex-start;gap:24rpx;margin-top:14rpx;color:#536a5c;font-size:24rpx;line-height:1.5}.info-label{flex:none;color:#91a197}.info-note{white-space:pre-wrap;word-break:break-all}

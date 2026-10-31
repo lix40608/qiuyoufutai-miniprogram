@@ -23,7 +23,8 @@
 .wechat-label { color:#748279; font-size:23rpx; font-weight:650; line-height:1.4; }
 .wechat-edit-link,.wechat-fill-link { display:flex; flex:none; align-items:center; min-height:48rpx; color:#197257; font-size:23rpx; font-weight:650; white-space:nowrap; }
 .wechat-fill-link text { margin-left:4rpx; font-size:28rpx; }
-.wechat-value { margin-top:10rpx; color:#193c30; font-size:30rpx; font-weight:650; line-height:1.4; overflow-wrap:anywhere; word-break:break-all; }
+.wechat-value-row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-top:8rpx; }
+.wechat-value { flex:1; min-width:0; color:#193c30; font-size:30rpx; font-weight:650; line-height:1.4; overflow-wrap:anywhere; word-break:break-all; }
 .wechat-footer { display:flex; align-items:center; justify-content:space-between; gap:12rpx; margin-top:12rpx; }
 .wechat-footer-filled { margin-top:14rpx; padding-top:12rpx; border-top:1rpx solid #edf0ea; }
 .wechat-hint { flex:1; min-width:0; color:#89968d; font-size:21rpx; line-height:1.45; }

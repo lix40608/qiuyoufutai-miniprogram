@@ -34,8 +34,8 @@
       <button class="contact-action {{contactSharing && contactSharing.peerWechatId ? '' : 'contact-action-disabled'}}" disabled="{{!contactSharing || !contactSharing.peerWechatId}}" bindtap="copyPeerWechatId">复制微信号</button>
     </view>
     <view wx:if="{{match.status === 'matched' && contactSharing && !contactSharing.canShare}}" class="contact-sharing-control">
-      <text class="contact-sharing-copy">微信号尚未填写，可前往「我的」填写；完成后，对方即可在本场详情复制你的微信号联系你</text>
-      <text class="contact-sharing-link" bindtap="openWechatEditor">快捷填写 ›</text>
+      <text class="contact-sharing-copy">尚未填写微信号，填写后对方可复制联系你</text>
+      <text class="contact-sharing-link" bindtap="goToWechatSettings">前往我的填写 ›</text>
     </view>
   </view>
   <view wx:if="{{!isHost && match.status === 'recruiting' && !match.displayEnded}}" class="card-actions">
@@ -44,14 +44,6 @@
   </view>
   <view wx:if="{{loggedIn && match.status === 'matched' && matchConversation}}" class="card-actions">
     <button class="primary-button action-button" bindtap="openMatchedChat" data-id="{{matchConversation.id}}">进入聊天</button>
-  </view>
-  <view wx:if="{{wechatEditorVisible}}" class="detail-wechat-mask" catchtap="closeWechatEditor">
-    <view class="detail-wechat-modal {{keyboardVisible ? 'keyboard-open' : ''}}" catchtap="stopModalTap">
-      <view class="detail-wechat-title">填写微信号</view>
-      <input class="detail-wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
-      <view class="detail-wechat-hint">保存后，对方即可在本场详情复制你的微信号联系你。</view>
-      <view class="detail-wechat-actions"><button class="detail-wechat-cancel" bindtap="closeWechatEditor">取消</button><button class="detail-wechat-save" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
-    </view>
   </view>
   <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>
