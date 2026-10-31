@@ -104,6 +104,8 @@ Page({
 
   cancelRecord(event) {
     const { id } = event.currentTarget.dataset;
+    const record = this.data.records.find(item => String(item.id) === String(id));
+    if (!record || record.status !== 'recruiting' || record.displayEnded) return;
     wx.showModal({
       title: '取消这场约局？',
       content: '取消后将从当前列表隐藏，历史约局和已有聊天仍会保留，聊天停止发送与确认。',

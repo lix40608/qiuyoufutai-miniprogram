@@ -73,3 +73,15 @@ test('全部约球中的发起记录卡片点击进详情，聊天按钮进球�
   assert.equal(destinations[0], '/pages/detail/index?id=7');
   assert.equal(destinations[1], '/pages/match-chats/index?matchId=7');
 });
+
+test('过期招募记录仍保留在列表，但卡片不提供取消操作', () => {
+  const page = loadAllMatches({}, {});
+  page.data = { ...page.data, activeView: 'created', activeFilter: 'all' };
+  const records = [
+    { id: 1, status: 'recruiting', displayEnded: false },
+    { id: 2, status: 'recruiting', displayEnded: true }
+  ];
+  assert.deepEqual(Array.from(page.filterRecords(records), item => item.id), [1, 2]);
+  const wxml = fs.readFileSync('pages/my-matches/index.wxml', 'utf8');
+  assert.match(wxml, /item\.status === 'recruiting' && !item\.displayEnded/);
+});
