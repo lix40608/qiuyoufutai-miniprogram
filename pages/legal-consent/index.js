@@ -4,7 +4,7 @@ Page({
   data: { agreementChecked: false, submitting: false, error: '' },
 
   onLoad() {
-    if (api.hasCurrentLegalAcceptance()) this.enterApp();
+    if (api.isLoggedIn()) this.enterApp();
   },
 
   toggleAgreement() { this.setData({ agreementChecked: !this.data.agreementChecked, error: '' }); },

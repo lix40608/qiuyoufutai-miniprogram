@@ -30,32 +30,8 @@ function request(path, options = {}) {
 }
 
 function ensureLogin() {
-  if (!hasCurrentLegalAcceptance()) {
-    redirectToLegalConsent();
-    return Promise.reject(legalConsentRequiredError());
-  }
   if (wx.getStorageSync(TOKEN_KEY)) return Promise.resolve();
-  if (loginPromise) return loginPromise;
-  loginPromise = new Promise((resolve, reject) => {
-    wx.login({
-      success(result) {
-        if (!result.code) return reject(new Error('微信登录失败，请重试'));
-        request('/v1/auth/login', { method: 'POST', data: loginPayload(result.code) }).then((session) => {
-          if (!session || !session.token) throw new Error('登录会话无效，请重试');
-          wx.setStorageSync(TOKEN_KEY, session.token);
-          resolve();
-        }).catch(reject);
-      },
-      fail: () => reject(new Error('微信登录失败，请重试'))
-    });
-  }).finally(() => { loginPromise = null; });
-  return loginPromise;
-}
-
-function redirectToLegalConsent() {
-  const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
-  const current = pages.length ? pages[pages.length - 1].route : '';
-  if (current !== 'pages/legal-consent/index') wx.redirectTo({ url: '/pages/legal-consent/index' });
+  return loginWithConsent(false).then(() => undefined);
 }
 
 function withLogin(path, options) {
@@ -95,10 +71,23 @@ function normalizeMatch(match) {
 }
 
 module.exports = {
-  isLoggedIn: () => Boolean(wx.getStorageSync(TOKEN_KEY) && hasCurrentLegalAcceptance()),
+  isLoggedIn: () => Boolean(wx.getStorageSync(TOKEN_KEY)),
   ensureLogin,
   legalVersions: () => ({ userAgreementVersion: USER_AGREEMENT_VERSION, privacyPolicyVersion: PRIVACY_POLICY_VERSION }),
   hasCurrentLegalAcceptance,
+  shouldShowLegalUpdateReminder() {
+    const acceptance = wx.getStorageSync(LEGAL_ACCEPTANCE_KEY);
+    if (!acceptance || hasCurrentLegalAcceptance()) return false;
+    const reminderKey = `${USER_AGREEMENT_VERSION}:${PRIVACY_POLICY_VERSION}`;
+    if (wx.getStorageSync('qiuyou-futai.legal-update-reminder.v1') === reminderKey) return false;
+    wx.setStorageSync('qiuyou-futai.legal-update-reminder.v1', reminderKey);
+    return true;
+  },
+  login(accepted) {
+    const token = wx.getStorageSync(TOKEN_KEY);
+    if (token) return Promise.resolve({ token });
+    return loginWithConsent(Boolean(accepted));
+  },
   acceptLegalTerms() {
     const consent = loginPayload();
     const token = wx.getStorageSync(TOKEN_KEY);
@@ -228,24 +217,30 @@ function hasCurrentLegalAcceptance() {
     && acceptance.privacyPolicyVersion === PRIVACY_POLICY_VERSION);
 }
 
-function loginPayload(code) {
-  const consent = {
+function loginPayload(code, accepted = true) {
+  const consent = accepted ? {
     userAgreementVersion: USER_AGREEMENT_VERSION,
     privacyPolicyVersion: PRIVACY_POLICY_VERSION
-  };
+  } : {};
   if (code) consent.code = code;
   return consent;
 }
 
-function loginWithConsent() {
+function loginWithConsent(accepted = true) {
   if (loginPromise) return loginPromise;
   loginPromise = new Promise((resolve, reject) => {
     wx.login({
       success(result) {
         if (!result.code) return reject(new Error('微信登录失败，请重试'));
-        request('/v1/auth/login', { method: 'POST', data: loginPayload(result.code) }).then((session) => {
+        request('/v1/auth/login', { method: 'POST', data: loginPayload(result.code, accepted) }).then((session) => {
           if (!session || !session.token) throw new Error('登录会话无效，请重试');
           wx.setStorageSync(TOKEN_KEY, session.token);
+          if (session.legalAcceptanceRecorded) {
+            wx.setStorageSync(LEGAL_ACCEPTANCE_KEY, {
+              userAgreementVersion: USER_AGREEMENT_VERSION,
+              privacyPolicyVersion: PRIVACY_POLICY_VERSION
+            });
+          }
           resolve(session);
         }).catch(reject);
       },
@@ -253,12 +248,6 @@ function loginWithConsent() {
     });
   }).finally(() => { loginPromise = null; });
   return loginPromise;
-}
-
-function legalConsentRequiredError() {
-  const error = new Error('请先阅读并同意用户协议和隐私政策，并确认已满18周岁');
-  error.code = 'LEGAL_CONSENT_REQUIRED';
-  return error;
 }
 
 function absoluteAvatarUrl(url) {

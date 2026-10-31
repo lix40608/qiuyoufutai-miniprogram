@@ -98,7 +98,6 @@ Page({
         if (!result.confirm) return;
         api.logout().then(() => {
           wx.removeStorageSync('qiuyou-futai.session-token.v1');
-          wx.removeStorageSync('qiuyou-futai.legal-acceptance.v1');
           wx.reLaunch({ url: '/pages/welcome/index' });
         }).catch((error) => wx.showToast({ title: error.message || '退出失败，请重试', icon: 'none' }));
       }

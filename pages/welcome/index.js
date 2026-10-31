@@ -3,7 +3,7 @@ const api = require('../../data/api');
 Page({
   data: {},
   onShow() {
-    if (api.isLoggedIn() && api.hasCurrentLegalAcceptance()) {
+    if (api.isLoggedIn()) {
       wx.switchTab({ url: '/pages/home/index' });
     } else if (!api.isLoggedIn() && wx.getStorageSync('qiuyou-futai.guest-intro-seen.v1')) {
       wx.switchTab({ url: '/pages/home/index' });

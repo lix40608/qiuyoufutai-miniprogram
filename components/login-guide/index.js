@@ -18,6 +18,9 @@ Component({
       const kind = options.kind || 'chat';
       const text = copy[kind] || copy.chat;
       this.setData({ visible: true, accepted: false, submitting: false, error: '', title: text[0], description: text[1] });
+      if (api.shouldShowLegalUpdateReminder()) {
+        wx.showToast({ title: '用户协议和隐私政策已更新', icon: 'none', duration: 2500 });
+      }
     },
     close() { if (!this.data.submitting) this.setData({ visible: false, error: '' }); },
     stopTap() {},
@@ -27,14 +30,17 @@ Component({
       wx.navigateTo({ url: `/pages/legal/index?type=${type}` });
     },
     async login() {
-      if (!this.data.accepted || this.data.submitting) return;
+      if (this.data.submitting) return;
       this.setData({ submitting: true, error: '' });
       try {
-        await api.acceptLegalTerms();
+        await api.login(this.data.accepted);
         this.setData({ visible: false, submitting: false });
         this.triggerEvent('success');
       } catch (error) {
-        this.setData({ submitting: false, error: error.message || '登录暂时不可用，请稍后重试。' });
+        const message = error.code === 'LEGAL_CONSENT_REQUIRED'
+          ? '首次创建账号前，请阅读并勾选同意《用户协议》和《隐私政策》。'
+          : (error.message || '登录暂时不可用，请稍后重试。');
+        this.setData({ submitting: false, error: message });
       }
     }
   }
