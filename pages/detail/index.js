@@ -5,7 +5,11 @@ const locationStore = require('../../data/location-store');
 Page({
   data: {
     match: null,
-    loggedIn: false
+    loggedIn: false,
+    wechatEditorVisible: false,
+    wechatDraft: '',
+    savingWechat: false,
+    keyboardVisible: false
   },
 
   onLoad(query) { this._matchId = query.id; },
@@ -63,7 +67,31 @@ Page({
     wx.setClipboardData({ data: wechatId, success: () => wx.showToast({ title: '微信号已复制', icon: 'success' }) });
   },
 
-  openWechatProfile() { wx.navigateTo({ url: '/pages/personal-profile/index?section=personal' }); },
+  openWechatEditor() {
+    this.setData({ wechatDraft: '', wechatEditorVisible: true, keyboardVisible: false });
+    this._wechatDraft = '';
+  },
+
+  closeWechatEditor() { if (!this.data.savingWechat) this.setData({ wechatEditorVisible: false, keyboardVisible: false }); },
+  stopModalTap() {},
+  onWechatInput(event) { this._wechatDraft = event.detail.value; },
+  onWechatKeyboardHeightChange(event) { this.setData({ keyboardVisible: Number(event.detail.height) > 0 }); },
+
+  saveWechatId() {
+    if (this.data.savingWechat) return;
+    const wechatId = (this._wechatDraft || '').trim();
+    if (!/^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(wechatId)) {
+      wx.showToast({ title: '微信号需为6至20位，以字母开头', icon: 'none' });
+      return;
+    }
+    this.setData({ savingWechat: true });
+    api.saveMyWechatContact(wechatId).then(() => {
+      const contactSharing = Object.assign({}, this.data.contactSharing, { canShare: true });
+      this.setData({ contactSharing, wechatEditorVisible: false, keyboardVisible: false });
+      wx.showToast({ title: '微信号已保存', icon: 'success' });
+    }).catch((error) => wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' }))
+      .finally(() => this.setData({ savingWechat: false }));
+  },
 
   openHostProfile(event) {
     const userId = event.currentTarget.dataset.userId;

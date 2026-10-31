@@ -28,14 +28,6 @@
     </view>
     <view wx:if="{{errors.gender}}" class="field-error">{{errors.gender}}</view>
   </view>
-  <view class="section-title">约球联系方式</view>
-  <view class="profile-group contact-profile-group">
-    <view class="field-row">
-      <view class="row-label">微信号 <text class="optional">选填</text></view>
-      <input class="row-input" maxlength="20" placeholder="填写微信号" value="{{wechatId}}" adjust-position="false" cursor-spacing="24" bindinput="onWechatIdInput" />
-    </view>
-    <view class="contact-privacy-note">填写并保存后，双方确认组局时，本场对方可在详情查看并复制；不填写不影响站内聊天。</view>
-  </view>
   <view id="archive-section" class="section-title">球员档案</view>
   <view class="profile-group archive-group">
     <view class="archive-label">常打玩法 <text class="optional">选填，可多选</text></view>
