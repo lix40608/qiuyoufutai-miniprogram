@@ -34,7 +34,7 @@
       <button class="contact-action {{contactSharing && contactSharing.peerWechatId ? '' : 'contact-action-disabled'}}" disabled="{{!contactSharing || !contactSharing.peerWechatId}}" bindtap="copyPeerWechatId">复制微信号</button>
     </view>
     <view wx:if="{{match.status === 'matched' && contactSharing && !contactSharing.canShare}}" class="contact-sharing-control">
-      <text class="contact-sharing-copy">微信号尚未填写，可前往「我的」填写；填写后，本场双方可在详情查看并复制</text>
+      <text class="contact-sharing-copy">微信号尚未填写，可前往「我的」填写；完成后，对方即可在本场详情复制你的微信号联系你</text>
       <text class="contact-sharing-link" bindtap="openWechatEditor">快捷填写 ›</text>
     </view>
   </view>
@@ -49,7 +49,7 @@
     <view class="detail-wechat-modal {{keyboardVisible ? 'keyboard-open' : ''}}" catchtap="stopModalTap">
       <view class="detail-wechat-title">填写微信号</view>
       <input class="detail-wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" adjust-position="false" cursor-spacing="24" bindinput="onWechatInput" bindkeyboardheightchange="onWechatKeyboardHeightChange" />
-      <view class="detail-wechat-hint">保存后，本场双方可在详情查看并复制。</view>
+      <view class="detail-wechat-hint">保存后，对方即可在本场详情复制你的微信号联系你。</view>
       <view class="detail-wechat-actions"><button class="detail-wechat-cancel" bindtap="closeWechatEditor">取消</button><button class="detail-wechat-save" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
     </view>
   </view>
