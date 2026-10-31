@@ -18,11 +18,25 @@
 .archive-intro { color: #43584d; font-size: 25rpx; line-height: 1.55; }
 .archive-games { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
 .archive-game { padding: 8rpx 14rpx; border-radius: 20rpx; background: #e8efe5; color: #197257; font-size: 21rpx; }
-.legal-entry-card { display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-top:22rpx; padding:18rpx 22rpx; }
-.legal-entry-title { flex:none; color:#30473c; font-size:23rpx; font-weight:700; }
-.legal-entry-links { display:flex; flex:1; justify-content:flex-end; gap:22rpx; }
-.legal-entry-link { color:#197257; font-size:23rpx; font-weight:650; }
-.legal-entry-link text { padding-left:4rpx; color:#98a69d; }
+.wechat-card { padding: 22rpx 24rpx 18rpx; }
+.wechat-row { display:flex; align-items:center; justify-content:space-between; gap:18rpx; }
+.wechat-label { font-size:26rpx; font-weight:700; }
+.wechat-edit-button { margin:0; padding:8rpx 18rpx; border:1rpx solid #bdd3c5; border-radius:12rpx; background:#edf5ef; color:#197257; font-size:23rpx; font-weight:700; line-height:1.5; }
+.wechat-hint { margin-top:13rpx; color:#718178; font-size:22rpx; line-height:1.55; }
+.about-menu { margin-top:18rpx; }
+.account-title { margin-top:40rpx; }
+.account-action-button { display:flex; align-items:center; justify-content:center; width:100%; height:88rpx; margin:16rpx 0 0; border:1rpx solid #dfe5da; border-radius:20rpx; background:#fffefa; color:#385347; font-size:27rpx; font-weight:700; line-height:1; }
+.delete-account-button { margin-top:14rpx; border-color:#e7c9c5; background:#fff9f8; color:#bd4d46; }
+.modal-mask { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:40rpx; box-sizing:border-box; background:rgba(20,37,30,.48); }
+.wechat-editor-modal { width:100%; padding:34rpx 30rpx 26rpx; border-radius:24rpx; background:#fffefa; box-shadow:0 18rpx 58rpx rgba(19,43,32,.2); }
+.modal-title { color:#173128; font-size:32rpx; font-weight:800; text-align:center; }
+.wechat-input { height:84rpx; margin-top:26rpx; padding:0 22rpx; box-sizing:border-box; border:1rpx solid #dfe5da; border-radius:14rpx; background:#f7f8f4; color:#173128; font-size:27rpx; }
+.wechat-modal-hint { margin-top:16rpx; color:#718178; font-size:22rpx; line-height:1.6; }
+.modal-actions { display:flex; gap:16rpx; margin-top:30rpx; }
+.modal-actions button { flex:1; height:82rpx; margin:0; border-radius:16rpx; font-size:26rpx; font-weight:700; line-height:82rpx; }
+.modal-secondary { border:1rpx solid #dfe5da; background:#f7f8f4; color:#65766d; }
+.modal-primary { background:#197257; color:#fffefa; }
+.modal-primary[disabled] { opacity:.6; }
 
 /* 用球面高光、暗部和柔和投影表现黑八的材质。 */
 .eight-ball{box-sizing:border-box;border:1rpx solid #25292a;background:radial-gradient(ellipse at 28% 19%,rgba(255,255,255,.7) 0%,rgba(255,255,255,.24) 7%,rgba(255,255,255,0) 21%),radial-gradient(circle at 36% 28%,#505456 0%,#1e2223 40%,#080a0b 76%,#020303 100%);box-shadow:inset -5rpx -7rpx 12rpx rgba(0,0,0,.65),inset 2rpx 2rpx 5rpx rgba(255,255,255,.13),0 3rpx 7rpx rgba(0,0,0,.2)}

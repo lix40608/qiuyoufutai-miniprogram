@@ -1,12 +1,5 @@
 <view class="page me-page">
   <view class="page-title">我的</view>
-  <view class="legal-entry-card card">
-    <view class="legal-entry-title">协议与隐私</view>
-    <view class="legal-entry-links">
-      <view class="legal-entry-link" data-type="terms" bindtap="openLegal">用户协议 <text>›</text></view>
-      <view class="legal-entry-link" data-type="privacy" bindtap="openLegal">隐私政策 <text>›</text></view>
-    </view>
-  </view>
   <view class="section-title">个人资料</view>
   <view class="card personal-card" bindtap="editPersonalProfile">
     <view class="personal-avatar">
@@ -40,7 +33,25 @@
   </view>
 
   <view class="section-title settings-title">设置</view>
-  <view class="card menu-card" bindtap="editContactProfile">
-    <view><view>微信号</view><view class="muted">选填，仅可按单场约局授权分享</view></view><view class="muted">管理 ›</view>
+  <view class="card wechat-card">
+    <view class="wechat-row"><view class="wechat-label">微信号</view><button class="wechat-edit-button" bindtap="openWechatEditor">{{wechatId ? '修改' : '去填写'}}</button></view>
+    <view class="wechat-hint">仅在双方确认组局后，经你授权向本场对方展示；不会公开显示。</view>
+  </view>
+
+  <view class="card menu-card about-menu" bindtap="openAboutUs">
+    <view><view>关于我们</view><view class="muted">用户协议、隐私政策与产品信息</view></view><text class="muted">›</text>
+  </view>
+
+  <view class="section-title account-title">账号管理</view>
+  <button class="account-action-button logout-button" bindtap="confirmLogout">退出登录</button>
+  <button class="account-action-button delete-account-button" bindtap="confirmDeleteAccount">注销账号</button>
+
+  <view wx:if="{{wechatEditorVisible}}" class="modal-mask" catchtap="closeWechatEditor">
+    <view class="wechat-editor-modal" catchtap="stopModalTap">
+      <view class="modal-title">填写微信号</view>
+      <input class="wechat-input" value="{{wechatDraft}}" maxlength="20" placeholder="请输入微信号" bindinput="onWechatInput" />
+      <view class="wechat-modal-hint">微信号仅用于约球后的联系。你可以按单场授权对方查看；不会公开展示。</view>
+      <view class="modal-actions"><button class="modal-secondary" bindtap="closeWechatEditor">取消</button><button class="modal-primary" loading="{{savingWechat}}" disabled="{{savingWechat}}" bindtap="saveWechatId">保存</button></view>
+    </view>
   </view>
 </view>

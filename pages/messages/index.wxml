@@ -27,7 +27,7 @@
     <view wx:if="{{loading}}" class="empty-state">正在读取通知…</view>
     <view wx:elif="{{!notifications.length && !notificationError}}" class="empty-state"><view class="empty-title">暂时没有通知</view><view class="muted">约局状态变化和公开展示结束会显示在这里。</view></view>
     <view wx:for="{{notifications}}" wx:key="id" class="card notification-row {{item.unread ? 'notification-unread' : ''}}" data-id="{{item.id}}" data-match-id="{{item.matchId}}" bindtap="openNotification">
-      <view class="notification-mark">{{item.type === 'CANCELLED' ? '×' : item.type === 'DISPLAY_ENDED' ? '·' : '✓'}}</view>
+      <view class="notification-mark">{{item.type === 'CANCELLED' || item.type === 'PARTICIPANT_LEFT' ? '×' : item.type === 'DISPLAY_ENDED' ? '·' : '✓'}}</view>
       <view class="notification-main"><view class="notification-title">{{item.title}}<text wx:if="{{item.unread}}" class="notification-dot"></text></view><view class="notification-content">{{item.content}}</view><view class="muted">{{item.timeLabel}}</view></view>
       <view class="notification-arrow">›</view>
     </view>

@@ -1,0 +1,20 @@
+<view class="page about-page">
+  <view class="about-brand card">
+    <image class="about-logo" src="/assets/eight-ball.png" mode="aspectFit" />
+    <view class="about-name">球友赴台</view>
+    <view class="about-description">连接同城球友，约一场好球</view>
+  </view>
+
+  <view class="section-title">协议与说明</view>
+  <view class="card about-links">
+    <view class="about-link" data-type="terms" bindtap="openLegal">
+      <view><view class="about-link-title">用户协议</view><view class="muted">了解服务规则与账号约定</view></view>
+      <text class="muted">›</text>
+    </view>
+    <view class="about-divider"></view>
+    <view class="about-link" data-type="privacy" bindtap="openLegal">
+      <view><view class="about-link-title">隐私政策</view><view class="muted">了解个人信息的处理方式</view></view>
+      <text class="muted">›</text>
+    </view>
+  </view>
+</view>

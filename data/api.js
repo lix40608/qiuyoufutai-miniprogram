@@ -117,6 +117,11 @@ module.exports = {
     });
   },
   getProfile: () => withLogin('/v1/me/profile').then(normalizeProfile),
+  logout: () => request('/v1/me/logout', { method: 'POST' }).catch((error) => {
+    if (error.statusCode === 401) return { loggedOut: true };
+    throw error;
+  }),
+  deleteAccount: () => request('/v1/me/account', { method: 'DELETE' }),
   saveProfile: (profile) => withLogin('/v1/me/profile', { method: 'PUT', data: Object.assign({}, profile, { gender: genderValue(profile.gender), age: profile.age === '' ? null : Number(profile.age), avatarUrl: stripBaseUrl(Object.prototype.hasOwnProperty.call(profile, 'avatarUrl') ? profile.avatarUrl : (profile.avatarPath || '')) }) }).then(normalizeProfile),
   getMyWechatContact: () => withLogin('/v1/me/wechat-contact'),
   saveMyWechatContact: (wechatId) => withLogin('/v1/me/wechat-contact', { method: 'PUT', data: { wechatId: (wechatId || '').trim() } }),

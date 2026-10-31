@@ -1,0 +1,11 @@
+.about-page { padding-top: 34rpx; }
+.about-brand { display:flex; flex-direction:column; align-items:center; padding:38rpx 24rpx; }
+.about-logo { width:104rpx; height:104rpx; }
+.about-name { margin-top:14rpx; color:#173d32; font-size:32rpx; font-weight:800; }
+.about-description { margin-top:8rpx; color:#718178; font-size:23rpx; }
+.section-title { margin:36rpx 4rpx 10rpx; color:#173d32; font-size:27rpx; font-weight:800; }
+.about-links { padding:0 24rpx; }
+.about-link { display:flex; align-items:center; justify-content:space-between; min-height:104rpx; }
+.about-link-title { color:#263d33; font-size:26rpx; font-weight:700; }
+.about-link .muted { margin-top:6rpx; font-size:21rpx; }
+.about-divider { height:1rpx; background:#edf0e9; }
