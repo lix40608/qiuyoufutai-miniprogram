@@ -1,6 +1,6 @@
 <view wx:if="{{match}}" class="page detail-page">
   <view class="card">
-    <view class="detail-top"><view class="tag">{{match.gameType}}</view><view class="status">{{match.cancelReason === 'PARTICIPANT_DELETED' || match.status !== 'cancelled' && match.displayEnded ? '已过期' : match.status === 'cancelled' ? '已取消' : match.status === 'matched' ? '已组局' : '招募中'}}</view></view>
+    <view class="detail-top"><view class="tag">{{match.gameType}}</view><view class="status">{{match.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : match.status === 'cancelled' ? '已取消' : match.status === 'matched' ? '已组局' : match.displayEnded ? '已过期' : '招募中'}}</view></view>
     <view wx:if="{{match.cancelReason === 'PARTICIPANT_DELETED'}}" class="match-ended-reason">对方账号已注销，本场组局已结束</view>
     <view class="venue-label-row"><text class="detail-label">球房</text><view wx:if="{{distanceLabel}}" class="distance-entry" bindtap="openMap"><view class="pin-icon"><view class="pin-dot"></view></view><text>{{distanceLabel}}</text></view><view wx:elif="{{!hasUserLocation}}" class="distance-entry distance-prompt" bindtap="chooseLocation"><view class="pin-icon"><view class="pin-dot"></view></view><text>选择位置查看距离 ›</text></view></view><view class="venue-name">{{match.venue || '球房待选择'}}</view>
     <view class="time-block"><view class="time-icon">◷</view><view><view class="detail-label">开球时间</view><view class="time-value">{{match.startLabel}}</view></view></view>
@@ -44,7 +44,7 @@
     <button class="primary-button secondary-button action-button" bindtap="openChat" data-focus="chat">去聊聊</button>
   </view>
   <view wx:if="{{loggedIn && match.status === 'matched' && matchConversation}}" class="card-actions">
-    <button class="primary-button action-button" bindtap="openMatchedChat" data-id="{{matchConversation.id}}">进入聊天</button>
+    <button class="primary-button action-button" bindtap="openMatchedChat" data-id="{{matchConversation.id}}">{{match.displayEnded ? '查看聊天' : '进入聊天'}}</button>
   </view>
   <login-guide id="loginGuide" bind:success="onLoginSuccess" />
 </view>

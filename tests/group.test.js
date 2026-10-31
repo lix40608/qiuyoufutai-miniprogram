@@ -85,3 +85,34 @@ test('过期招募记录仍保留在列表，但卡片不提供取消操作', ()
   const wxml = fs.readFileSync('pages/my-matches/index.wxml', 'utf8');
   assert.match(wxml, /item\.status === 'recruiting' && !item\.displayEnded/);
 });
+
+test('已组局记录在展示期限结束后仍留在已组局筛选，不进入已过期筛选', () => {
+  const page = loadAllMatches({}, {});
+  const records = [
+    { id: 1, status: 'matched', displayEnded: false },
+    { id: 2, status: 'matched', displayEnded: true },
+    { id: 3, status: 'recruiting', displayEnded: true }
+  ];
+
+  page.data = { ...page.data, activeView: 'created', activeFilter: 'matched' };
+  assert.deepEqual(Array.from(page.filterRecords(records), item => item.id), [1, 2]);
+  page.data = { ...page.data, activeFilter: 'expired' };
+  assert.deepEqual(Array.from(page.filterRecords(records), item => item.id), [3]);
+});
+
+test('已组局卡片在聊天只读后仍显示业务状态已组局', async () => {
+  const page = loadAllMatches({ getMyMatches: async () => [{ id: 2, status: 'matched', displayEnded: true }] }, {
+    stopPullDownRefresh() {}
+  });
+  page.setData = (update, callback) => {
+    page.data = { ...page.data, ...update };
+    if (callback) callback();
+  };
+  page.data = { ...page.data, activeView: 'created', activeFilter: 'matched' };
+
+  await page.loadRecords(1, false);
+
+  assert.equal(page.data.records[0].stateLabel, '已组局');
+  const detail = fs.readFileSync('pages/detail/index.wxml', 'utf8');
+  assert.match(detail, /match\.displayEnded \? '查看聊天' : '进入聊天'/);
+});

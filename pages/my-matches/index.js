@@ -57,7 +57,7 @@ Page({
       const merged = (append ? this.data.records.concat(records) : records).map(item => Object.assign({}, item, {
         rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`,
         chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0,
-        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已过期' : item.status === 'matched' ? '已组局' : '组局中'
+        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中'
       }));
       this.setData({ records: merged, visibleRecords: this.filterRecords(merged), page, hasMore: records.length === 10, loading: false, loadingMore: false });
     }).catch((error) => {
@@ -77,8 +77,8 @@ Page({
       if (record.status === 'cancelled' && !participantDeleted) return false;
       if (this.data.activeFilter === 'all') return true;
       if (this.data.activeFilter === 'draft') return record.status === 'draft';
-      if (this.data.activeFilter === 'expired') return participantDeleted || record.status !== 'draft' && record.displayEnded;
-      if (this.data.activeFilter === 'matched') return record.status === 'matched' && !record.displayEnded;
+      if (this.data.activeFilter === 'expired') return participantDeleted || record.status === 'recruiting' && record.displayEnded;
+      if (this.data.activeFilter === 'matched') return record.status === 'matched';
       return record.status === 'recruiting' && !record.displayEnded;
     });
   },

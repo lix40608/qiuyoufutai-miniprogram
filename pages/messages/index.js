@@ -21,7 +21,7 @@ function groupConversations(rows) {
     const row = Object.assign({}, item, {
       preview,
       timeLabel: activity ? new Date(activity).toLocaleString('zh-CN') : '',
-      stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'cancelled' ? '已取消' : item.displayEnded ? '已结束' : item.status === 'matched' ? (item.won ? '已组局' : '本次未组局') : '沟通中'
+      stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? (item.won ? '已组局' : '本次未组局') : item.displayEnded ? '已结束' : '沟通中'
     });
     let group = groups.get(key);
     if (!group) {

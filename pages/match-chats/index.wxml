@@ -1,6 +1,6 @@
 <view class="page match-chats-page">
   <view wx:if="{{match}}" class="match-summary card">
-    <view class="summary-line"><text class="game-tag">{{match.gameType}}</text><text class="match-state">{{match.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : match.displayEnded ? '已结束' : match.status === 'matched' ? '已组局' : '招募中'}}</text></view>
+    <view class="summary-line"><text class="game-tag">{{match.gameType}}</text><text class="match-state">{{match.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : match.status === 'matched' ? '已组局' : match.displayEnded ? '已结束' : '招募中'}}</text></view>
     <view class="match-title">{{match.title}}</view>
     <view class="match-meta">{{match.startLabel}} · {{match.venueName || '球房待选择'}}</view>
     <view wx:if="{{match.cancelReason === 'PARTICIPANT_DELETED'}}" class="match-ended-reason">对方账号已注销，本场组局已结束</view>
