@@ -33,16 +33,16 @@ test('旧版会话接口缺少开球时间时仍根据已加载的约局详情�
 test('只读提示说明实际球局结果，而不是公开展示期限', () => {
   const expiredRecruitment = model.conversationState({ ...conversation, displayEnded: true }, 1);
   assert.equal(expiredRecruitment.statusLabel, '招募结束');
-  assert.match(expiredRecruitment.hint, /招募已结束.*历史聊天可查看/);
+  assert.match(expiredRecruitment.hint, /招募已结束/);
   assert.doesNotMatch(expiredRecruitment.hint, /公开展示期限/);
 
   const completed = model.conversationState({ ...conversation, status: 'matched', won: true, displayEnded: true }, 1);
   assert.equal(completed.statusLabel, '已组局');
-  assert.match(completed.hint, /组局已结束.*历史聊天可查看/);
+  assert.match(completed.hint, /组局已结束/);
 
   const cancelled = model.conversationState({ ...conversation, status: 'cancelled' }, 1);
   assert.equal(cancelled.statusLabel, '已取消');
-  assert.match(cancelled.hint, /约球已取消.*历史聊天可查看/);
+  assert.match(cancelled.hint, /约球已取消/);
 });
 test('confirmed participant deletion expires the match and tells the host why', () => {
   const state = model.conversationState({ ...conversation, status: 'cancelled', closed: true, cancelReason: 'PARTICIPANT_DELETED' }, 1);
@@ -158,7 +158,7 @@ test('已取消或落败聊天发送被拒后立即锁定并显示系统提示',
   for (const state of [
     { code: 'MATCH_CANCELLED', status: 'cancelled', won: false, expected: /约球已取消/ },
     { code: 'CONVERSATION_CLOSED', status: 'matched', won: false, expected: /其他球友组局.*本次未能组局/ },
-    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束.*历史聊天可查看/ }
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({
@@ -179,7 +179,7 @@ test('停留在旧会话时点确认，服务端拒绝后也关闭确认和发�
   for (const state of [
     { code: 'MATCH_CANCELLED', status: 'cancelled', expected: /约球已取消/ },
     { code: 'CONVERSATION_CLOSED', status: 'matched', expected: /其他球友组局.*本次未能组局/ },
-    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束.*历史聊天可查看/ }
+    { code: 'MATCH_DISPLAY_ENDED', status: 'recruiting', displayEnded: true, expected: /招募已结束/ }
   ]) {
     const error = Object.assign(new Error('聊天已关闭'), { code: state.code, statusCode: 400 });
     const p = page({

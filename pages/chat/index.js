@@ -152,7 +152,7 @@ Page({
     const noticeFor = conversation => {
       const latest = error.code === 'MATCH_DISPLAY_ENDED' ? Object.assign({}, conversation, { displayEnded: true }) : conversation;
       const reason = model.conversationState(latest, this._userId, this.data.match || {}).hint;
-      return `${reason}。${actionLabel}；本聊天的确认和发送已关闭，你仍可查看历史记录。`;
+      return `${reason}。${actionLabel}。`;
     };
     const notice = noticeFor(this.data.conversation || {});
     this.setData({ closed: true, canConfirm: false, showInvite: false, hint: notice, systemNotice: notice, scrollTarget: 'closure-notice' });

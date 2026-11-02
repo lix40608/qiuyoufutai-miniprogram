@@ -42,7 +42,7 @@
       </scroll-view>
       <view wx:if="{{newMessageCount}}" class="new-messages-tip" bindtap="jumpToLatest">{{newMessageCount > 99 ? '99+' : newMessageCount}} 条新消息 <text class="new-messages-arrow">↓</text></view>
     </view>
-    <view wx:if="{{closed && !systemNotice}}" class="closed-banner">{{hint}}</view>
+    <view wx:if="{{closed}}" class="closed-banner">{{hint}}</view>
     <view wx:if="{{!closed}}" class="composer">
       <view class="message-input-shell">
         <input class="message-input" placeholder="发送消息…" value="{{draft}}" maxlength="1000" adjust-position="false" bindinput="onDraftInput" bindkeyboardheightchange="onKeyboardHeightChange" bindconfirm="sendMessage" confirm-type="send" />
