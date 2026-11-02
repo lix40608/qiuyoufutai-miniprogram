@@ -19,9 +19,10 @@
     <view wx:if="{{notificationError}}" class="card muted" bindtap="refresh">{{notificationError}} · 点击重试</view>
     <view wx:if="{{loading}}" class="empty-state">正在读取通知…</view>
     <view wx:elif="{{!notifications.length && !notificationError}}" class="empty-state"><view class="empty-title">暂时没有通知</view><view class="muted">约局状态变化会显示在这里。</view></view>
-    <view wx:for="{{notifications}}" wx:key="id" class="card notification-row {{item.unread ? 'notification-unread' : ''}}" data-id="{{item.id}}" data-match-id="{{item.matchId}}" bindtap="openNotification">
-      <view class="notification-mark {{item.type === 'CANCELLED' || item.type === 'PARTICIPANT_LEFT' ? 'notification-mark-cancelled' : item.type === 'DISPLAY_ENDED' ? 'notification-mark-ended' : 'notification-mark-confirmed'}}">
-        <view wx:if="{{item.type === 'DISPLAY_ENDED'}}" class="notification-clock"></view>
+    <view wx:for="{{notifications}}" wx:key="id" class="card notification-row {{item.unread ? 'notification-unread' : ''}}" data-id="{{item.id}}" data-match-id="{{item.matchId}}" data-conversation-id="{{item.conversationId}}" bindtap="openNotification">
+      <view class="notification-mark {{item.type === 'GROUP_INVITED' ? 'notification-mark-invited' : item.type === 'CANCELLED' || item.type === 'PARTICIPANT_LEFT' ? 'notification-mark-cancelled' : item.type === 'DISPLAY_ENDED' ? 'notification-mark-ended' : 'notification-mark-confirmed'}}">
+        <view wx:if="{{item.type === 'GROUP_INVITED'}}" class="notification-envelope"></view>
+        <view wx:elif="{{item.type === 'DISPLAY_ENDED'}}" class="notification-clock"></view>
         <view wx:elif="{{item.type === 'CANCELLED' || item.type === 'PARTICIPANT_LEFT'}}" class="notification-cross"></view>
         <view wx:else class="notification-check"></view>
       </view>

@@ -13,30 +13,43 @@ Page({
     if(this._loading){this._refreshAgain=true;return;}
     clearTimeout(this._timer);
     this._loading = true;
+    let retrySoon = false;
     try {
-      const [chatResult, notificationResult, notificationCountResult] = await Promise.allSettled([api.getConversations(), api.getNotifications(), api.getUnreadNotificationCount()]);
-      const conversationGroups = conversationList.groupConversations(chatResult.status === 'fulfilled' ? chatResult.value : []);
-      if (!this._destroyed) this.setData({ conversationGroups, conversations: conversationGroups.flatMap(group => group.conversations), notifications: (notificationResult.status === 'fulfilled' ? notificationResult.value : []).map(item => Object.assign({}, item, {
+      // 两个通知接口都会在服务端补齐事件，避免同一页面并发执行相同写入。
+      const notificationRequest = async () => {
+        const [list] = await Promise.allSettled([api.getNotifications()]);
+        const [count] = await Promise.allSettled([api.getUnreadNotificationCount()]);
+        return [list, count];
+      };
+      const [chatResult, notificationResults] = await Promise.all([
+        Promise.allSettled([api.getConversations()]).then(results => results[0]), notificationRequest()
+      ]);
+      const [notificationResult, notificationCountResult] = notificationResults;
+      retrySoon = [chatResult, notificationResult, notificationCountResult].some(result => result.status === 'rejected');
+      const conversationGroups = conversationList.groupConversations(chatResult.status === 'fulfilled' ? chatResult.value : this.data.conversations);
+      if (!this._destroyed) this.setData({ conversationGroups, conversations: conversationGroups.flatMap(group => group.conversations), notifications: (notificationResult.status === 'fulfilled' ? notificationResult.value : this.data.notifications).map(item => Object.assign({}, item, {
         timeLabel: new Date(item.createdAt).toLocaleString('zh-CN'), unread: !item.readAt
       })), chatUnreadCount: chatResult.status === 'fulfilled' ? conversationGroups.reduce((sum, item) => sum + item.unreadCount, 0) : 0,
-      notificationUnreadCount: notificationCountResult.status === 'fulfilled' ? notificationCountResult.value : notificationResult.status === 'fulfilled' ? notificationResult.value.filter(item => !item.readAt).length : 0,
+      notificationUnreadCount: notificationCountResult.status === 'fulfilled' ? notificationCountResult.value : notificationResult.status === 'fulfilled' ? notificationResult.value.filter(item => !item.readAt).length : this.data.notificationUnreadCount,
       loading: false, loadError: chatResult.status === 'rejected' ? (chatResult.reason.message || '暂时无法读取聊天') : '',
       notificationError: notificationResult.status === 'rejected' ? (notificationResult.reason.message || '暂时无法读取通知') : '' });
-    } catch (error) { if (!this._destroyed) this.setData({ loading: false, loadError: error.message || '暂时无法读取消息' }); }
+    } catch (error) { retrySoon = true; if (!this._destroyed) this.setData({ loading: false, loadError: error.message || '暂时无法读取消息' }); }
     finally {
       this._loading = false;
       wx.stopPullDownRefresh();
-      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.refresh(), this._refreshAgain ? 100 : 60000)
+      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.refresh(), this._refreshAgain ? 100 : retrySoon ? 5000 : 60000)
       this._refreshAgain=false;
     }
   },
-  selectTab(event) { this.setData({ activeTab: event.currentTarget.dataset.tab }); },
+  selectTab(event) { this.setData({ activeTab: event.currentTarget.dataset.tab }); if(this.data.loadError || this.data.notificationError)this.refresh(); },
   openConversation(event) { wx.navigateTo({ url: `/pages/chat/index?id=${event.currentTarget.dataset.id}` }); },
   async openNotification(event) {
     const id = event.currentTarget.dataset.id;
     const matchId = event.currentTarget.dataset.matchId;
+    const conversationId = event.currentTarget.dataset.conversationId;
     try { await api.markNotificationRead(id); } catch (_) {}
     if (this._active) this.refresh();
+    if (conversationId) { wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversationId)}` }); return; }
     if (matchId) wx.navigateTo({ url: `/pages/detail/index?id=${matchId}` });
   }
 });

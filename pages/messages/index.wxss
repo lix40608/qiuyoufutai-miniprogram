@@ -24,3 +24,7 @@
 .notification-cross::before,.notification-cross::after { position: absolute; top: 11rpx; left: 1rpx; width: 23rpx; height: 3rpx; border-radius: 2rpx; background: currentColor; content: ''; }
 .notification-cross::before { transform: rotate(45deg); }
 .notification-cross::after { transform: rotate(-45deg); }
+
+.notification-mark-invited { background: #eaf0f8; color: #54769b; }
+.notification-envelope { position: relative; width: 27rpx; height: 20rpx; border: 2.5rpx solid currentColor; border-radius: 4rpx; box-sizing: border-box; overflow: hidden; }
+.notification-envelope::after { position: absolute; top: -9rpx; left: 4rpx; width: 14rpx; height: 14rpx; border-right: 2rpx solid currentColor; border-bottom: 2rpx solid currentColor; transform: rotate(45deg); content: ''; }
