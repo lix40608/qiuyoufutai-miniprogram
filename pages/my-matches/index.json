@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "全部约球",
+  "navigationBarTitleText": "发起记录",
   "navigationStyle": "default",
   "enablePullDownRefresh": true,
   "usingComponents": { "cancel-match-dialog": "/components/cancel-match-dialog/index" }

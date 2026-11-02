@@ -38,7 +38,9 @@ test('消息按对局分组，确认邀请计入聊过，空会话过滤', async
 test('消息列表显示球局分组和会话各自的未读数', () => {
   const source = fs.readFileSync('pages/messages/index.wxml', 'utf8');
   assert.match(source, /wx:for="\{\{conversationGroups\}\}"/);
-  assert.match(source, /wx:for="\{\{item\.conversations\}\}"/);
-  assert.match(source, /conversation\.unreadCount/);
-  assert.match(source, /conversation\.peerAvatar/);
+  const shared=fs.readFileSync('templates/conversation-group.wxml','utf8');
+  assert.match(source,/template is="conversation-group"/);
+  assert.match(shared, /wx:for="\{\{group\.conversations\}\}"/);
+  assert.match(shared, /conversation\.unreadCount/);
+  assert.match(shared, /conversation\.peerAvatar/);
 });

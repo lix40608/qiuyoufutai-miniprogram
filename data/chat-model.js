@@ -12,7 +12,11 @@ function conversationState(conversation, userId, match = {}) {
   const displayEnded = Boolean(conversation.displayEnded || match.displayEnded) || conversation.status === 'matched' && Boolean(matchedAt) && Date.now() >= new Date(matchedAt).getTime() + 24 * 60 * 60 * 1000
     || conversation.status === 'recruiting' && Boolean(startsAt) && Date.now() >= new Date(startsAt).getTime() + 30 * 60 * 1000;
   const ended = displayEnded || cancelled || lost || accountClosed;
+  const cancelNote = String(conversation.cancelNote || '').trim();
+  const cancellationNotice = cancelled && conversation.won && cancelNote
+    ? `${String(conversation.cancelledByUserId) === String(userId) ? '你' : '对方'}已取消约球。取消原因：${cancelNote}` : '';
   return {
+    ...(cancellationNotice ? { systemNotice: cancellationNotice } : {}),
     count, mineConfirmed,
     showInvite: !ended && peerConfirmed && !mineConfirmed && conversation.status === 'recruiting',
     closed: ended,

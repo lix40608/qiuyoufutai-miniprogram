@@ -142,13 +142,14 @@ Page({
       const startsAt = draft.startAt;
       this.setData({ form: Object.assign({}, this.data.form, draft, { date: startsAt ? datePart(startsAt) : '', time: startsAt ? `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}` : '' }) });
       // 跳转成功后清空表单，跳转失败时保留已保存的草稿供继续操作。
-      wx.redirectTo({
-        url: '/pages/my-matches/index?filter=draft',
+      getApp().globalData.showCreatedMatches = true;
+      wx.switchTab({
+        url: '/pages/group/index',
         success: () => {
           this.setData({ form: defaultForm(), formErrors: { venue: '', time: '' } });
           wx.showToast({ title: '草稿已保存', icon: 'success' });
         },
-        fail: () => wx.showModal({ title: '草稿已保存', content: '暂时无法打开我的约局，可稍后在「编辑中」继续编辑。', showCancel: false })
+        fail: () => wx.showModal({ title: '草稿已保存', content: '暂时无法打开约球页，可稍后在「我发起的」下方继续编辑草稿。', showCancel: false })
       });
     }).catch((error) => wx.showModal({ title: '草稿未保存', content: error.message || '服务暂时不可用，内容仍保留在页面中。', showCancel: false })).finally(() => { this._savingDraft = false; this.setData({ savingDraft: false }); });
   },

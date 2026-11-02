@@ -2,7 +2,7 @@ const api = require('../../data/api');
 const conversationList = require('../../data/conversation-list');
 
 Page({
-  data: { match: null, conversations: [], page: 1, hasMore: true, loading: true, loadingMore: false, loadError: '' },
+  data: { conversations: [], conversationGroups: [], page: 1, hasMore: true, loading: true, loadingMore: false, loadError: '' },
   onLoad(query) {
     this.matchId = query.matchId;
     if (!this.matchId) return this.setData({ loading: false, loadError: '缺少约局信息' });
@@ -19,13 +19,13 @@ Page({
     const requestId = this._requestId = (this._requestId || 0) + 1;
     this.setData(append ? { loadingMore: true } : { loading: true, loadingMore: false, loadError: '' });
     try {
-      const [match, rows] = await Promise.all([api.getMatch(this.matchId), api.getMatchConversations(this.matchId, page, 10)]);
+      const rows = await api.getMatchConversations(this.matchId, page, 10);
       if (requestId !== this._requestId) return;
-      const conversations = conversationList.groupConversations(rows).reduce((all, group) => all.concat(group.conversations), []);
-      this.setData({ match, conversations: append ? this.data.conversations.concat(conversations) : conversations,
+      const conversationGroups = conversationList.groupConversations(append ? this.data.conversations.concat(rows) : rows);
+      const conversations = conversationGroups.reduce((all, group) => all.concat(group.conversations), []);
+      this.setData({ conversationGroups, conversations,
         page, hasMore: rows.length === 10, loading: false, loadingMore: false, loadError: '' });
       this._loaded = true;
-      wx.setNavigationBarTitle({ title: '球友聊天' });
     } catch (error) {
       if (requestId === this._requestId) this.setData({ loading: false, loadingMore: false, loadError: error.message || '暂时无法加载聊天列表' });
     } finally { this._loading = false; }

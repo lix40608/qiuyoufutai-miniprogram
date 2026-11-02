@@ -217,10 +217,10 @@ test('消息气泡展示双方真实昵称头像而非固定球友占位', () =>
 
 test('消息中心分聊天和通知，聊天列表使用对方头像并以黑八兜底', () => {
   const source = fs.readFileSync('pages/messages/index.wxml', 'utf8');
-  const styles = fs.readFileSync('pages/messages/index.wxss', 'utf8');
+  const styles = fs.readFileSync('styles/conversation-list.wxss', 'utf8');
   assert.match(source, /data-tab="chat"/);
   assert.match(source, /data-tab="notification"/);
-  assert.match(source, /conversation\.peerAvatar \|\| '\/assets\/eight-ball\.png'/);
+  assert.match(fs.readFileSync('templates/conversation-group.wxml','utf8'), /conversation\.peerAvatar \|\| '\/assets\/eight-ball\.png'/);
   assert.match(source, /item\.title/);
   assert.match(styles, /\.conversation-avatar\s*\{[^}]*border-radius:\s*50%/);
 });
@@ -233,4 +233,12 @@ test('结束的我聊过卡片显示查看聊天且聊天页隐藏输入区', ()
   assert.match(chat, /wx:if="\{\{closed && !systemNotice\}\}" class="closed-banner"/);
   assert.match(chat, /bindscroll="onMessageScroll"/);
   assert.match(chat, /class="new-messages-tip" bindtap="jumpToLatest"/);
+});
+
+test('已组局取消后聊天记录中显示带原因的系统通知并区分取消方',()=>{
+ const model=require('../data/chat-model');
+ const conversation={hostUserId:1,guestUserId:2,status:'cancelled',won:true,hostConfirmed:true,guestConfirmed:true,cancelledByUserId:2,cancelNote:'临时有事，无法赴约'};
+ assert.equal(model.conversationState(conversation,1).systemNotice,'对方已取消约球。取消原因：临时有事，无法赴约');
+ assert.equal(model.conversationState(conversation,2).systemNotice,'你已取消约球。取消原因：临时有事，无法赴约');
+ assert.equal(model.conversationState({...conversation,won:false},1).systemNotice,undefined);
 });

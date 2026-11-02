@@ -1,18 +1,16 @@
 const api = require('../../data/api');
+const resolveMatchChatRoute = require('../../data/match-chat-route');
 const unread = require('../../data/unread');
+const locationStore = require('../../data/location-store');
 
 Page({
   data: {
-    views: [
-      { label: '我发起的', value: 'created' },
-      { label: '我聊过的', value: 'chatted' }
-    ],
     filters: [
       { label: '全部', value: 'all' },
-      { label: '编辑中', value: 'draft' },
       { label: '组局中', value: 'active' },
       { label: '已组局', value: 'matched' },
-      { label: '已过期', value: 'expired' }
+      { label: '已过期', value: 'expired' },
+      { label: '已取消', value: 'cancelled' }
     ],
     activeView: 'created',
     activeFilter: 'all',
@@ -27,7 +25,10 @@ Page({
   },
 
   onLoad(query) {
-    if (query.filter === 'draft' || query.filter === 'active') this.setData({ activeView: 'created', activeFilter: query.filter });
+    const activeView = query.view === 'chatted' ? 'chatted' : 'created';
+    const activeFilter = this.data.filters.some(item => item.value === query.filter) ? query.filter : 'all';
+    this.setData({ activeView, activeFilter });
+    wx.setNavigationBarTitle({ title: activeView === 'created' ? '发起记录' : '聊过记录' });
   },
 
   onShow() {
@@ -46,18 +47,24 @@ Page({
 
   loadRecords(page, append) {
     const activeView = this.data.activeView;
+    const userLocation = locationStore.getUserLocation();
+    this.setData({ hasUserLocation: Boolean(userLocation) });
     const requestId = this._requestId = (this._requestId || 0) + 1;
     this.setData(append ? { loadingMore: true } : { loading: true, loadingMore: false, loadError: '', page: 1, hasMore: true, records: [], visibleRecords: [] });
     const request = activeView === 'created'
       ? api.getMyMatches(page, 10, this.data.activeFilter)
-      : api.getChattedMatches(page, 10);
-    request.then((records) => {
+      : api.getChattedMatches(page, 10, this.data.activeFilter);
+    return request.then((records) => {
       if (requestId !== this._requestId || this.data.activeView !== activeView) return;
       if (append && !records.length) return this.setData({ loadingMore: false, hasMore: false });
       const merged = (append ? this.data.records.concat(records) : records).map(item => Object.assign({}, item, {
+        distanceLabel: (() => {
+          const distance = locationStore.distanceKm(userLocation, { latitude: item.venueLatitude, longitude: item.venueLongitude });
+          return Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '';
+        })(),
         rowKey: activeView === 'chatted' ? `conversation-${item.conversationId}` : `match-${item.id}`,
         chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0,
-        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中',
+        stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'draft' ? '编辑中' : item.status === 'cancelled' ? '已取消' : item.status === 'matched' ? (activeView === 'chatted' && !item.won ? '未组局' : '已组局') : item.displayEnded ? '已过期' : '组局中',
         canCancel: item.status === 'matched'
           ? Boolean(item.cancellationWindowOpen === true && (activeView === 'created' || item.won))
           : activeView === 'created' && item.status === 'recruiting' && !item.displayEnded
@@ -74,20 +81,16 @@ Page({
   },
 
   filterRecords(records) {
-    return records.filter((record) => {
-      if (this.data.activeView === 'chatted') return true;
+    return records.filter(record => {
+      if (record.status === 'draft') return false;
       const participantDeleted = record.cancelReason === 'PARTICIPANT_DELETED';
-      if (record.status === 'cancelled' && !participantDeleted) return false;
+      const lost = this.data.activeView === 'chatted' && record.status === 'matched' && !record.won;
       if (this.data.activeFilter === 'all') return true;
-      if (this.data.activeFilter === 'draft') return record.status === 'draft';
-      if (this.data.activeFilter === 'expired') return participantDeleted || record.status === 'recruiting' && record.displayEnded;
-      if (this.data.activeFilter === 'matched') return record.status === 'matched';
+      if (this.data.activeFilter === 'cancelled') return record.status === 'cancelled' && !participantDeleted;
+      if (this.data.activeFilter === 'expired') return participantDeleted || lost || record.status === 'recruiting' && record.displayEnded;
+      if (this.data.activeFilter === 'matched') return record.status === 'matched' && !lost;
       return record.status === 'recruiting' && !record.displayEnded;
     });
-  },
-
-  selectView(event) {
-    this.setData({ activeView: event.currentTarget.dataset.value }, () => this.refreshRecords());
   },
 
   selectFilter(event) {
@@ -96,14 +99,25 @@ Page({
 
   openRecord(event) {
     const { id, status, conversationId } = event.currentTarget.dataset;
-    if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${conversationId}` });
     if (status === 'draft') {
       wx.navigateTo({ url: `/pages/publish/index?draftId=${encodeURIComponent(id)}` });
       return;
     }
     wx.navigateTo({ url: `/pages/detail/index?id=${id}` });
   },
-  openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
+  openConversation(event) { wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
+  chooseLocation() { locationStore.chooseUserLocation(() => this.refreshRecords()); },
+  openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
+  async openMatchChats(event) {
+    if (this._openingMatchChats) return;
+    this._openingMatchChats = true;
+    try {
+      const url = await resolveMatchChatRoute(api, event.currentTarget.dataset.id);
+      wx.navigateTo({ url });
+    } catch (error) {
+      wx.showToast({ title: error.message || '暂时无法打开聊天', icon: 'none' });
+    } finally { this._openingMatchChats = false; }
+  },
 
   cancelRecord(event) {
     const { id, conversationId } = event.currentTarget.dataset;

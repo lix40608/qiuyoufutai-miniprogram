@@ -139,10 +139,11 @@ module.exports = {
     });
   },
   openConversation: (id) => withLogin(`/v1/matches/${encodeURIComponent(id)}/conversations`, { method: 'POST' }).then(normalizeConversation),
-  getConversations(page, pageSize, guestOnly = false) {
+  getConversations(page, pageSize, guestOnly = false, filter) {
     const params = [];
     if (Number.isFinite(page) && Number.isFinite(pageSize)) params.push(`page=${page}&pageSize=${Math.min(pageSize, 10)}`);
     if (guestOnly) params.push('guestOnly=true');
+    if (filter && filter !== 'all') params.push(`filter=${encodeURIComponent(filter)}`);
     const query = params.length ? `?${params.join('&')}` : '';
     return withLogin(`/v1/me/conversations${query}`).then(rows => rows.map(normalizeConversation));
   },
@@ -159,13 +160,22 @@ module.exports = {
   sendMessage: (id, content, clientId) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content, clientId } }),
   confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
   getPublicMatches: (query = '') => request(`/v1/matches${query}`, { anonymous: true }).then((rows) => rows.map(normalizeMatch)),
-  async getChattedMatches(page, pageSize) {
-    const conversations = await this.getConversations(page, pageSize);
+  async getChattedMatches(page, pageSize, filter) {
+    const conversations = await this.getConversations(page, pageSize, false, filter);
     const records = [];
     // Bound concurrent detail reads rather than sending hundreds of requests at once.
     for (let offset = 0; offset < conversations.length; offset += 4) {
-      const batch = await Promise.all(conversations.slice(offset, offset + 4).map(async item =>
-        Object.assign(await this.getMatch(item.matchId), { conversationId: item.id, won: Boolean(item.won), peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt, lastMessage: item.lastMessage, hostConfirmed: item.hostConfirmed, guestConfirmed: item.guestConfirmed, hostConfirmedAt: item.hostConfirmedAt, guestConfirmedAt: item.guestConfirmedAt, unreadCount: item.unreadCount })));
+      const batch = await Promise.all(conversations.slice(offset, offset + 4).map(async item => {
+        const match = await this.getMatch(item.matchId);
+        return Object.assign(match, {
+          conversationId: item.id, won: Boolean(item.won), cancelReason: item.cancelReason,
+          conversationClosed: item.closed,
+          displayEnded: Boolean(match.displayEnded || item.displayEnded || item.closed || item.status === 'matched' && !item.won),
+          peerName: item.peerName, peerAvatar: item.peerAvatar, lastMessageAt: item.lastMessageAt,
+          lastMessage: item.lastMessage, hostConfirmed: item.hostConfirmed, guestConfirmed: item.guestConfirmed,
+          hostConfirmedAt: item.hostConfirmedAt, guestConfirmedAt: item.guestConfirmedAt, unreadCount: item.unreadCount
+        });
+      }));
       records.push(...batch);
     }
     return records;

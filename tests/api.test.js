@@ -173,3 +173,15 @@ test('我聊过的约局保留最终组局标识和服务端取消时限', async
   assert.equal(records[0].cancellationWindowOpen,true);
   assert.equal(records[0].cancellationDeadline,'2026-11-01T06:00:00Z');
 });
+
+test('聊过记录把状态筛选传到服务端分页查询，同时保留原有参与范围',async()=>{
+ let conversationRequest;
+ const c=client(o=>{
+  if(o.url.includes('/v1/me/conversations')){conversationRequest=o;return ok([]);}
+  return ok([]);
+ },'session');
+ await c.api.getChattedMatches(2,10,'cancelled');
+ assert.match(conversationRequest.url,/page=2&pageSize=10/);
+ assert.match(conversationRequest.url,/filter=cancelled/);
+ assert.equal(conversationRequest.url.includes('guestOnly=true'),false);
+});

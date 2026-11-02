@@ -45,10 +45,10 @@ test('临近午夜时默认开球时间进入次日', () => {
   assert.equal(page.data.minDate, '2026-10-29');
 });
 
-test('草稿保存成功后进入我的约局的编辑中列表', async () => {
+test('草稿保存成功后回到约球页的单草稿卡片', async () => {
   let destination;
   const wx = {
-    redirectTo(options) { destination = options.url; options.success(); },
+    switchTab(options) { destination = options.url; options.success(); },
     showToast() {}, showModal() {}
   };
   const api = { saveDraft: () => Promise.resolve({ id: 12, startAt: new Date('2030-01-01T10:00:00Z') }) };
@@ -56,7 +56,7 @@ test('草稿保存成功后进入我的约局的编辑中列表', async () => {
   page.data.form.note = '待保存内容';
   page.saveDraft();
   await new Promise(setImmediate);
-  assert.equal(destination, '/pages/my-matches/index?filter=draft');
+  assert.equal(destination, '/pages/group/index');
   assert.equal(page.data.form.id, '');
   assert.equal(page.data.savingDraft, false);
 });

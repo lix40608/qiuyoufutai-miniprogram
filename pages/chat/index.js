@@ -57,7 +57,8 @@ Page({
       if (!this._destroyed) {
         const nextState = model.conversationState(conversation, this._userId, this.data.match);
         const newlyReceivedInvite = !this.data.showInvite && nextState.showInvite;
-        this.setData(Object.assign({ conversation, loading: false, syncError: '' }, nextState));
+        const showCancellationNotice = nextState.systemNotice && nextState.systemNotice !== this.data.systemNotice && this._nearBottom !== false;
+        this.setData(Object.assign({ conversation, loading: false, syncError: '' }, nextState, showCancellationNotice ? { scrollTarget: 'closure-notice' } : {}));
         if (newlyReceivedInvite) api.markConversationRead(conversation.id).catch(() => {});
         if (justConfirmed) this.showConfirmedTip();
       }

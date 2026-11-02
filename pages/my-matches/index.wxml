@@ -1,11 +1,6 @@
+<import src="../../templates/my-game-card.wxml" />
 <view class="page my-matches-page">
-  <view class="page-title">全部约球</view>
-
-  <view class="view-tabs">
-    <view wx:for="{{views}}" wx:key="value" class="view-tab {{activeView === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="selectView">{{item.label}}</view>
-  </view>
-
-  <scroll-view wx:if="{{activeView === 'created'}}" class="filter-scroll" scroll-x="true" show-scrollbar="false">
+  <scroll-view class="filter-scroll" scroll-x="true" show-scrollbar="false">
     <view class="filter-row">
       <view wx:for="{{filters}}" wx:key="value" class="filter-chip {{activeFilter === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="selectFilter">{{item.label}}</view>
     </view>
@@ -19,37 +14,20 @@
   </view>
   <view wx:elif="{{activeView === 'chatted' && !visibleRecords.length}}" class="empty-state">
     <view class="empty-icon">◌</view>
-    <view class="empty-title">还没有聊过的约局</view>
-    <view class="muted">加入一场约局后，可以在这里查看参与记录。</view>
+    <view class="empty-title">暂无符合条件的约局</view>
+    <view class="muted">可以切换其他状态查看。</view>
   </view>
 
   <view wx:elif="{{visibleRecords.length}}">
-    <view wx:for="{{visibleRecords}}" wx:key="rowKey" class="match-card card" data-id="{{item.id}}" data-status="{{item.status}}" data-conversation-id="{{item.conversationId}}" bindtap="openRecord">
-      <view class="card-top">
-          <view class="tag">{{item.stateLabel}}</view>
-      </view>
-      <view wx:if="{{item.cancelReason === 'PARTICIPANT_DELETED'}}" class="cancel-reason">对方账号已注销，本场组局已结束</view>
-      <view wx:if="{{activeView === 'chatted'}}" class="chat-partner">与 {{item.peerName || '球友'}} 聊天</view>
-      <view class="record-venue"><view class="record-label">球房</view><view class="record-venue-name">{{item.venueName || '球房待选择'}}</view></view>
-      <view class="record-time"><text class="record-clock">◷</text><view><view class="record-label">开球时间</view><view class="record-time-value">{{item.startLabel}}</view></view></view>
-      <view class="muted record-meta">{{item.gameType || '玩法待填写'}} · 费用 {{item.feeLabel || '待定'}}</view>
-      <view wx:if="{{item.level}}" class="muted record-extra">水平：{{item.level}}</view>
-      <view wx:if="{{item.note}}" class="muted record-extra">备注：{{item.note}}</view>
-      <view wx:if="{{activeView === 'created'}}" class="card-actions match-action-row">
-        <button wx:if="{{item.status === 'draft'}}" class="primary-button" catchtap="openRecord" data-id="{{item.id}}" data-status="draft">继续编辑</button>
-        <button wx:if="{{activeView === 'created' && item.status !== 'draft'}}" class="primary-button match-action-button match-action-chat" catchtap="openMatchChats" data-id="{{item.id}}"><text class="match-action-label">{{item.displayEnded ? '查看聊天' : '进入聊天'}}</text><text wx:if="{{item.chatUnreadCount}}" class="match-action-unread">{{item.chatUnreadCount > 99 ? '99+' : item.chatUnreadCount}}</text></button>
-        <button wx:if="{{item.canCancel}}" class="primary-button match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{item.id}}">取消约球</button>
-      </view>
-      <view wx:if="{{activeView === 'chatted' && item.canCancel}}" class="card-actions match-action-row">
-        <button class="primary-button match-action-button match-action-cancel" catchtap="cancelRecord" data-id="{{item.id}}" data-conversation-id="{{item.conversationId}}">取消约球</button>
-      </view>
-    </view>
+    <block wx:for="{{visibleRecords}}" wx:key="rowKey">
+      <template is="{{activeView === 'created' ? 'created-game-card' : 'chatted-game-card'}}" data="{{item, hasUserLocation}}" />
+    </block>
     <view class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
   </view>
 
   <view wx:elif="{{activeView === 'created'}}" class="empty-state">
     <view class="empty-icon">＋</view>
-    <view class="empty-title">{{activeFilter === 'draft' ? '还没有保存的草稿' : activeFilter === 'expired' ? '还没有过期的约局' : activeFilter === 'matched' ? '还没有已组局的约球' : activeFilter === 'all' ? '还没有约球记录' : '当前没有组局中的约球'}}</view>
+    <view class="empty-title">{{activeFilter === 'cancelled' ? '还没有已取消的约球' : activeFilter === 'expired' ? '还没有过期的约局' : activeFilter === 'matched' ? '还没有已组局的约球' : activeFilter === 'all' ? '还没有约球记录' : '当前没有组局中的约球'}}</view>
   </view>
 </view>
 <cancel-match-dialog id="cancelMatchDialog" bind:success="onCancelSuccess" />

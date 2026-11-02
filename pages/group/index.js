@@ -1,9 +1,11 @@
 const api = require('../../data/api');
+const resolveMatchChatRoute = require('../../data/match-chat-route');
 const locationStore = require('../../data/location-store');
 const unread = require('../../data/unread');
+const conversationList = require('../../data/conversation-list');
 
 Page({
-  data: { loggedIn: false, activeView: 'created', loading: true, loadingMore: false, hasMore: true, page: 1, loadError: '', latestActive: null, latestDraft: null, chatted: [] },
+  data: { loggedIn: false, activeView: 'created', loading: true, loadingMore: false, hasMore: true, page: 1, loadError: '', recentCreated: [], latestDraft: null, chatted: [] },
 
   onShow() {
     const loggedIn = api.isLoggedIn();
@@ -24,35 +26,34 @@ Page({
     return this.loadPage(1, false);
   },
 
-  loadPage(page, append) {
+  async loadPage() {
     const requestId = this._requestId = (this._requestId || 0) + 1;
     const view = this.data.activeView;
     const userLocation = locationStore.getUserLocation();
-    this.setData({ hasUserLocation: Boolean(userLocation) });
-    this.setData(append ? { loadingMore: true } : { loading: true, loadingMore: false, page: 1, hasMore: true, loadError: '', chatted: [] });
-    const request = view === 'created'
-      ? Promise.all([api.getMyMatches(1, 10, 'active'), api.getMyMatches(1, 10, 'matched'), api.getMyMatches(1, 10, 'draft')]).then(groups => groups[0].concat(groups[1], groups[2]))
-      : api.getChattedMatches(page, 10);
-    request.then((records) => {
-      if (requestId !== this._requestId) return;
-      if (append && !records.length) return this.setData({ loadingMore: false, hasMore: false });
-      // 接口暂无发布时间，按更新时间倒序；草稿同样按最近编辑时间排序。
-      const source = append ? this.data.chatted.concat(records) : records;
-      const recent = source.map(item => {
-        const distance = locationStore.distanceKm(userLocation, { latitude: item.venueLatitude, longitude: item.venueLongitude });
-        const canCancel = item.status === 'matched' ? item.cancellationWindowOpen === true : item.status === 'recruiting' && !item.displayEnded;
-        return Object.assign({}, item, { distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '', chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0, canCancel });
-      }).sort((a, b) => (Date.parse(b.lastMessageAt || b.updatedAt) || 0) - (Date.parse(a.lastMessageAt || a.updatedAt) || 0) || Number(b.id) - Number(a.id));
+    this.setData({ hasUserLocation: Boolean(userLocation), loading: true, loadError: '' });
+    try {
+      let rows;
+      let latestDraft = this.data.latestDraft;
       if (view === 'created') {
-        this.setData({ latestActive: recent.find(item => item.status !== 'draft' && item.status !== 'cancelled' && (!item.displayEnded || item.status === 'matched' && item.canCancel)) || null, latestDraft: recent.find(item => item.status === 'draft') || null, loading: false });
-      } else {
-        this.setData({ chatted: recent, page, hasMore: records.length === 10, loading: false, loadingMore: false });
-      }
-    }).catch(error => { if (requestId === this._requestId) this.setData(append ? { loadingMore: false } : { loading: false, loadError: error.message || '暂时无法加载约球' }); });
-  },
-
-  onReachBottom() {
-    if (this.data.activeView === 'chatted' && !this.data.loading && !this.data.loadingMore && this.data.hasMore) this.loadPage(this.data.page + 1, true);
+        const results = await Promise.all([api.getMyMatches(1, 2, 'all'), api.getMyMatches(1, 1, 'draft')]);
+        rows = results[0]; latestDraft = results[1][0] || null;
+      } else rows = await api.getChattedMatches(1, 2, 'all');
+      if (requestId !== this._requestId || view !== this.data.activeView) return;
+      const recent = rows.slice(0, 2).map(item => {
+        const distance = locationStore.distanceKm(userLocation, { latitude: item.venueLatitude, longitude: item.venueLongitude });
+        const canCancel = item.status === 'matched' ? item.cancellationWindowOpen === true && (view === 'created' || item.won) : view === 'created' && item.status === 'recruiting' && !item.displayEnded;
+        const lost = view === 'chatted' && item.status === 'matched' && !item.won;
+        return Object.assign({}, item, {
+          distanceLabel: Number.isFinite(distance) ? `距你 ${locationStore.formatDistance(distance)}` : '',
+          chatUnreadCount: (this.data.unreadByMatchId || {})[String(item.id)] || 0,
+          stateLabel: item.cancelReason === 'PARTICIPANT_DELETED' ? '已过期' : item.status === 'cancelled' ? '已取消' : lost ? '未组局' : item.status === 'matched' ? '已组局' : item.displayEnded ? '已过期' : '组局中',
+          preview: conversationList.presentConversation(item).preview, canCancel
+        });
+      });
+      this.setData(view === 'created' ? { recentCreated: recent, latestDraft, loading: false } : { chatted: recent, loading: false });
+    } catch (error) {
+      if (requestId === this._requestId) this.setData({ loading: false, loadError: error.message || '暂时无法加载约球' });
+    }
   },
 
   openGuestLogin(event) { this.selectComponent('#loginGuide').open({ kind: event.currentTarget.dataset.kind || 'group' }); },
@@ -61,9 +62,18 @@ Page({
   openVenue(event) { locationStore.openVenueLocation(event.currentTarget.dataset.match); },
   publish() { if (!api.isLoggedIn()) { this._pendingPublish = true; this.selectComponent('#loginGuide').open({ kind: 'publish' }); return; } wx.navigateTo({ url: '/pages/publish/index' }); },
   browseMatches() { wx.switchTab({ url: '/pages/find/index' }); },
-  allMatches() { wx.navigateTo({ url: '/pages/my-matches/index' }); },
+  allMatches() { wx.navigateTo({ url: `/pages/my-matches/index?view=${this.data.activeView === 'chatted' ? 'chatted' : 'created'}` }); },
   openConversation(event) { wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
-  openMatchChats(event) { wx.navigateTo({ url: `/pages/match-chats/index?matchId=${encodeURIComponent(event.currentTarget.dataset.id)}` }); },
+  async openMatchChats(event) {
+    if (this._openingMatchChats) return;
+    this._openingMatchChats = true;
+    try {
+      const url = await resolveMatchChatRoute(api, event.currentTarget.dataset.id);
+      wx.navigateTo({ url });
+    } catch (error) {
+      wx.showToast({ title: error.message || '暂时无法打开聊天', icon: 'none' });
+    } finally { this._openingMatchChats = false; }
+  },
   openRecord(event) {
     const { id, status, conversationId } = event.currentTarget.dataset;
     if (conversationId) return wx.navigateTo({ url: `/pages/chat/index?id=${encodeURIComponent(conversationId)}` });
@@ -72,7 +82,7 @@ Page({
   },
   cancelRecord(event) {
     const id = event.currentTarget.dataset.id;
-    const record = this.data.latestActive;
+    const record = this.data.recentCreated.find(item => String(item.id) === String(id));
     if (!record || String(record.id) !== String(id) || !record.canCancel) return;
     if (record.status === 'matched') {
       this.selectComponent('#cancelMatchDialog').open(id);

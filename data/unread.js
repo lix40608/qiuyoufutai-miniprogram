@@ -20,6 +20,7 @@ function start(page) {
       const unreadByConversationId = conversations.reduce((counts, row) => { counts[String(row.id)] = Number(row.unreadCount) || 0; return counts; }, {});
       page.setData({ chatUnreadCount, notificationUnreadCount, unreadCount: chatUnreadCount + notificationUnreadCount, hasChatUnread: chatUnreadCount > 0, hasNotificationUnread: notificationUnreadCount > 0, unreadByMatchId, unreadByConversationId });
       if (Array.isArray(page.data.matches)) page.setData({ matches: page.data.matches.map(row => Object.assign({}, row, { chatUnreadCount: unreadByMatchId[String(row.id)] || 0 })) });
+      if (Array.isArray(page.data.recentCreated)) page.setData({ recentCreated: page.data.recentCreated.map(row => Object.assign({}, row, { chatUnreadCount: unreadByMatchId[String(row.id)] || 0 })) });
       if (page.data.latestActive) page.setData({ latestActive: Object.assign({}, page.data.latestActive, { chatUnreadCount: unreadByMatchId[String(page.data.latestActive.id)] || 0 }) });
       if (Array.isArray(page.data.chatted)) page.setData({ chatted: page.data.chatted.map(row => Object.assign({}, row, { unreadCount: unreadByConversationId[String(row.conversationId)] || 0 })) });
       if (Array.isArray(page.data.records)) {
