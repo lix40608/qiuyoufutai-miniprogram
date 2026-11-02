@@ -14,9 +14,9 @@
 | 页面 | WXML + WXSS + JavaScript，原生navigation/tabBar |
 | UI复用 | 自定义Component、WXML template、共享WXSS |
 | 状态 | 页面`data/setData`、模块函数、少量`App.globalData`；没有独立全局状态库 |
-| 网络 | `wx.request` / 头像`wx.uploadFile`，HTTPS REST |
+| 网络 | `wx.request` / 头像`wx.uploadFile` / 共享SocketTask，HTTP查询与WS收发 + WSS |
 | 登录 | `wx.login` + 后端不透明Bearer会话；非前端签发JWT |
-| 实时性 | 页面前台轮询、历史增量读取及返回恢复；非WebSocket |
+| 实时性 | 单实例WebSocket收发/ACK/已读/状态；HTTP历史、重连补齐及60秒低频对账 |
 | 本地数据 | 微信Storage存储会话、协议接受/提醒标记、用户位置等；业务记录在后端 |
 | 检查 | Node.js内置测试框架；真实编译和预览使用微信开发者工具 |
 
@@ -32,7 +32,9 @@ flowchart TD
     Models --> API
     API --> Storage[微信本地会话与协议标记]
     API --> HTTP[wx.request / wx.uploadFile]
-    HTTP --> Server[Spring Boot REST API]
+    HTTP --> Server[Spring Boot API]
+    Pages --> Realtime[data/realtime.js 与 realtime-client.js]
+    Realtime <-->|WSS| Server
     Location --> Map[微信定位 / 选点 / 地图]
 ```
 
@@ -51,19 +53,48 @@ flowchart TD
 
 ### 浏览与登录
 
-公开列表和详情可匿名请求。受保护操作经登录引导；`wx.login`的code发给后端换取会话，令牌存储在设备，后续请求携带Bearer。并发登录复用进行中的Promise；收到401清除失效令牌并在受保护请求中最多重新登录重试一次，不自动重试结果未知的网络写请求。
+公开列表和详情可匿名请求。受保护操作经登录引导；`wx.login`的code发给后端换取会话，令牌存储在设备，后续请求携带Bearer。并发登录复用进行中的Promise；收到401清除失效令牌并在受保护请求中最多重新登录重试一次，HTTP不自动重试结果未知的网络写请求；WS未确认消息则使用稳定clientId幂等重试。
 
 成功响应读取`{data: ...}`；失败响应读取`{error: {code, message}}`，页面根据错误码及状态展示提示。登录失败不应被包装成空列表或发布成功。
 
 ### 发布与确认
 
-发布入口→资料完整性检查→发布/草稿表单→API持久化。点击“确认组局”仅进入聊天，必须在聊天确认卡明确操作；服务端决定最终会话，再由轮询返回更新页面。发布和发送使用请求标识区分同次操作重试。
+发布入口→资料完整性检查→发布/草稿表单→API持久化。点击“确认组局”仅进入聊天，必须在聊天确认卡明确操作；服务端决定最终会话，再由WS状态事件触发页面更新。发布和发送使用请求标识区分同次操作重试。
 
 ### 聊天与消息
 
-聊天页加载会话和约局→读取历史→前台同步消息与状态→更新未读/确认/关闭提示。页面隐藏或销毁时停止轮询，返回恢复。状态不在不同入口分别实现；详情、我的记录、消息中心最终均进入同一聊天页。
+页面可见时共享WS连接，首帧使用登录token鉴权。在线消息和确认/已读命令走WS；消息直接推送完整正文，ACK表示已持久化，不表示对方已读。断线后重连并重发未超时命令，同一消息保留clientId；HTTP按游标补齐，不用推送消息ID越过尚未读取的消息。
 
-通知列表正文来自服务端`/v1/me/notifications`；聊天页提示来自前端状态模型，两者不能混为同一套文案。聊天结束不修改已组局业务结果。
+聊天、消息中心及未读摘要由事件驱动，每60秒低频对账。页面隐藏时取消订阅；无可见订阅者时释放连接。没有新增在线状态或公开已读UI。
+
+通知列表正文来自后端，聊天状态提示由`chat-model.js`推导。详情或我的记录进入同一聊天页；组局结果不因聊天到期而改变。
+
+### 实时连接部署配置
+
+默认使用官方 `wx.cloud.connectContainer`，不需要为聊天单独购买域名或填写 socket 合法域名。修改 `data/realtime-config.js`：
+
+```js
+module.exports = {
+  transport: 'container',
+  environment: '控制台实际环境ID',
+  service: '后端实际服务名称',
+  path: '/ws/chat',
+  url: ''
+};
+```
+
+- **环境 ID**：在微信云托管控制台选择目标环境，复制其环境 ID；不要填写显示名（如 test）。
+- **服务名称**：在该环境的服务列表中进入后端服务，复制服务名称；不要填写完整域名。
+- 上面两项必须与 `data/api.js` 的 HTTP 服务指向同一环境，避免登录令牌和消息落到不同后端。当前已填写测试环境 `test-d3g0io2m167fbc67a`、服务 `springboot-r9wn`；切换生产环境时必须同时修改并核对 HTTP 地址。
+- 小程序基础库至少 **2.21.1**；需已开通并关联目标云托管环境。代码在首次连接前初始化云能力，使用返回的 SocketTask，并在 onOpen 后发送鉴权帧。
+- 不新增后端域名或 Redis 环境变量。云托管后端 `REALTIME_INSTANCE_COUNT=1`（默认 1），控制台最小/最大实例数均设置 1；服务端口保持现有配置（默认 8080），不另开 WS 端口。
+- `socket` 保留为明确选择的本地调试/普通 WSS 接入方式，才需要配置合法 socket 域名；container 失败不会自动改走它。
+
+官方要求：[微信云托管 WebSocket 小程序接入](https://developers.weixin.qq.com/miniprogram/dev/wxcloudservice/wxcloudrun/src/development/websocket/miniprogram.html)。
+
+**后端必须单实例**，发布时确认旧版本退出、连接重建，不能分流到新旧两个实例；本轮不需要Redis。先部署WS后端，再发布新版小程序。没有配置/部署WS时新版不能发送消息；不会默默降级为HTTP发送。
+
+客户端心跳25秒，鉴权等待10秒，业务ACK等待20秒；超时提示结果待确认并可按原clientId重试。服务端空闲75秒后由定时扫描清理。完整协议、单实例限制及自测范围见后端仓库`docs/chat-realtime.md`。
 
 ## 3. 工程目录
 
@@ -72,6 +103,7 @@ flowchart TD
 | `app.js` / `app.json` / `app.wxss` | 应用生命周期、路由与四个原生 tab、全局样式 |
 | `pages/` | 首页、找球、约球、我的、详情、发布、聊天、记录及设置页面 |
 | `data/api.js` | 服务地址、请求、登录会话、字段转换和业务API |
+| `data/realtime-client.js` / `data/realtime.js` / `data/realtime-config.js` | 连接鉴权、WS命令/事件、心跳、重连和部署配置 |
 | `data/chat-model.js` | 确认进度、可发送/只读状态与关闭原因 |
 | `data/match-chat-route.js` | 招募进入会话列表、已组局直达最终会话 |
 | `data/conversation-list.js` / `data/unread.js` | 消息列表展示、分组和未读同步 |

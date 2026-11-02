@@ -6,7 +6,7 @@ const vm = require('node:vm');
 function loadMessages(api) {
   let definition;
   vm.runInNewContext(fs.readFileSync('pages/messages/index.js', 'utf8'), {
-    Page: value => { definition = value; }, require: name => name.endsWith('/api') ? api : require('../data/conversation-list'),
+    Page: value => { definition = value; }, require: name => name.endsWith('/api') ? api : name.endsWith('/realtime') ? {subscribe:()=>()=>{}} : require('../data/conversation-list'),
     wx: { stopPullDownRefresh() {} }, setTimeout: () => 1, clearTimeout() {}, console
   });
   definition.data = { ...definition.data };

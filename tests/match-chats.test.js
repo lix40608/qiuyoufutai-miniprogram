@@ -7,9 +7,9 @@ function loadMatchChats(api) {
   let definition;
   vm.runInNewContext(fs.readFileSync('pages/match-chats/index.js', 'utf8'), {
     Page: value => { definition = value; },
-    require: name => name.endsWith('/api') ? api : require('../data/conversation-list'),
+    require: name => name.endsWith('/api') ? api : name.endsWith('/realtime') ? {subscribe:()=>()=>{}} : require('../data/conversation-list'),
     wx: { setNavigationBarTitle() {}, stopPullDownRefresh() {} },
-    console
+    console, setTimeout:()=>1,clearTimeout() {}
   });
   definition.data = { ...definition.data };
   definition.setData = value => Object.assign(definition.data, value);

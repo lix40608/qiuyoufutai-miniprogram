@@ -19,8 +19,9 @@ Page({
     }
     this.refresh();
   },
+  onRealtimeState() { clearTimeout(this._recordEventTimer);this._recordEventTimer=setTimeout(()=>{if(this._unreadActive)this.refresh();},100); },
   onHide() { unread.stop(this); },
-  onUnload() { this._requestId = (this._requestId || 0) + 1; },
+  onUnload() { unread.stop(this); this._requestId = (this._requestId || 0) + 1; },
 
   refresh() {
     return this.loadPage(1, false);

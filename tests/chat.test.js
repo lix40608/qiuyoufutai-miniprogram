@@ -60,9 +60,10 @@ function page(api, wx = {}) {
   let definition;
   vm.runInNewContext(fs.readFileSync('pages/chat/index.js', 'utf8'), {
     Page: value => { definition = value; },
-    require: name => name.endsWith('chat-model') ? model : api,
+    require: name => name.endsWith('chat-model') ? model : name.endsWith('/realtime') ? {isReady:()=>false,subscribe:()=>()=>{}} : api,
     wx, setTimeout: () => 1, clearTimeout() {}, console
   });
+  definition._active=true;
   definition.data = { ...definition.data, conversation, messages: [] };
   definition.setData = value => Object.assign(definition.data, value);
   return definition;
@@ -226,11 +227,11 @@ test('消息中心分聊天和通知，聊天列表使用对方头像并以黑�
 });
 
 test('结束的我聊过卡片显示查看聊天且聊天页隐藏输入区', () => {
-  const group = fs.readFileSync('pages/group/index.wxml', 'utf8');
+  const group = (fs.readFileSync('pages/group/index.wxml', 'utf8')+fs.readFileSync('templates/my-game-card.wxml','utf8'));
   const chat = fs.readFileSync('pages/chat/index.wxml', 'utf8');
   assert.match(group, /item\.displayEnded \? '查看聊天' : '进入聊天'/);
   assert.match(chat, /wx:if="\{\{!closed\}\}" class="composer"/);
-  assert.match(chat, /wx:if="\{\{closed && !systemNotice\}\}" class="closed-banner"/);
+  assert.match(chat, /wx:if="\{\{closed\}\}" class="closed-banner"/);
   assert.match(chat, /bindscroll="onMessageScroll"/);
   assert.match(chat, /class="new-messages-tip" bindtap="jumpToLatest"/);
 });

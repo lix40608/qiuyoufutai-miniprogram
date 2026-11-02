@@ -1,5 +1,6 @@
 const api = require('../../data/api');
 const model = require('../../data/chat-model');
+const realtime = require('../../data/realtime');
 
 Page({
   data: { match: null, conversation: null, messages: [], draft: '', loading: true, newMessageCount: 0,
@@ -14,29 +15,44 @@ Page({
     this.setData({ focusConfirm: query.focus === 'confirm' });
     this.initialize(query);
   },
-  onShow() { this._active = true; if (this._ready) this.sync(); },
-  onHide() { this._active = false; clearTimeout(this._timer); },
-  onUnload() { this._active = false; this._destroyed = true; clearTimeout(this._timer); clearTimeout(this._confirmedTipTimer); },
+  onShow() { this._active = true; if (this._ready) { this.startRealtime(); this.sync(); } },
+  onHide() { this._active = false; clearTimeout(this._timer); this.stopRealtime(); },
+  onUnload() { this._active = false; this._destroyed = true; this.stopRealtime(); clearTimeout(this._timer); clearTimeout(this._confirmedTipTimer); },
 
   async initialize(query) {
     try {
       const profile = await api.getProfile();
       this._userId = profile.userId;
-      const conversation = query.id ? await api.getConversation(query.id, true) : await api.openConversation(query.matchId);
+      const conversation = query.id ? await api.getConversation(query.id) : await api.openConversation(query.matchId);
       const match = await api.getMatch(conversation.matchId);
       if (this._destroyed) return;
       this._ready = true;
       wx.setNavigationBarTitle({ title: conversation.peerName || '约局聊天' });
       this.setData(Object.assign({ match, conversation, loadError: '', currentName: profile.nickname || '我', currentAvatar: profile.avatarUrl || '',
         peerName: conversation.peerName || '球友', peerAvatar: conversation.peerAvatar || '' }, model.conversationState(conversation, this._userId, match)));
-      if (this._active) this.sync();
+      if (this._active) { this.startRealtime(); this.sync(); }
     } catch (error) {
       if (!this._destroyed) this.setData({ loading: false, loadError: error.message || '暂时无法打开聊天' });
     }
   },
 
+  startRealtime() {
+    if (this._stopRealtime) return;
+    this._stopRealtime = realtime.subscribe(event => {
+      if (!this._active || this._destroyed) return;
+      if (event.type === 'ready') { this.sync(); return; }
+      if (event.type === 'message' && String(event.data.conversationId) === String(this.data.conversation.id)) {
+        const message=event.data.message;
+        this.renderMessages(model.mergeMessages(this.data.messages,[message]));
+        api.markConversationRead(this.data.conversation.id,message.id).catch(()=>{});
+      }
+      if (event.type === 'state' && (!event.data.matchId || String(event.data.matchId) === String(this.data.match.id))) this.sync();
+    });
+  },
+  stopRealtime() { if (this._stopRealtime) this._stopRealtime(); this._stopRealtime=null; },
   async sync() {
-    if (!this._active || !this._ready || this._syncing) return;
+    if (!this._active || !this._ready) return;
+    if (this._syncing) { this._syncAgain=true; return; }
     clearTimeout(this._timer);
     this._syncing = true;
     let catchingUp = false;
@@ -59,14 +75,15 @@ Page({
         const newlyReceivedInvite = !this.data.showInvite && nextState.showInvite;
         const showCancellationNotice = nextState.systemNotice && nextState.systemNotice !== this.data.systemNotice && this._nearBottom !== false;
         this.setData(Object.assign({ conversation, loading: false, syncError: '' }, nextState, showCancellationNotice ? { scrollTarget: 'closure-notice' } : {}));
-        if (newlyReceivedInvite) api.markConversationRead(conversation.id).catch(() => {});
+        if (realtime.isReady()) api.markConversationRead(conversation.id,this._afterId).catch(() => {});
         if (justConfirmed) this.showConfirmedTip();
       }
     } catch (error) {
       if (!this._destroyed) this.setData({ loading: false, syncError: error.message || '连接中断，正在重试' });
     } finally {
       this._syncing = false;
-      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.sync(), catchingUp ? 100 : 3000);
+      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.sync(), catchingUp || this._syncAgain ? 100 : 60000);
+      this._syncAgain=false;
     }
   },
   renderMessages(messages) {
@@ -133,6 +150,10 @@ Page({
     if (!content || this.data.loading || this.data.sending || this.data.closed || !this._ready) return;
     if (content.length > 1000) return wx.showToast({ title: '消息最多 1000 字', icon: 'none' });
     const clientId = `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return this.sendWithId(content,clientId);
+  },
+  async sendWithId(content,clientId) {
+    if(this.data.sending || this._destroyed || !this._active)return;
     this.setData({ sending: true, draft: '' });
     try {
       const message = await api.sendMessage(this.data.conversation.id, content, clientId);
@@ -140,8 +161,9 @@ Page({
     } catch (error) {
       if (!this._destroyed) {
         const failed = { clientId, senderId: this._userId, content, state: 'failed', createdAt: new Date().toISOString(),
-          failureLabel: error.statusCode ? '未发送' : '发送结果待确认',
-          failureReason: error.statusCode ? error.message : '发送结果暂未确认，请等待消息同步后再决定是否重发。' };
+          failureLabel: error.uncertain === false ? '未发送' : '发送结果待确认',
+          uncertain: error.uncertain !== false,
+          failureReason: error.uncertain === false ? error.message : '发送结果暂未确认，可使用原消息标识重试，避免重复发送。' };
         this.renderMessages(model.mergeMessages(this.data.messages, [failed]));
         await this.lockClosedConversation(error, '刚才这条消息未投递');
       }
@@ -171,9 +193,10 @@ Page({
     const item = this.data.messages.find(row => row.key === event.currentTarget.dataset.key);
     if (!item) return;
     if (this.data.closed) return wx.showModal({ title: '消息未发送', content: item.failureReason, showCancel: false, confirmText: '知道了' });
-    wx.showModal({ title: '消息未确认发送', content: item.failureReason, confirmText: '修改消息',
+    wx.showModal({ title: '消息未确认发送', content: item.failureReason, confirmText: item.uncertain ? '重新发送' : '修改消息',
       success: result => {
         if (!result.confirm || this._destroyed) return;
+        if(item.uncertain) { this.sendWithId(item.content,item.clientId); return; }
         this.setData({ draft: item.content });
         this.renderMessages(this.data.messages.filter(row => row.key !== item.key));
       } });

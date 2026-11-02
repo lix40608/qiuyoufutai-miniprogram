@@ -1,14 +1,16 @@
 const api = require('../../data/api');
+const realtime = require('../../data/realtime');
 const conversationList = require('../../data/conversation-list');
 
 Page({
   data: { activeTab: 'chat', conversations: [], conversationGroups: [], notifications: [], loading: true, loadError: '', notificationError: '', chatUnreadCount: 0, notificationUnreadCount: 0 },
-  onShow() { this._active = true; this.refresh(); },
-  onHide() { this._active = false; clearTimeout(this._timer); },
-  onUnload() { this._destroyed = true; this._active = false; clearTimeout(this._timer); },
+  onShow() { this._active = true; this._stopRealtime = realtime.subscribe(()=>this.refresh()); this.refresh(); },
+  onHide() { this._active = false; if(this._stopRealtime)this._stopRealtime();this._stopRealtime=null;clearTimeout(this._timer); },
+  onUnload() { this._destroyed = true; this._active = false; if(this._stopRealtime)this._stopRealtime();this._stopRealtime=null; clearTimeout(this._timer); },
   onPullDownRefresh() { this.refresh(); },
   async refresh() {
-    if (this._loading || !this._active) return;
+    if (!this._active) return;
+    if(this._loading){this._refreshAgain=true;return;}
     clearTimeout(this._timer);
     this._loading = true;
     try {
@@ -24,7 +26,8 @@ Page({
     finally {
       this._loading = false;
       wx.stopPullDownRefresh();
-      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.refresh(), 15000);
+      if (this._active && !this._destroyed) this._timer = setTimeout(() => this.refresh(), this._refreshAgain ? 100 : 60000)
+      this._refreshAgain=false;
     }
   },
   selectTab(event) { this.setData({ activeTab: event.currentTarget.dataset.tab }); },

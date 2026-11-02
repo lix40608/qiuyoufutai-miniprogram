@@ -1,12 +1,16 @@
 const api = require('./api');
+const realtime = require('./realtime');
 
 // 页面可见时轮询会话未读数；离开后停止，避免后台持续请求。
 function start(page) {
   stop(page);
   page._unreadActive = true;
   const generation = page._unreadGeneration;
+  let refreshing=false,again=false;
   const refresh = () => {
     if (!page._unreadActive || page._unreadGeneration !== generation) return;
+    if(refreshing){again=true;return;}
+    refreshing=true;clearTimeout(page._unreadTimer);
     Promise.allSettled([api.getConversations(), api.getUnreadNotificationCount()]).then(results => {
       if (!page._unreadActive || page._unreadGeneration !== generation) return;
       const conversations = results[0].status === 'fulfilled' ? results[0].value : [];
@@ -30,10 +34,13 @@ function start(page) {
         page.setData({ records: update(page.data.records), visibleRecords: update(page.data.visibleRecords || []) });
       }
     }).finally(() => {
-      if (page._unreadActive && page._unreadGeneration === generation) page._unreadTimer = setTimeout(refresh, 15000);
+      refreshing=false;
+      if (page._unreadActive && page._unreadGeneration === generation) page._unreadTimer = setTimeout(refresh, again ? 100 : 60000);
+      again=false;
     });
   };
+  page._stopUnreadRealtime = realtime.subscribe(event=>{if(event.type!=='disconnected')refresh();if(event.type==='state' && page.onRealtimeState)page.onRealtimeState(event);});
   refresh();
 }
-function stop(page) { page._unreadGeneration = (page._unreadGeneration || 0) + 1; page._unreadActive = false; clearTimeout(page._unreadTimer); }
+function stop(page) { clearTimeout(page._recordEventTimer); if(page._stopUnreadRealtime)page._stopUnreadRealtime();page._stopUnreadRealtime=null; page._unreadGeneration = (page._unreadGeneration || 0) + 1; page._unreadActive = false; clearTimeout(page._unreadTimer); }
 module.exports = { start, stop };

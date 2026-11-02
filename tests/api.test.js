@@ -8,7 +8,9 @@ const path = require('node:path');
 function client(handler, token) {
   const store = new Map(token ? [['qiuyou-futai.session-token.v1', token]] : []);
   let logins = 0;
-  const context = { module: { exports: {} }, require: createRequire(path.resolve('data/api.js')), console, wx: {
+  const wsCalls=[];
+  const realRequire=createRequire(path.resolve('data/api.js'));
+  const context = { module: { exports: {} }, require: name=>name==='./realtime'?{request:async(type,data)=>{wsCalls.push({type,data});return{id:12}}}:realRequire(name), console, wx: {
     getStorageSync: key => store.get(key),
     setStorageSync: (key, value) => store.set(key, value),
     removeStorageSync: key => store.delete(key),
@@ -19,7 +21,7 @@ function client(handler, token) {
     })
   }};
   vm.runInNewContext(fs.readFileSync('data/api.js', 'utf8'), context);
-  return { api: context.module.exports, logins: () => logins };
+  return { api: context.module.exports, logins: () => logins, wsCalls };
 }
 const ok = data => ({ statusCode: 200, data: { data } });
 const profile = { userId: 1, nickname: '球友', gender: 'male', age: 28, avatarUrl: '', gameTypes: [] };
@@ -67,7 +69,9 @@ test('chat endpoints send only an explicit confirmation request when called', as
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url.endsWith('/v1/matches/7/conversations'), true);
   await c.api.confirmConversation(12);
-  assert.equal(calls[1].url.endsWith('/v1/conversations/12/confirm'), true);
+  assert.equal(calls.length,1);
+  assert.equal(c.wsCalls[0].type,'confirm');
+  assert.equal(c.wsCalls[0].data.conversationId,12);
 });
 
 test('opening a chat can mark its pending confirmation invitation as read', async () => {
@@ -76,8 +80,8 @@ test('opening a chat can mark its pending confirmation invitation as read', asyn
   await c.api.getConversation(12, true);
   assert.match(calls[0].url, /\/v1\/conversations\/12\?markRead=true$/);
   await c.api.markConversationRead(12);
-  assert.equal(calls[1].url.endsWith('/v1/conversations/12/read'), true);
-  assert.equal(calls[1].method, 'POST');
+  assert.equal(calls.length,1);
+  assert.equal(c.wsCalls[0].type,'read');
 });
 
 test('message center reads peer avatar and notification endpoints with unread count', async () => {

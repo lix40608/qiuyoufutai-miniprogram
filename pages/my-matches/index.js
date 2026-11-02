@@ -35,7 +35,9 @@ Page({
     unread.start(this);
     this.refreshRecords();
   },
+  onRealtimeState() { clearTimeout(this._recordEventTimer);this._recordEventTimer=setTimeout(()=>{if(this._unreadActive)this.refreshRecords();},100); },
   onHide() { unread.stop(this); },
+  onUnload() { unread.stop(this);this._requestId=(this._requestId||0)+1; },
 
   onPullDownRefresh() {
     this.refreshRecords();

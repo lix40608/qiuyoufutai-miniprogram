@@ -72,6 +72,7 @@ function normalizeMatch(match) {
 
 module.exports = {
   isLoggedIn: () => Boolean(wx.getStorageSync(TOKEN_KEY)),
+  realtimeOptions: () => ({token:wx.getStorageSync(TOKEN_KEY),url:API_BASE_URL.replace(/^http/,'ws')+'/ws/chat'}),
   ensureLogin,
   legalVersions: () => ({ userAgreementVersion: USER_AGREEMENT_VERSION, privacyPolicyVersion: PRIVACY_POLICY_VERSION }),
   hasCurrentLegalAcceptance,
@@ -152,13 +153,13 @@ module.exports = {
     return withLogin(`/v1/matches/${encodeURIComponent(matchId)}/conversations?page=${Math.max(1, Number(page) || 1)}&pageSize=${Math.min(10, Math.max(1, Number(pageSize) || 10))}`).then(rows => rows.map(normalizeConversation));
   },
   getConversation: (id, markRead = false) => withLogin(`/v1/conversations/${encodeURIComponent(id)}${markRead ? '?markRead=true' : ''}`).then(normalizeConversation),
-  markConversationRead: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/read`, { method: 'POST' }),
+  markConversationRead: (id, lastMessageId=0) => require('./realtime').request('read',{conversationId:Number(id),lastMessageId:Number(lastMessageId)}),
   getNotifications: () => withLogin('/v1/me/notifications'),
   getUnreadNotificationCount: () => withLogin('/v1/me/notifications/unread-count').then(result => Number(result.count) || 0),
   markNotificationRead: (id) => withLogin(`/v1/me/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' }),
-  getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}`),
-  sendMessage: (id, content, clientId) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages`, { method: 'POST', data: { content, clientId } }),
-  confirmConversation: (id) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/confirm`, { method: 'POST' }),
+  getMessages: (id, afterId = 0) => withLogin(`/v1/conversations/${encodeURIComponent(id)}/messages?afterId=${Number(afterId) || 0}&markRead=false`),
+  sendMessage: (id, content, clientId) => require('./realtime').request('send',{conversationId:Number(id),content,clientId}),
+  confirmConversation: (id) => require('./realtime').request('confirm',{conversationId:Number(id)}).then(normalizeConversation),
   getPublicMatches: (query = '') => request(`/v1/matches${query}`, { anonymous: true }).then((rows) => rows.map(normalizeMatch)),
   async getChattedMatches(page, pageSize, filter) {
     const conversations = await this.getConversations(page, pageSize, false, filter);
