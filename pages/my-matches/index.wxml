@@ -12,11 +12,6 @@
     <view class="muted">{{loadError}}</view>
     <button class="primary-button empty-button" bindtap="refreshRecords">重新加载</button>
   </view>
-  <view wx:elif="{{activeView === 'chatted' && !visibleRecords.length}}" class="empty-state">
-    <view class="empty-icon">◌</view>
-    <view class="empty-title">暂无符合条件的约局</view>
-    <view class="muted">可以切换其他状态查看。</view>
-  </view>
 
   <view wx:elif="{{visibleRecords.length}}">
     <block wx:for="{{visibleRecords}}" wx:key="rowKey">
@@ -25,9 +20,8 @@
     <view class="list-footer muted">{{loadingMore ? '正在加载更多…' : hasMore ? '继续下滑加载更多' : '已经到底了'}}</view>
   </view>
 
-  <view wx:elif="{{activeView === 'created'}}" class="empty-state">
-    <view class="empty-icon">＋</view>
-    <view class="empty-title">{{activeFilter === 'cancelled' ? '还没有已取消的约球' : activeFilter === 'expired' ? '还没有过期的约局' : activeFilter === 'matched' ? '还没有已组局的约球' : activeFilter === 'all' ? '还没有约球记录' : '当前没有组局中的约球'}}</view>
+  <view wx:else class="empty-state records-empty">
+    <view class="empty-caption">{{activeFilter === 'cancelled' ? '暂无已取消的约球' : activeFilter === 'expired' ? '暂无已过期的约球' : activeFilter === 'matched' ? '暂无已组局的约球' : activeFilter === 'active' ? '暂无组局中的约球' : activeView === 'created' ? '暂无发起记录' : '暂无聊过记录'}}</view>
   </view>
 </view>
 <cancel-match-dialog id="cancelMatchDialog" bind:success="onCancelSuccess" />
